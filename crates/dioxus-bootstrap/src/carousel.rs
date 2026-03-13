@@ -15,6 +15,9 @@ pub struct CarouselSlide {
 
 /// Bootstrap Carousel component — signal-driven, no JavaScript.
 ///
+/// Supports slide/fade transitions, auto-play with configurable interval,
+/// pause on hover, keyboard navigation (arrow keys), and touch swipe.
+///
 /// ```rust
 /// let active = use_signal(|| 0usize);
 /// rsx! {
@@ -26,6 +29,8 @@ pub struct CarouselSlide {
 ///             CarouselSlide { src: "/img/2.jpg".into(), alt: "Second".into(),
 ///                 caption_title: None, caption_text: None },
 ///         ],
+///         ride: true,
+///         interval: 5000,
 ///     }
 /// }
 /// ```
@@ -47,9 +52,22 @@ pub struct CarouselProps {
     /// Dark variant for lighter background images.
     #[props(default)]
     pub dark: bool,
+    /// Enable auto-play cycling.
+    #[props(default)]
+    pub ride: bool,
+    /// Auto-play interval in milliseconds (default 5000).
+    #[props(default = 5000)]
+    pub interval: u64,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+}
+
+/// Direction of slide transition.
+#[derive(Clone, Copy, PartialEq)]
+enum SlideDirection {
+    Next,
+    Prev,
 }
 
 #[component]
@@ -61,6 +79,55 @@ pub fn Carousel(props: CarouselProps) -> Element {
     if total == 0 {
         return rsx! {};
     }
+
+    // Track which slide is transitioning and direction
+    let mut transitioning = use_signal(|| Option::<(usize, usize, SlideDirection)>::None);
+    let trans = *transitioning.read();
+
+    // Pause state for hover
+    let mut paused = use_signal(|| false);
+
+    // Touch tracking for swipe
+    let mut touch_start_x = use_signal(|| 0.0f64);
+
+    // Navigate to next/prev — reads signals fresh each call
+    let mut go_direction = move |direction: SlideDirection| {
+        // Read current state from signals (not stale captures)
+        if transitioning.read().is_some() {
+            return; // already transitioning
+        }
+        let cur = *active_signal.read();
+        let to = match direction {
+            SlideDirection::Next => {
+                if cur + 1 >= total { 0 } else { cur + 1 }
+            }
+            SlideDirection::Prev => {
+                if cur == 0 { total - 1 } else { cur - 1 }
+            }
+        };
+        transitioning.set(Some((cur, to, direction)));
+        // After transition duration, finalize
+        spawn(async move {
+            gloo_timers::future::TimeoutFuture::new(600).await;
+            active_signal.set(to);
+            transitioning.set(None);
+        });
+    };
+
+    // Auto-play timer
+    let ride = props.ride;
+    let interval = props.interval;
+    use_future(move || async move {
+        if !ride || total <= 1 {
+            return;
+        }
+        loop {
+            gloo_timers::future::TimeoutFuture::new(interval as u32).await;
+            if !*paused.read() && transitioning.read().is_none() {
+                go_direction(SlideDirection::Next);
+            }
+        }
+    });
 
     let mut classes = vec!["carousel".to_string(), "slide".to_string()];
     if props.fade {
@@ -75,7 +142,42 @@ pub fn Carousel(props: CarouselProps) -> Element {
     let full_class = classes.join(" ");
 
     rsx! {
-        div { class: "{full_class}",
+        div {
+            class: "{full_class}",
+            tabindex: "0",
+            // Pause on hover
+            onmouseenter: move |_| paused.set(true),
+            onmouseleave: move |_| paused.set(false),
+            // Keyboard navigation
+            onkeydown: move |evt: KeyboardEvent| {
+                match evt.key() {
+                    Key::ArrowLeft => go_direction(SlideDirection::Prev),
+                    Key::ArrowRight => go_direction(SlideDirection::Next),
+                    _ => {}
+                }
+            },
+            // Touch start
+            ontouchstart: move |evt: TouchEvent| {
+                if let Some(touch) = evt.touches().first() {
+                    let coords: dioxus_elements::geometry::PagePoint = touch.page_coordinates();
+                    touch_start_x.set(coords.x);
+                }
+            },
+            // Touch end — detect swipe direction
+            ontouchend: move |evt: TouchEvent| {
+                if let Some(touch) = evt.touches_changed().first() {
+                    let start = *touch_start_x.read();
+                    let coords: dioxus_elements::geometry::PagePoint = touch.page_coordinates();
+                    let diff = coords.x - start;
+                    // Minimum swipe threshold of 50px
+                    if diff < -50.0 {
+                        go_direction(SlideDirection::Next);
+                    } else if diff > 50.0 {
+                        go_direction(SlideDirection::Prev);
+                    }
+                }
+            },
+
             // Indicators
             if props.indicators {
                 div { class: "carousel-indicators",
@@ -92,22 +194,31 @@ pub fn Carousel(props: CarouselProps) -> Element {
             }
 
             // Slides
-            div { class: "carousel-inner",
+            div {
+                class: "carousel-inner",
+                style: "overflow: hidden;",
                 for (i, slide) in props.slides.iter().enumerate() {
-                    div {
-                        class: if current == i { "carousel-item active" } else { "carousel-item" },
-                        img {
-                            class: "d-block w-100",
-                            src: "{slide.src}",
-                            alt: "{slide.alt}",
-                        }
-                        if slide.caption_title.is_some() || slide.caption_text.is_some() {
-                            div { class: "carousel-caption d-none d-md-block",
-                                if let Some(ref title) = slide.caption_title {
-                                    h5 { "{title}" }
+                    {
+                        let item_class = build_slide_class(i, current, trans, props.fade);
+                        let item_style = build_slide_style(i, current, trans, props.fade);
+                        rsx! {
+                            div {
+                                class: "{item_class}",
+                                style: "{item_style}",
+                                img {
+                                    class: "d-block w-100",
+                                    src: "{slide.src}",
+                                    alt: "{slide.alt}",
                                 }
-                                if let Some(ref text) = slide.caption_text {
-                                    p { "{text}" }
+                                if slide.caption_title.is_some() || slide.caption_text.is_some() {
+                                    div { class: "carousel-caption d-none d-md-block",
+                                        if let Some(ref title) = slide.caption_title {
+                                            h5 { "{title}" }
+                                        }
+                                        if let Some(ref text) = slide.caption_text {
+                                            p { "{text}" }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -120,24 +231,83 @@ pub fn Carousel(props: CarouselProps) -> Element {
                 button {
                     class: "carousel-control-prev",
                     r#type: "button",
-                    onclick: move |_| {
-                        let prev = if current == 0 { total - 1 } else { current - 1 };
-                        active_signal.set(prev);
-                    },
+                    onclick: move |_| go_direction(SlideDirection::Prev),
                     span { class: "carousel-control-prev-icon", "aria-hidden": "true" }
                     span { class: "visually-hidden", "Previous" }
                 }
                 button {
                     class: "carousel-control-next",
                     r#type: "button",
-                    onclick: move |_| {
-                        let next = if current + 1 >= total { 0 } else { current + 1 };
-                        active_signal.set(next);
-                    },
+                    onclick: move |_| go_direction(SlideDirection::Next),
                     span { class: "carousel-control-next-icon", "aria-hidden": "true" }
                     span { class: "visually-hidden", "Next" }
                 }
             }
         }
+    }
+}
+
+/// Build the CSS class for a slide item during transitions.
+fn build_slide_class(
+    index: usize,
+    current: usize,
+    trans: Option<(usize, usize, SlideDirection)>,
+    fade: bool,
+) -> String {
+    match trans {
+        Some((from, to, direction)) => {
+            if fade {
+                if index == from {
+                    "carousel-item active".to_string()
+                } else if index == to {
+                    "carousel-item carousel-item-next carousel-item-start active".to_string()
+                } else {
+                    "carousel-item".to_string()
+                }
+            } else {
+                if index == from {
+                    match direction {
+                        SlideDirection::Next => "carousel-item active carousel-item-start".to_string(),
+                        SlideDirection::Prev => "carousel-item active carousel-item-end".to_string(),
+                    }
+                } else if index == to {
+                    match direction {
+                        SlideDirection::Next => "carousel-item carousel-item-next carousel-item-start".to_string(),
+                        SlideDirection::Prev => "carousel-item carousel-item-prev carousel-item-end".to_string(),
+                    }
+                } else {
+                    "carousel-item".to_string()
+                }
+            }
+        }
+        None => {
+            if index == current {
+                "carousel-item active".to_string()
+            } else {
+                "carousel-item".to_string()
+            }
+        }
+    }
+}
+
+/// Build inline styles for slide positioning during transitions.
+fn build_slide_style(
+    index: usize,
+    _current: usize,
+    trans: Option<(usize, usize, SlideDirection)>,
+    fade: bool,
+) -> String {
+    if fade {
+        return String::new();
+    }
+    match trans {
+        Some((from, to, _direction)) => {
+            if index == from || index == to {
+                "transition: transform 0.6s ease-in-out;".to_string()
+            } else {
+                String::new()
+            }
+        }
+        None => String::new(),
     }
 }

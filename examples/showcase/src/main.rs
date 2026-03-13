@@ -880,6 +880,8 @@ fn MediaSection() -> Element {
             div { class: "mb-4", style: "max-width: 600px;",
                 Carousel {
                     active: carousel_active,
+                    ride: true,
+                    interval: 4000,
                     slides: vec![
                         CarouselSlide {
                             src: "https://picsum.photos/600/300?random=1".into(),
