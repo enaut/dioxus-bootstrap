@@ -6,4 +6,4 @@ publish = false
 
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap = { path = "../../crates/dioxus-bootstrap" }
+dioxus-bootstrap-css = { path = "../../crates/dioxus-bootstrap" }
