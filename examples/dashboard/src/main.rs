@@ -8,8 +8,10 @@ fn main() {
 fn app() -> Element {
     let active_tab = use_signal(|| 0usize);
     let nav_collapsed = use_signal(|| true);
+    let theme = use_signal(|| Theme::Dark);
 
     rsx! {
+        ThemeProvider { theme: theme }
         BootstrapHead {}
 
         // Navbar
@@ -26,6 +28,7 @@ fn app() -> Element {
                 NavItem { NavLink { href: "#", "Services" } }
                 NavItem { NavLink { href: "#", "Settings" } }
             }
+            ThemeToggle { theme: theme }
         }
 
         // Main content

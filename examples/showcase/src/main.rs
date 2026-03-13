@@ -7,10 +7,12 @@ fn main() {
 
 fn app() -> Element {
     let active_tab = use_signal(|| 0usize);
+    let theme = use_signal(|| Theme::Dark);
 
     rsx! {
+        ThemeProvider { theme: theme }
         BootstrapHead {}
-        NavbarDemo {}
+        NavbarDemo { theme: theme }
         Container { class: "py-4",
             h1 { class: "mb-4", "dioxus-bootstrap Showcase" }
             p { class: "lead mb-4",
@@ -51,21 +53,27 @@ fn app() -> Element {
     }
 }
 
+#[derive(Clone, PartialEq, Props)]
+struct NavbarDemoProps {
+    theme: Signal<Theme>,
+}
+
 #[component]
-fn NavbarDemo() -> Element {
+fn NavbarDemo(props: NavbarDemoProps) -> Element {
     let collapsed = use_signal(|| true);
 
     rsx! {
         Navbar {
             color: Color::Dark,
             expand: NavbarExpand::Lg,
-            brand: rsx! { a { class: "navbar-brand", href: "#", Icon { name: "bootstrap", class: "me-2" } "dioxus-bootstrap" } },
+            brand: rsx! { a { class: "navbar-brand", href: "#", Icon { name: "bootstrap", class: "me-2" } "dioxus-bootstrap-css" } },
             NavbarToggler { collapsed: collapsed }
             NavbarCollapse { collapsed: collapsed,
                 NavItem { NavLink { href: "#", active: true, "Showcase" } }
                 NavItem { NavLink { href: "#", "Docs" } }
                 NavItem { NavLink { href: "#", "GitHub" } }
             }
+            ThemeToggle { theme: props.theme }
         }
     }
 }
