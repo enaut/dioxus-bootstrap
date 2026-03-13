@@ -40,6 +40,11 @@ fn app() -> Element {
                         icon: Some("lightning".into()),
                         content: rsx! { InteractiveSection {} },
                     },
+                    TabDef {
+                        label: "More".into(),
+                        icon: Some("plus-circle".into()),
+                        content: rsx! { MoreSection {} },
+                    },
                 ],
             }
         }
@@ -439,6 +444,126 @@ fn InteractiveSection() -> Element {
                     Card {
                         body: rsx! {
                             "This content is shown/hidden using a Dioxus signal driving the Bootstrap collapse classes. No JavaScript transitions needed."
+                        },
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn MoreSection() -> Element {
+    let accordion_open = use_signal(|| Some(0usize));
+    let mut toast_show = use_signal(|| false);
+    let page = use_signal(|| 3usize);
+    let mut offcanvas_show = use_signal(|| false);
+
+    rsx! {
+        div { class: "mt-3",
+            // Accordion
+            h3 { class: "mb-3", "Accordion" }
+            Accordion { open: accordion_open, class: "mb-4",
+                AccordionItem { index: 0, title: "Accordion Item #1".to_string(), open: accordion_open,
+                    "This is the first item's accordion body. It is shown by default."
+                }
+                AccordionItem { index: 1, title: "Accordion Item #2".to_string(), open: accordion_open,
+                    "This is the second item's accordion body. Click the header to toggle."
+                }
+                AccordionItem { index: 2, title: "Accordion Item #3".to_string(), open: accordion_open,
+                    "This is the third item's accordion body. Only one item is open at a time."
+                }
+            }
+
+            // Toast
+            h3 { class: "mb-3", "Toast" }
+            div { class: "mb-4",
+                Button { color: Color::Success, onclick: move |_| toast_show.set(true),
+                    Icon { name: "bell", class: "me-1" }
+                    "Show Toast"
+                }
+                ToastContainer { position: ToastPosition::TopEnd,
+                    Toast { show: toast_show, title: "Notification".to_string(), subtitle: "just now".to_string(),
+                        "This toast is controlled by a Dioxus signal. No JavaScript!"
+                    }
+                }
+            }
+
+            // Pagination
+            h3 { class: "mb-3", "Pagination" }
+            div { class: "mb-4",
+                Pagination { current: page, total: 20 }
+                p { class: "text-muted", "Current page: {page}" }
+                Pagination { current: page, total: 20, size: Size::Sm }
+            }
+
+            // Input Group
+            h3 { class: "mb-3", "Input Group" }
+            div { class: "mb-4",
+                InputGroup { class: "mb-2",
+                    InputGroupText { "@" }
+                    Input { placeholder: "Username".to_string() }
+                }
+                InputGroup { class: "mb-2",
+                    Input { placeholder: "Search...".to_string() }
+                    InputGroupText {
+                        Button { color: Color::Primary,
+                            Icon { name: "search" }
+                        }
+                    }
+                }
+                InputGroup { class: "mb-2", size: Size::Sm,
+                    InputGroupText { "$" }
+                    Input { r#type: "number".to_string(), placeholder: "Amount".to_string() }
+                    InputGroupText { ".00" }
+                }
+            }
+
+            // Offcanvas
+            h3 { class: "mb-3", "Offcanvas" }
+            div { class: "mb-4",
+                Button { color: Color::Info, onclick: move |_| offcanvas_show.set(true),
+                    Icon { name: "layout-sidebar", class: "me-1" }
+                    "Open Offcanvas"
+                }
+                Offcanvas { show: offcanvas_show, title: "Sidebar Menu".to_string(),
+                    p { "This sidebar slides in from the left. Powered by Dioxus signals." }
+                    ListGroup { flush: true,
+                        ListGroupItem { Icon { name: "house", class: "me-2" } "Home" }
+                        ListGroupItem { Icon { name: "speedometer2", class: "me-2" } "Dashboard" }
+                        ListGroupItem { Icon { name: "gear", class: "me-2" } "Settings" }
+                    }
+                }
+            }
+
+            // Placeholder / Skeleton
+            h3 { class: "mb-3", "Placeholders (Loading Skeletons)" }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(4),
+                    Card {
+                        body: rsx! {
+                            Placeholder { width: 7, glow: true }
+                            Placeholder { width: 4, glow: true }
+                            Placeholder { width: 6, glow: true }
+                            Placeholder { width: 8, glow: true }
+                        },
+                    }
+                }
+                Col { md: ColumnSize::Span(4),
+                    Card {
+                        body: rsx! {
+                            Placeholder { width: 6, wave: true, color: Color::Primary }
+                            Placeholder { width: 9, wave: true, color: Color::Primary }
+                            Placeholder { width: 5, wave: true, color: Color::Primary }
+                        },
+                    }
+                }
+                Col { md: ColumnSize::Span(4),
+                    Card {
+                        body: rsx! {
+                            h5 { class: "card-title", "Real Content" }
+                            p { class: "card-text", "Compare this card with the loading placeholders on the left." }
+                            Button { color: Color::Primary, size: Size::Sm, "Action" }
                         },
                     }
                 }
