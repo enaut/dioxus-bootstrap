@@ -19,3 +19,8 @@ Thumbs.db
 # Dioxus
 /dist
 /gen
+
+# Node / Playwright
+node_modules/
+test-results/
+playwright-report/
