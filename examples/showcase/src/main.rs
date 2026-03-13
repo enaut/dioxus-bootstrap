@@ -43,6 +43,21 @@ fn app() -> Element {
                         content: rsx! { InteractiveSection {} },
                     },
                     TabDef {
+                        label: "Overlays".into(),
+                        icon: Some("chat-square".into()),
+                        content: rsx! { OverlaysSection {} },
+                    },
+                    TabDef {
+                        label: "Media".into(),
+                        icon: Some("image".into()),
+                        content: rsx! { MediaSection {} },
+                    },
+                    TabDef {
+                        label: "Navigation".into(),
+                        icon: Some("signpost".into()),
+                        content: rsx! { NavigationSection {} },
+                    },
+                    TabDef {
                         label: "More".into(),
                         icon: Some("plus-circle".into()),
                         content: rsx! { MoreSection {} },
@@ -64,8 +79,8 @@ fn NavbarDemo(props: NavbarDemoProps) -> Element {
 
     rsx! {
         Navbar {
-            color: Color::Dark,
             expand: NavbarExpand::Lg,
+            class: "sticky-top border-bottom",
             brand: rsx! { a { class: "navbar-brand", href: "#", Icon { name: "bootstrap", class: "me-2" } "dioxus-bootstrap-css" } },
             NavbarToggler { collapsed: collapsed }
             NavbarCollapse { collapsed: collapsed,
@@ -78,13 +93,15 @@ fn NavbarDemo(props: NavbarDemoProps) -> Element {
     }
 }
 
+// ── Basics ──────────────────────────────────────────────────────────────────
+
 #[component]
 fn BasicsSection() -> Element {
     rsx! {
         div { class: "mt-3",
             // Buttons
             h3 { class: "mb-3", "Buttons" }
-            div { class: "d-flex flex-wrap gap-2 mb-4",
+            div { class: "d-flex flex-wrap gap-2 mb-3",
                 Button { color: Color::Primary, "Primary" }
                 Button { color: Color::Secondary, "Secondary" }
                 Button { color: Color::Success, "Success" }
@@ -94,21 +111,36 @@ fn BasicsSection() -> Element {
                 Button { color: Color::Light, "Light" }
                 Button { color: Color::Dark, "Dark" }
             }
-            div { class: "d-flex flex-wrap gap-2 mb-4",
+            div { class: "d-flex flex-wrap gap-2 mb-3",
                 Button { color: Color::Primary, outline: true, "Outline" }
                 Button { color: Color::Primary, size: Size::Sm, "Small" }
                 Button { color: Color::Primary, size: Size::Lg, "Large" }
                 Button { color: Color::Primary, disabled: true, "Disabled" }
+                Button { color: Color::Success, active: true, "Active" }
             }
-            ButtonGroup { class: "mb-4",
+
+            // Button Group & Toolbar
+            h4 { class: "mb-2 mt-3", "Button Group & Toolbar" }
+            ButtonGroup { class: "mb-3",
                 Button { color: Color::Primary, "Left" }
                 Button { color: Color::Primary, "Middle" }
                 Button { color: Color::Primary, "Right" }
             }
+            ButtonToolbar { class: "mb-4 gap-2",
+                ButtonGroup {
+                    Button { color: Color::Primary, "1" }
+                    Button { color: Color::Primary, "2" }
+                    Button { color: Color::Primary, "3" }
+                }
+                ButtonGroup {
+                    Button { color: Color::Secondary, "A" }
+                    Button { color: Color::Secondary, "B" }
+                }
+            }
 
             // Grid
             h3 { class: "mb-3", "Grid" }
-            Row { class: "g-3 mb-4",
+            Row { class: "g-3 mb-3",
                 Col { md: ColumnSize::Span(4),
                     div { class: "p-3 bg-primary-subtle border rounded", "col-md-4" }
                 }
@@ -119,12 +151,26 @@ fn BasicsSection() -> Element {
                     div { class: "p-3 bg-primary-subtle border rounded", "col-md-4" }
                 }
             }
+
+            // Grid with offset and order
+            h4 { class: "mb-2", "Grid Offset & Order" }
             Row { class: "g-3 mb-4",
-                Col { lg: ColumnSize::Span(3),
-                    div { class: "p-3 bg-success-subtle border rounded", "col-lg-3" }
+                Col { md: ColumnSize::Span(4), offset_md: Some(2),
+                    div { class: "p-3 bg-info-subtle border rounded", "col-md-4 offset-md-2" }
                 }
-                Col { lg: ColumnSize::Span(9),
-                    div { class: "p-3 bg-success-subtle border rounded", "col-lg-9" }
+                Col { md: ColumnSize::Span(4),
+                    div { class: "p-3 bg-info-subtle border rounded", "col-md-4" }
+                }
+            }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(4), order: Some(3),
+                    div { class: "p-3 bg-warning-subtle border rounded", "First in source, order-3" }
+                }
+                Col { md: ColumnSize::Span(4), order: Some(1),
+                    div { class: "p-3 bg-warning-subtle border rounded", "Second in source, order-1" }
+                }
+                Col { md: ColumnSize::Span(4), order: Some(2),
+                    div { class: "p-3 bg-warning-subtle border rounded", "Third in source, order-2" }
                 }
             }
 
@@ -204,12 +250,16 @@ fn BasicsSection() -> Element {
     }
 }
 
+// ── Forms ───────────────────────────────────────────────────────────────────
+
 #[component]
 fn FormsSection() -> Element {
     let mut email = use_signal(String::new);
     let mut password = use_signal(String::new);
     let mut message = use_signal(String::new);
     let mut accept = use_signal(|| false);
+    let mut switch_on = use_signal(|| true);
+    let mut range_val = use_signal(|| "50".to_string());
 
     rsx! {
         div { class: "mt-3",
@@ -233,6 +283,7 @@ fn FormsSection() -> Element {
                                     value: "{password}",
                                     oninput: move |e: FormEvent| password.set(e.value()),
                                 }
+                                FormText { "Must be 8-20 characters long." }
                             }
                             Checkbox {
                                 checked: *accept.read(),
@@ -274,19 +325,103 @@ fn FormsSection() -> Element {
                                 Radio { name: "color".to_string(), label: "Green".to_string() }
                                 Radio { name: "color".to_string(), label: "Blue".to_string() }
                             }
-                            FormGroup { label: "Small Input",
-                                Input { size: Size::Sm, placeholder: "Small" }
-                            }
-                            FormGroup { label: "Large Input",
-                                Input { size: Size::Lg, placeholder: "Large" }
-                            }
                         },
                     }
                 }
             }
+
+            // Switch
+            h3 { class: "mb-3 mt-4", "Switch" }
+            Switch {
+                checked: *switch_on.read(),
+                label: "Enable notifications".to_string(),
+                onchange: move |_| {
+                    let current = *switch_on.read();
+                    switch_on.set(!current);
+                },
+            }
+            p { class: "text-muted", "Switch is: ", if *switch_on.read() { "ON" } else { "OFF" } }
+
+            // Range
+            h3 { class: "mb-3 mt-3", "Range" }
+            FormGroup { label: "Volume",
+                Range {
+                    value: "{range_val}",
+                    min: "0".to_string(),
+                    max: "100".to_string(),
+                    oninput: move |e: FormEvent| range_val.set(e.value()),
+                }
+            }
+            p { class: "text-muted", "Value: {range_val}" }
+
+            // Floating Labels
+            h3 { class: "mb-3 mt-3", "Floating Labels" }
+            Row { class: "g-3 mb-3",
+                Col { md: ColumnSize::Span(6),
+                    FloatingLabel { label: "Email address".to_string(),
+                        Input { r#type: "email", placeholder: "name@example.com" }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FloatingLabel { label: "Password".to_string(),
+                        Input { r#type: "password", placeholder: "Password" }
+                    }
+                }
+            }
+
+            // Validation
+            h3 { class: "mb-3 mt-3", "Validation Feedback" }
+            Row { class: "g-3 mb-3",
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Valid input",
+                        Input { value: "correct value", class: "is-valid".to_string() }
+                        FormFeedback { valid: true, "Looks good!" }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Invalid input",
+                        Input { value: "", class: "is-invalid".to_string(), placeholder: "Required field" }
+                        FormFeedback { "Please provide a value." }
+                    }
+                }
+            }
+
+            // Input sizes
+            h3 { class: "mb-3 mt-3", "Input Sizes" }
+            FormGroup { label: "Small Input",
+                Input { size: Size::Sm, placeholder: "Small" }
+            }
+            FormGroup { label: "Default Input",
+                Input { placeholder: "Default" }
+            }
+            FormGroup { label: "Large Input",
+                Input { size: Size::Lg, placeholder: "Large" }
+            }
+
+            // Input Group
+            h3 { class: "mb-3 mt-3", "Input Group" }
+            InputGroup { class: "mb-2",
+                InputGroupText { "@" }
+                Input { placeholder: "Username".to_string() }
+            }
+            InputGroup { class: "mb-2",
+                Input { placeholder: "Search...".to_string() }
+                InputGroupText {
+                    Button { color: Color::Primary,
+                        Icon { name: "search" }
+                    }
+                }
+            }
+            InputGroup { class: "mb-2", size: Size::Sm,
+                InputGroupText { "$" }
+                Input { r#type: "number".to_string(), placeholder: "Amount".to_string() }
+                InputGroupText { ".00" }
+            }
         }
     }
 }
+
+// ── Data ────────────────────────────────────────────────────────────────────
 
 #[component]
 fn DataSection() -> Element {
@@ -330,6 +465,23 @@ fn DataSection() -> Element {
                                 td { Badge { color: Color::Danger, "Down" } }
                                 td { "—" }
                             }
+                        }
+                    }
+                },
+            }
+
+            // Table with caption and striped columns
+            h4 { class: "mb-3", "Table with Caption & Striped Columns" }
+            Card { class: "mb-4",
+                body: rsx! {
+                    Table { striped_columns: true, bordered: true, caption: "List of users".to_string(), caption_top: true,
+                        thead {
+                            tr { th { "Name" } th { "Role" } th { "Status" } }
+                        }
+                        tbody {
+                            tr { td { "Alice" } td { "Admin" } td { "Active" } }
+                            tr { td { "Bob" } td { "Editor" } td { "Active" } }
+                            tr { td { "Carol" } td { "Viewer" } td { "Inactive" } }
                         }
                     }
                 },
@@ -387,24 +539,42 @@ fn DataSection() -> Element {
                 Spinner { style: SpinnerStyle::Grow, color: Color::Danger, "Loading..." }
                 Spinner { size: Size::Sm, color: Color::Info, "Loading..." }
             }
+
+            // Pagination
+            h3 { class: "mb-3", "Pagination" }
+            div { class: "mb-4",
+                Pagination { current: use_signal(|| 3usize), total: 20 }
+                Pagination { current: use_signal(|| 3usize), total: 20, size: Size::Sm }
+            }
         }
     }
 }
 
+// ── Interactive ─────────────────────────────────────────────────────────────
+
 #[component]
 fn InteractiveSection() -> Element {
     let mut show_modal = use_signal(|| false);
+    let mut show_modal_fs = use_signal(|| false);
     let dropdown_open = use_signal(|| false);
+    let split_dropdown_open = use_signal(|| false);
     let mut collapse_expanded = use_signal(|| false);
+    let accordion_open = use_signal(|| Some(0usize));
+    let mut toast_show = use_signal(|| false);
+    let mut offcanvas_show = use_signal(|| false);
 
     rsx! {
         div { class: "mt-3",
             // Modal
             h3 { class: "mb-3", "Modal" }
-            div { class: "mb-4",
+            div { class: "d-flex flex-wrap gap-2 mb-4",
                 Button { color: Color::Primary, onclick: move |_| show_modal.set(true),
                     Icon { name: "box-arrow-up-right", class: "me-1" }
                     "Open Modal"
+                }
+                Button { color: Color::Secondary, onclick: move |_| show_modal_fs.set(true),
+                    Icon { name: "arrows-fullscreen", class: "me-1" }
+                    "Fullscreen Modal"
                 }
                 Modal {
                     show: show_modal,
@@ -419,11 +589,23 @@ fn InteractiveSection() -> Element {
                         Button { color: Color::Primary, "Save changes" }
                     },
                 }
+                Modal {
+                    show: show_modal_fs,
+                    title: "Fullscreen Modal".to_string(),
+                    fullscreen: ModalFullscreen::Always,
+                    body: rsx! {
+                        p { "This modal takes up the entire screen." }
+                        p { "Useful for complex forms or content that needs more space." }
+                    },
+                    footer: rsx! {
+                        Button { color: Color::Secondary, onclick: move |_| show_modal_fs.set(false), "Close" }
+                    },
+                }
             }
 
             // Dropdown
             h3 { class: "mb-3", "Dropdown" }
-            div { class: "mb-4",
+            div { class: "d-flex flex-wrap gap-3 mb-4",
                 Dropdown {
                     open: dropdown_open,
                     toggle: rsx! { "Dropdown Menu" },
@@ -433,6 +615,19 @@ fn InteractiveSection() -> Element {
                         DropdownItem { Icon { name: "files", class: "me-2" } "Duplicate" }
                         DropdownDivider {}
                         DropdownItem { Icon { name: "trash", class: "me-2" } "Delete" }
+                    },
+                }
+                // Split dropdown
+                Dropdown {
+                    open: split_dropdown_open,
+                    split: true,
+                    color: Some(Color::Success),
+                    toggle: rsx! { "Split Action" },
+                    menu: rsx! {
+                        DropdownItem { "Action 1" }
+                        DropdownItem { "Action 2" }
+                        DropdownDivider {}
+                        DropdownItem { "Separated action" }
                     },
                 }
             }
@@ -456,19 +651,7 @@ fn InteractiveSection() -> Element {
                     }
                 }
             }
-        }
-    }
-}
 
-#[component]
-fn MoreSection() -> Element {
-    let accordion_open = use_signal(|| Some(0usize));
-    let mut toast_show = use_signal(|| false);
-    let page = use_signal(|| 3usize);
-    let mut offcanvas_show = use_signal(|| false);
-
-    rsx! {
-        div { class: "mt-3",
             // Accordion
             h3 { class: "mb-3", "Accordion" }
             Accordion { open: accordion_open, class: "mb-4",
@@ -483,8 +666,31 @@ fn MoreSection() -> Element {
                 }
             }
 
+            // Tabs with different styles
+            h3 { class: "mb-3", "Tabs" }
+            h5 { "Standard Tabs" }
+            TabList {
+                active: use_signal(|| 0usize),
+                tabs: vec![
+                    TabDef { label: "Home".into(), icon: Some("house".into()), content: rsx! { p { class: "mt-2", "Home tab content." } } },
+                    TabDef { label: "Profile".into(), icon: Some("person".into()), content: rsx! { p { class: "mt-2", "Profile tab content." } } },
+                    TabDef { label: "Messages".into(), icon: None, content: rsx! { p { class: "mt-2", "Messages tab content." } } },
+                ],
+            }
+            h5 { class: "mt-3", "Pills (fill)" }
+            TabList {
+                active: use_signal(|| 0usize),
+                pills: true,
+                tabs: vec![
+                    TabDef { label: "Tab A".into(), icon: None, content: rsx! { p { class: "mt-2", "Tab A content." } } },
+                    TabDef { label: "Tab B".into(), icon: None, content: rsx! { p { class: "mt-2", "Tab B content." } } },
+                    TabDef { label: "Tab C".into(), icon: None, content: rsx! { p { class: "mt-2", "Tab C content." } } },
+                ],
+                class: "nav-fill".to_string(),
+            }
+
             // Toast
-            h3 { class: "mb-3", "Toast" }
+            h3 { class: "mb-3 mt-4", "Toast" }
             div { class: "mb-4",
                 Button { color: Color::Success, onclick: move |_| toast_show.set(true),
                     Icon { name: "bell", class: "me-1" }
@@ -494,36 +700,6 @@ fn MoreSection() -> Element {
                     Toast { show: toast_show, title: "Notification".to_string(), subtitle: "just now".to_string(),
                         "This toast is controlled by a Dioxus signal. No JavaScript!"
                     }
-                }
-            }
-
-            // Pagination
-            h3 { class: "mb-3", "Pagination" }
-            div { class: "mb-4",
-                Pagination { current: page, total: 20 }
-                p { class: "text-muted", "Current page: {page}" }
-                Pagination { current: page, total: 20, size: Size::Sm }
-            }
-
-            // Input Group
-            h3 { class: "mb-3", "Input Group" }
-            div { class: "mb-4",
-                InputGroup { class: "mb-2",
-                    InputGroupText { "@" }
-                    Input { placeholder: "Username".to_string() }
-                }
-                InputGroup { class: "mb-2",
-                    Input { placeholder: "Search...".to_string() }
-                    InputGroupText {
-                        Button { color: Color::Primary,
-                            Icon { name: "search" }
-                        }
-                    }
-                }
-                InputGroup { class: "mb-2", size: Size::Sm,
-                    InputGroupText { "$" }
-                    Input { r#type: "number".to_string(), placeholder: "Amount".to_string() }
-                    InputGroupText { ".00" }
                 }
             }
 
@@ -543,8 +719,225 @@ fn MoreSection() -> Element {
                     }
                 }
             }
+        }
+    }
+}
 
-            // Placeholder / Skeleton
+// ── Overlays (Tooltips & Popovers) ─────────────────────────────────────────
+
+#[component]
+fn OverlaysSection() -> Element {
+    rsx! {
+        div { class: "mt-3",
+            // Tooltips
+            h3 { class: "mb-3", "Tooltips" }
+            p { class: "text-muted mb-3", "Hover over the buttons to see tooltips." }
+            div { class: "d-flex flex-wrap gap-3 mb-4",
+                Tooltip { text: "Tooltip on top".to_string(), placement: TooltipPlacement::Top,
+                    Button { color: Color::Primary, "Top" }
+                }
+                Tooltip { text: "Tooltip on bottom".to_string(), placement: TooltipPlacement::Bottom,
+                    Button { color: Color::Secondary, "Bottom" }
+                }
+                Tooltip { text: "Tooltip on left".to_string(), placement: TooltipPlacement::Start,
+                    Button { color: Color::Success, "Start" }
+                }
+                Tooltip { text: "Tooltip on right".to_string(), placement: TooltipPlacement::End,
+                    Button { color: Color::Danger, "End" }
+                }
+            }
+
+            // Popovers
+            h3 { class: "mb-3", "Popovers" }
+            p { class: "text-muted mb-3", "Click the buttons to toggle popovers." }
+            div { class: "d-flex flex-wrap gap-3 mb-4",
+                Popover {
+                    title: "Popover Title".to_string(),
+                    body: rsx! { "And here's some amazing content. It's very engaging. Right?" },
+                    placement: PopoverPlacement::Top,
+                    Button { color: Color::Primary, "Popover Top" }
+                }
+                Popover {
+                    title: "Bottom Popover".to_string(),
+                    body: rsx! { "This popover appears below the trigger." },
+                    placement: PopoverPlacement::Bottom,
+                    Button { color: Color::Secondary, "Popover Bottom" }
+                }
+                Popover {
+                    title: "".to_string(),
+                    body: rsx! {
+                        p { "A popover with rich content and no title." }
+                        Button { color: Color::Success, size: Size::Sm, "Action" }
+                    },
+                    placement: PopoverPlacement::End,
+                    Button { color: Color::Info, "Rich Content" }
+                }
+            }
+        }
+    }
+}
+
+// ── Media (Carousel, Figure, Ratio) ────────────────────────────────────────
+
+#[component]
+fn MediaSection() -> Element {
+    let carousel_active = use_signal(|| 0usize);
+
+    rsx! {
+        div { class: "mt-3",
+            // Carousel
+            h3 { class: "mb-3", "Carousel" }
+            div { class: "mb-4", style: "max-width: 600px;",
+                Carousel {
+                    active: carousel_active,
+                    slides: vec![
+                        CarouselSlide {
+                            src: "https://picsum.photos/600/300?random=1".into(),
+                            alt: "First slide".into(),
+                            caption_title: Some("First Slide".into()),
+                            caption_text: Some("This is the first slide caption.".into()),
+                        },
+                        CarouselSlide {
+                            src: "https://picsum.photos/600/300?random=2".into(),
+                            alt: "Second slide".into(),
+                            caption_title: Some("Second Slide".into()),
+                            caption_text: Some("Another slide with a caption.".into()),
+                        },
+                        CarouselSlide {
+                            src: "https://picsum.photos/600/300?random=3".into(),
+                            alt: "Third slide".into(),
+                            caption_title: None,
+                            caption_text: None,
+                        },
+                    ],
+                }
+                p { class: "text-muted mt-2", "Active slide: {carousel_active}" }
+            }
+
+            // Figure
+            h3 { class: "mb-3", "Figure" }
+            Figure {
+                src: "https://picsum.photos/400/250?random=4".to_string(),
+                alt: "Sample image".to_string(),
+                caption: "A caption for this figure image.".to_string(),
+                rounded: true,
+            }
+
+            // Ratio (responsive embeds)
+            h3 { class: "mb-3 mt-4", "Ratio (Responsive Embeds)" }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(6),
+                    h5 { "16x9" }
+                    Ratio { aspect: "16x9".to_string(),
+                        div { class: "bg-primary-subtle d-flex align-items-center justify-content-center h-100 rounded",
+                            "16x9 content"
+                        }
+                    }
+                }
+                Col { md: ColumnSize::Span(3),
+                    h5 { "4x3" }
+                    Ratio { aspect: "4x3".to_string(),
+                        div { class: "bg-success-subtle d-flex align-items-center justify-content-center h-100 rounded",
+                            "4x3"
+                        }
+                    }
+                }
+                Col { md: ColumnSize::Span(3),
+                    h5 { "1x1" }
+                    Ratio { aspect: "1x1".to_string(),
+                        div { class: "bg-warning-subtle d-flex align-items-center justify-content-center h-100 rounded",
+                            "1x1"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+
+#[component]
+fn NavigationSection() -> Element {
+    rsx! {
+        div { class: "mt-3",
+            // Nav — Pills
+            h3 { class: "mb-3", "Nav — Pills" }
+            Nav { pills: true, class: "mb-4",
+                NavItem { NavLink { active: true, "Active" } }
+                NavItem { NavLink { "Link" } }
+                NavItem { NavLink { "Another Link" } }
+                NavItem { NavLink { disabled: true, "Disabled" } }
+            }
+
+            // Nav — Tabs
+            h3 { class: "mb-3", "Nav — Tabs" }
+            Nav { tabs: true, class: "mb-4",
+                NavItem { NavLink { active: true, "Home" } }
+                NavItem { NavLink { "Profile" } }
+                NavItem { NavLink { "Messages" } }
+            }
+
+            // Nav — Underline
+            h3 { class: "mb-3", "Nav — Underline" }
+            Nav { underline: true, class: "mb-4",
+                NavItem { NavLink { active: true, "Active" } }
+                NavItem { NavLink { "Link" } }
+                NavItem { NavLink { "Another" } }
+            }
+
+            // Nav — Fill
+            h3 { class: "mb-3", "Nav — Fill" }
+            Nav { pills: true, fill: true, class: "mb-4",
+                NavItem { NavLink { active: true, "Home" } }
+                NavItem { NavLink { "Much longer nav link" } }
+                NavItem { NavLink { "Short" } }
+            }
+
+            // Nav — Justified
+            h3 { class: "mb-3", "Nav — Justified" }
+            Nav { pills: true, justified: true, class: "mb-4",
+                NavItem { NavLink { active: true, "Equal" } }
+                NavItem { NavLink { "Width" } }
+                NavItem { NavLink { "Items" } }
+            }
+
+            // Nav — Vertical
+            h3 { class: "mb-3", "Nav — Vertical" }
+            Row { class: "mb-4",
+                Col { md: ColumnSize::Span(3),
+                    Nav { pills: true, vertical: true,
+                        NavItem { NavLink { active: true, "Home" } }
+                        NavItem { NavLink { "Profile" } }
+                        NavItem { NavLink { "Messages" } }
+                        NavItem { NavLink { disabled: true, "Disabled" } }
+                    }
+                }
+                Col { md: ColumnSize::Span(9),
+                    Card {
+                        body: rsx! { "Content area next to vertical nav." },
+                    }
+                }
+            }
+
+            // Breadcrumb
+            h3 { class: "mb-3", "Breadcrumb" }
+            Breadcrumb {
+                BreadcrumbItem { href: "#", "Home" }
+                BreadcrumbItem { href: "#", "Library" }
+                BreadcrumbItem { active: true, "Data" }
+            }
+        }
+    }
+}
+
+// ── More ────────────────────────────────────────────────────────────────────
+
+#[component]
+fn MoreSection() -> Element {
+    rsx! {
+        div { class: "mt-3",
+            // Placeholders
             h3 { class: "mb-3", "Placeholders (Loading Skeletons)" }
             Row { class: "g-3 mb-4",
                 Col { md: ColumnSize::Span(4),
