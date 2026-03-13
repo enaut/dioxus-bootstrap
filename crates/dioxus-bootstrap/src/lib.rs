@@ -19,12 +19,15 @@ pub mod nav;
 pub mod offcanvas;
 pub mod pagination;
 pub mod placeholder;
+pub mod popover;
 pub mod progress;
+pub mod scrollspy;
 pub mod spinner;
 pub mod table;
 pub mod tabs;
 pub mod theme;
 pub mod toast;
+pub mod tooltip;
 pub mod types;
 
 /// Prelude — import everything with `use dioxus_bootstrap_css::prelude::*`.
@@ -50,11 +53,14 @@ pub mod prelude {
     pub use crate::offcanvas::*;
     pub use crate::pagination::*;
     pub use crate::placeholder::*;
+    pub use crate::popover::*;
     pub use crate::progress::*;
+    pub use crate::scrollspy::*;
     pub use crate::spinner::*;
     pub use crate::table::*;
     pub use crate::tabs::*;
     pub use crate::theme::*;
     pub use crate::toast::*;
+    pub use crate::tooltip::*;
     pub use crate::types::*;
 }
