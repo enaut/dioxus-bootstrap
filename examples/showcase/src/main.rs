@@ -1,6 +1,16 @@
 use dioxus::prelude::*;
 use dioxus_bootstrap_css::prelude::*;
 
+fn scroll_to(id: &str) {
+    if let Some(window) = web_sys::window() {
+        if let Some(doc) = window.document() {
+            if let Some(el) = doc.get_element_by_id(id) {
+                el.scroll_into_view();
+            }
+        }
+    }
+}
+
 fn main() {
     dioxus::launch(app);
 }
@@ -64,6 +74,79 @@ fn app() -> Element {
                     },
                 ],
             }
+
+            // Docs section — scroll target for navbar link
+            div { id: "docs-section", class: "mt-5 pt-4 border-top",
+                h2 { class: "mb-3",
+                    Icon { name: "book", class: "me-2" }
+                    "Component Reference"
+                }
+                p { class: "lead", "All Bootstrap 5.3 components available in dioxus-bootstrap-css." }
+
+                Row { class: "g-4",
+                    Col { md: ColumnSize::Span(4),
+                        h5 { "Layout" }
+                        ul {
+                            li { "Container / Container-fluid" }
+                            li { "Row / Col (offset, order)" }
+                            li { "BootstrapHead" }
+                            li { "ThemeProvider / ThemeToggle" }
+                        }
+                        h5 { class: "mt-3", "Content" }
+                        ul {
+                            li { "Button / ButtonGroup / ButtonToolbar" }
+                            li { "Card (header, body, footer)" }
+                            li { "Alert (dismissible)" }
+                            li { "Badge (pill)" }
+                            li { "Icon (Bootstrap Icons)" }
+                            li { "Spinner (border, grow)" }
+                            li { "Progress / ProgressBar" }
+                            li { "Placeholder / PlaceholderParagraph" }
+                            li { "Figure / Ratio" }
+                        }
+                    }
+                    Col { md: ColumnSize::Span(4),
+                        h5 { "Forms" }
+                        ul {
+                            li { "Input / Select / Textarea" }
+                            li { "Checkbox / Radio / Switch" }
+                            li { "Range (slider)" }
+                            li { "FloatingLabel" }
+                            li { "FormGroup / FormFeedback / FormText" }
+                            li { "InputGroup / InputGroupText" }
+                        }
+                        h5 { class: "mt-3", "Data Display" }
+                        ul {
+                            li { "Table (striped, hover, caption)" }
+                            li { "ListGroup / ListGroupItem" }
+                            li { "Pagination" }
+                        }
+                    }
+                    Col { md: ColumnSize::Span(4),
+                        h5 { "Interactive (Signal-Driven)" }
+                        ul {
+                            li { "Modal (sizes, fullscreen)" }
+                            li { "Dropdown (split, directions)" }
+                            li { "Collapse" }
+                            li { "Tabs / Tab / TabList" }
+                            li { "Accordion / AccordionItem" }
+                            li { "Offcanvas (placements)" }
+                            li { "Toast / ToastContainer" }
+                            li { "Carousel" }
+                            li { "Tooltip" }
+                            li { "Popover" }
+                            li { "Scrollspy" }
+                        }
+                        h5 { class: "mt-3", "Navigation" }
+                        ul {
+                            li { "Navbar / NavbarToggler / NavbarCollapse" }
+                            li { "Nav (pills, tabs, underline, fill)" }
+                            li { "NavItem / NavLink" }
+                            li { "Breadcrumb / BreadcrumbItem" }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -80,13 +163,17 @@ fn NavbarDemo(props: NavbarDemoProps) -> Element {
     rsx! {
         Navbar {
             expand: NavbarExpand::Lg,
-            class: "sticky-top border-bottom",
+            class: "sticky-top border-bottom bg-body",
             brand: rsx! { a { class: "navbar-brand", href: "#", Icon { name: "bootstrap", class: "me-2" } "dioxus-bootstrap-css" } },
             NavbarToggler { collapsed: collapsed }
             NavbarCollapse { collapsed: collapsed,
                 NavItem { NavLink { href: "#", active: true, "Showcase" } }
-                NavItem { NavLink { href: "#", "Docs" } }
-                NavItem { NavLink { href: "#", "GitHub" } }
+                NavItem {
+                    a { class: "nav-link", href: "javascript:void(0)",
+                        onclick: move |_| scroll_to("docs-section"),
+                        "Docs"
+                    }
+                }
             }
             ThemeToggle { theme: props.theme }
         }
@@ -258,6 +345,7 @@ fn FormsSection() -> Element {
     let mut password = use_signal(String::new);
     let mut message = use_signal(String::new);
     let mut accept = use_signal(|| false);
+    let mut selected = use_signal(|| String::new());
     let mut switch_on = use_signal(|| true);
     let mut range_val = use_signal(|| "50".to_string());
 
@@ -305,6 +393,8 @@ fn FormsSection() -> Element {
                         body: rsx! {
                             FormGroup { label: "Select",
                                 Select {
+                                    value: "{selected}",
+                                    onchange: move |e: FormEvent| selected.set(e.value()),
                                     option { value: "", "Choose..." }
                                     option { value: "1", "Option 1" }
                                     option { value: "2", "Option 2" }
