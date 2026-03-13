@@ -1,48 +1,49 @@
 # Roadmap
 
-Tracking remaining Bootstrap 5.3 features not yet implemented in dioxus-bootstrap-css.
+## Status: Complete
 
-## Completed
-
-All Bootstrap 5.3 components and features are implemented except the items listed below.
+All Bootstrap 5.3 components are implemented.
 
 ### Components
-- Accordion, Alert, Badge, Breadcrumb, Button, ButtonGroup, ButtonToolbar
-- Card, Carousel, Collapse
-- Dropdown (including split button, directions, alignment)
-- Figure, Ratio (responsive embed)
-- Form: Input, Select, Textarea, Checkbox, Radio, Switch, Range, FloatingLabel, FormFeedback, FormText, FormGroup, InputGroup
-- Grid: Container, Row, Col (with offset and order)
-- Icon, ListGroup, Modal (sizes, fullscreen, centered, scrollable)
-- Nav (pills, tabs, underline, fill, justified, vertical), Navbar, NavbarToggler, NavbarCollapse
-- Offcanvas (all placements, responsive variants)
-- Pagination, Placeholder, Progress/ProgressBar
-- Spinner, Table (striped, striped-columns, caption, responsive)
-- Tabs (pills, fill, justified, vertical), Toast/ToastContainer
-- Theme: ThemeProvider, ThemeToggle
 
-## Not Yet Implemented
+**Layout & Head:**
+Container, Row, Col (offset, order), BootstrapHead, ThemeProvider, ThemeToggle
 
-### Tooltips
-Bootstrap uses Popper.js for tooltip positioning. Implementing this requires either:
-- A pure Rust/WASM positioning engine
-- Using `document::eval` with lightweight JS positioning logic
+**Content:**
+Button (active, outline, sizes), ButtonGroup, ButtonToolbar, Card, Alert,
+Badge, Icon, Spinner, Progress/ProgressBar, Placeholder/PlaceholderParagraph,
+Figure, Ratio
 
-**Status:** Deferred — requires positioning strategy decision.
+**Data Display:**
+Table (striped, striped-columns, hover, bordered, responsive, caption),
+ListGroup/ListGroupItem, Pagination
 
-### Popovers
-Same positioning challenge as Tooltips. Popovers are essentially tooltips with richer content (title + body).
+**Forms:**
+FormGroup, Input, Select, Textarea, Checkbox, Radio, Switch, Range,
+FloatingLabel, InputGroup/InputGroupText, FormFeedback, FormText
 
-**Status:** Deferred — blocked on same positioning solution as Tooltips.
+**Interactive (Signal-Driven, Zero JS):**
+Modal (sizes, fullscreen, centered, scrollable), Dropdown (split, directions),
+Collapse, Tabs/Tab/TabList (pills, fill, justified, vertical),
+Accordion/AccordionItem, Offcanvas (placements, responsive), Toast/ToastContainer,
+Carousel (indicators, controls, fade, dark), Tooltip, Popover, Scrollspy
 
-### Scrollspy
-Tracks scroll position and highlights the corresponding nav link. Requires:
-- Scroll event listener on a container
-- Intersection Observer or manual offset calculation
-- Signal-driven nav link active state updates
+**Navigation:**
+Navbar, NavbarToggler, NavbarCollapse, Nav (pills, tabs, underline, fill,
+justified, vertical), NavItem, NavLink, Breadcrumb/BreadcrumbItem
 
-**Status:** Deferred — medium complexity, requires scroll event integration.
+### Notes
 
-## Design Decisions
+- **Tooltip** uses CSS-based positioning relative to the trigger element.
+  For most use cases this works well. Edge cases near viewport boundaries
+  may require the app to adjust placement manually.
 
-See [DESIGN.md](DESIGN.md) for the 1-to-1 Bootstrap parity rule that governs all implementation decisions.
+- **Popover** follows the same CSS positioning approach as Tooltip, with
+  click-to-toggle and click-outside-to-close behavior.
+
+- **Scrollspy** uses `document::eval` with a scroll event listener to track
+  visible sections and update a signal with the active section id.
+
+### Design Principles
+
+See [DESIGN.md](DESIGN.md) — strict 1-to-1 Bootstrap 5.3 parity.
