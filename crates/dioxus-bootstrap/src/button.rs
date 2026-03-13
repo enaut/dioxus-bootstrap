@@ -31,6 +31,9 @@ pub struct ButtonProps {
     /// Click event handler.
     #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Active (pressed) state.
+    #[props(default)]
+    pub active: bool,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -49,10 +52,12 @@ pub fn Button(props: ButtonProps) -> Element {
         s => format!(" btn-{s}"),
     };
 
+    let active_class = if props.active { " active" } else { "" };
+
     let full_class = if props.class.is_empty() {
-        format!("btn {color_class}{size_class}")
+        format!("btn {color_class}{size_class}{active_class}")
     } else {
-        format!("btn {color_class}{size_class} {}", props.class)
+        format!("btn {color_class}{size_class}{active_class} {}", props.class)
     };
 
     rsx! {
@@ -110,6 +115,47 @@ pub fn ButtonGroup(props: ButtonGroupProps) -> Element {
         div {
             class: "{full_class}",
             role: "group",
+            {props.children}
+        }
+    }
+}
+
+/// Bootstrap ButtonToolbar — groups multiple ButtonGroups.
+///
+/// ```rust
+/// rsx! {
+///     ButtonToolbar {
+///         ButtonGroup {
+///             Button { color: Color::Primary, "1" }
+///             Button { color: Color::Primary, "2" }
+///         }
+///         ButtonGroup {
+///             Button { color: Color::Secondary, "A" }
+///         }
+///     }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct ButtonToolbarProps {
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Child elements (ButtonGroups).
+    pub children: Element,
+}
+
+#[component]
+pub fn ButtonToolbar(props: ButtonToolbarProps) -> Element {
+    let full_class = if props.class.is_empty() {
+        "btn-toolbar".to_string()
+    } else {
+        format!("btn-toolbar {}", props.class)
+    };
+
+    rsx! {
+        div {
+            class: "{full_class}",
+            role: "toolbar",
             {props.children}
         }
     }

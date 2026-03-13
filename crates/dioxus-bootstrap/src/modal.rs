@@ -2,6 +2,26 @@ use dioxus::prelude::*;
 
 use crate::types::ModalSize;
 
+/// Modal fullscreen variants.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum ModalFullscreen {
+    /// Not fullscreen.
+    #[default]
+    Off,
+    /// Always fullscreen.
+    Always,
+    /// Fullscreen below sm breakpoint.
+    SmDown,
+    /// Fullscreen below md breakpoint.
+    MdDown,
+    /// Fullscreen below lg breakpoint.
+    LgDown,
+    /// Fullscreen below xl breakpoint.
+    XlDown,
+    /// Fullscreen below xxl breakpoint.
+    XxlDown,
+}
+
 /// Bootstrap Modal component — signal-driven, no JavaScript.
 ///
 /// ```rust
@@ -47,6 +67,9 @@ pub struct ModalProps {
     /// Allow the modal body to scroll.
     #[props(default)]
     pub scrollable: bool,
+    /// Fullscreen mode.
+    #[props(default)]
+    pub fullscreen: ModalFullscreen,
     /// Additional CSS classes for the modal-dialog.
     #[props(default)]
     pub class: String,
@@ -83,11 +106,21 @@ pub fn Modal(props: ModalProps) -> Element {
         ""
     };
 
+    let fullscreen = match props.fullscreen {
+        ModalFullscreen::Off => "",
+        ModalFullscreen::Always => " modal-fullscreen",
+        ModalFullscreen::SmDown => " modal-fullscreen-sm-down",
+        ModalFullscreen::MdDown => " modal-fullscreen-md-down",
+        ModalFullscreen::LgDown => " modal-fullscreen-lg-down",
+        ModalFullscreen::XlDown => " modal-fullscreen-xl-down",
+        ModalFullscreen::XxlDown => " modal-fullscreen-xxl-down",
+    };
+
     let dialog_class = if props.class.is_empty() {
-        format!("modal-dialog{size_class}{centered}{scrollable}")
+        format!("modal-dialog{size_class}{centered}{scrollable}{fullscreen}")
     } else {
         format!(
-            "modal-dialog{size_class}{centered}{scrollable} {}",
+            "modal-dialog{size_class}{centered}{scrollable}{fullscreen} {}",
             props.class
         )
     };

@@ -30,6 +30,10 @@ pub struct OffcanvasProps {
     /// Show close button.
     #[props(default = true)]
     pub show_close: bool,
+    /// Responsive variant — offcanvas only below this breakpoint.
+    /// E.g., "lg" makes it offcanvas below lg, regular content above.
+    #[props(default)]
+    pub responsive: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -70,10 +74,16 @@ pub fn Offcanvas(props: OffcanvasProps) -> Element {
     let placement = props.placement;
     let show = " show";
 
-    let full_class = if props.class.is_empty() {
-        format!("offcanvas {placement}{show}")
+    let offcanvas_base = if props.responsive.is_empty() {
+        "offcanvas".to_string()
     } else {
-        format!("offcanvas {placement}{show} {}", props.class)
+        format!("offcanvas-{}", props.responsive)
+    };
+
+    let full_class = if props.class.is_empty() {
+        format!("{offcanvas_base} {placement}{show}")
+    } else {
+        format!("{offcanvas_base} {placement}{show} {}", props.class)
     };
 
     let backdrop_close = props.backdrop_close;
