@@ -38,6 +38,15 @@ pub struct TabsProps {
     /// Active tab color (for pills).
     #[props(default)]
     pub color: Option<Color>,
+    /// Fill available width.
+    #[props(default)]
+    pub fill: bool,
+    /// Justify items equally.
+    #[props(default)]
+    pub justified: bool,
+    /// Vertical tabs layout.
+    #[props(default)]
+    pub vertical: bool,
     /// Additional CSS classes for the nav container.
     #[props(default)]
     pub class: String,
@@ -48,11 +57,20 @@ pub struct TabsProps {
 #[component]
 pub fn Tabs(props: TabsProps) -> Element {
     let style = if props.pills { "nav-pills" } else { "nav-tabs" };
-    let nav_class = if props.class.is_empty() {
-        format!("nav {style}")
-    } else {
-        format!("nav {style} {}", props.class)
-    };
+    let mut nav_classes = vec![format!("nav {style}")];
+    if props.fill {
+        nav_classes.push("nav-fill".to_string());
+    }
+    if props.justified {
+        nav_classes.push("nav-justified".to_string());
+    }
+    if props.vertical {
+        nav_classes.push("flex-column".to_string());
+    }
+    if !props.class.is_empty() {
+        nav_classes.push(props.class.clone());
+    }
+    let nav_class = nav_classes.join(" ");
 
     rsx! {
         div {

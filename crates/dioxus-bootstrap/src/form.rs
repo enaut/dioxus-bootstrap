@@ -277,6 +277,222 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
     }
 }
 
+/// Bootstrap Switch (toggle) component.
+///
+/// ```rust
+/// rsx! {
+///     Switch { checked: true, label: "Enable notifications" }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct SwitchProps {
+    /// Whether the switch is on.
+    #[props(default)]
+    pub checked: bool,
+    /// Label text.
+    #[props(default)]
+    pub label: String,
+    /// Disabled state.
+    #[props(default)]
+    pub disabled: bool,
+    /// Change event handler.
+    #[props(default)]
+    pub onchange: Option<EventHandler<FormEvent>>,
+    /// Additional CSS classes for the wrapper.
+    #[props(default)]
+    pub class: String,
+}
+
+#[component]
+pub fn Switch(props: SwitchProps) -> Element {
+    let full_class = if props.class.is_empty() {
+        "form-check form-switch".to_string()
+    } else {
+        format!("form-check form-switch {}", props.class)
+    };
+
+    rsx! {
+        div { class: "{full_class}",
+            input {
+                class: "form-check-input",
+                r#type: "checkbox",
+                role: "switch",
+                checked: props.checked,
+                disabled: props.disabled,
+                onchange: move |evt| {
+                    if let Some(handler) = &props.onchange {
+                        handler.call(evt);
+                    }
+                },
+            }
+            if !props.label.is_empty() {
+                label { class: "form-check-label", "{props.label}" }
+            }
+        }
+    }
+}
+
+/// Bootstrap Range (slider) input.
+///
+/// ```rust
+/// rsx! {
+///     Range { value: "50", min: "0", max: "100" }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct RangeProps {
+    /// Current value.
+    #[props(default)]
+    pub value: String,
+    /// Minimum value.
+    #[props(default = "0".to_string())]
+    pub min: String,
+    /// Maximum value.
+    #[props(default = "100".to_string())]
+    pub max: String,
+    /// Step increment.
+    #[props(default)]
+    pub step: String,
+    /// Disabled state.
+    #[props(default)]
+    pub disabled: bool,
+    /// Input event handler.
+    #[props(default)]
+    pub oninput: Option<EventHandler<FormEvent>>,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+}
+
+#[component]
+pub fn Range(props: RangeProps) -> Element {
+    let full_class = if props.class.is_empty() {
+        "form-range".to_string()
+    } else {
+        format!("form-range {}", props.class)
+    };
+
+    rsx! {
+        input {
+            class: "{full_class}",
+            r#type: "range",
+            value: "{props.value}",
+            min: "{props.min}",
+            max: "{props.max}",
+            step: if props.step.is_empty() { None } else { Some(props.step.clone()) },
+            disabled: props.disabled,
+            oninput: move |evt| {
+                if let Some(handler) = &props.oninput {
+                    handler.call(evt);
+                }
+            },
+        }
+    }
+}
+
+/// Bootstrap Floating Label wrapper.
+///
+/// Wraps an Input or Textarea with a floating label that moves
+/// above the control when focused or filled.
+///
+/// ```rust
+/// rsx! {
+///     FloatingLabel { label: "Email address",
+///         Input { r#type: "email", placeholder: "name@example.com" }
+///     }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct FloatingLabelProps {
+    /// Label text.
+    pub label: String,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Child element (Input or Textarea).
+    pub children: Element,
+}
+
+#[component]
+pub fn FloatingLabel(props: FloatingLabelProps) -> Element {
+    let full_class = if props.class.is_empty() {
+        "form-floating".to_string()
+    } else {
+        format!("form-floating {}", props.class)
+    };
+
+    rsx! {
+        div { class: "{full_class}",
+            {props.children}
+            label { "{props.label}" }
+        }
+    }
+}
+
+/// Bootstrap form validation feedback text.
+///
+/// ```rust
+/// rsx! {
+///     Input { class: "is-valid".to_string(), value: "correct" }
+///     FormFeedback { valid: true, "Looks good!" }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct FormFeedbackProps {
+    /// True for valid feedback, false for invalid.
+    #[props(default)]
+    pub valid: bool,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Feedback text.
+    pub children: Element,
+}
+
+#[component]
+pub fn FormFeedback(props: FormFeedbackProps) -> Element {
+    let base = if props.valid { "valid-feedback" } else { "invalid-feedback" };
+    let full_class = if props.class.is_empty() {
+        base.to_string()
+    } else {
+        format!("{base} {}", props.class)
+    };
+
+    rsx! {
+        div { class: "{full_class}", {props.children} }
+    }
+}
+
+/// Bootstrap form text (help text below a control).
+///
+/// ```rust
+/// rsx! {
+///     Input { r#type: "password" }
+///     FormText { "Must be 8-20 characters long." }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct FormTextProps {
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Help text content.
+    pub children: Element,
+}
+
+#[component]
+pub fn FormText(props: FormTextProps) -> Element {
+    let full_class = if props.class.is_empty() {
+        "form-text".to_string()
+    } else {
+        format!("form-text {}", props.class)
+    };
+
+    rsx! {
+        div { class: "{full_class}", {props.children} }
+    }
+}
+
 /// Bootstrap Radio component.
 ///
 /// ```rust

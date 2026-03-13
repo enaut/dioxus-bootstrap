@@ -36,6 +36,12 @@ pub struct DropdownProps {
     /// Align menu to the end (right).
     #[props(default)]
     pub align_end: bool,
+    /// Split button mode — toggle is a separate caret-only button.
+    #[props(default)]
+    pub split: bool,
+    /// Color for split button mode (used for the main button).
+    #[props(default)]
+    pub color: Option<crate::types::Color>,
 }
 
 /// Dropdown direction.
@@ -66,8 +72,15 @@ pub fn Dropdown(props: DropdownProps) -> Element {
         format!("{dir_class} {}", props.class)
     };
 
-    let toggle_class = if props.toggle_class.is_empty() {
-        "btn btn-secondary dropdown-toggle".to_string()
+    let color_name = match &props.color {
+        Some(c) => format!("{c}"),
+        None => "secondary".to_string(),
+    };
+
+    let toggle_class = if props.split {
+        format!("btn btn-{color_name} dropdown-toggle dropdown-toggle-split")
+    } else if props.toggle_class.is_empty() {
+        format!("btn btn-{color_name} dropdown-toggle")
     } else {
         format!("btn dropdown-toggle {}", props.toggle_class)
     };
@@ -94,6 +107,14 @@ pub fn Dropdown(props: DropdownProps) -> Element {
         }
         div { class: "{container_class}",
             style: if is_open { "position: relative; z-index: 991;" } else { "" },
+            // Split mode: main button + separate toggle caret
+            if props.split {
+                button {
+                    class: "btn btn-{color_name}",
+                    r#type: "button",
+                    {props.toggle.clone()}
+                }
+            }
             button {
                 class: "{toggle_class}",
                 r#type: "button",
@@ -102,7 +123,12 @@ pub fn Dropdown(props: DropdownProps) -> Element {
                     evt.stop_propagation();
                     open_signal.set(!is_open);
                 },
-                {props.toggle}
+                if !props.split {
+                    {props.toggle}
+                }
+                if props.split {
+                    span { class: "visually-hidden", "Toggle Dropdown" }
+                }
             }
             ul { class: "{menu_class}",
                 // Close dropdown when clicking an item

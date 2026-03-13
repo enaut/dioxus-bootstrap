@@ -2,6 +2,76 @@ use dioxus::prelude::*;
 
 use crate::types::{Color, NavbarExpand};
 
+/// Bootstrap Nav component — standalone nav (not inside a Navbar).
+///
+/// ```rust
+/// rsx! {
+///     Nav { pills: true, fill: true,
+///         NavItem { NavLink { active: true, "Home" } }
+///         NavItem { NavLink { "Profile" } }
+///     }
+/// }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct NavProps {
+    /// Use pill style.
+    #[props(default)]
+    pub pills: bool,
+    /// Use tab style.
+    #[props(default)]
+    pub tabs: bool,
+    /// Use underline style.
+    #[props(default)]
+    pub underline: bool,
+    /// Fill available width equally.
+    #[props(default)]
+    pub fill: bool,
+    /// Justify items to fill width (equal-width items).
+    #[props(default)]
+    pub justified: bool,
+    /// Vertical layout.
+    #[props(default)]
+    pub vertical: bool,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Child elements (NavItems).
+    pub children: Element,
+}
+
+#[component]
+pub fn Nav(props: NavProps) -> Element {
+    let mut classes = vec!["nav".to_string()];
+    if props.pills {
+        classes.push("nav-pills".to_string());
+    }
+    if props.tabs {
+        classes.push("nav-tabs".to_string());
+    }
+    if props.underline {
+        classes.push("nav-underline".to_string());
+    }
+    if props.fill {
+        classes.push("nav-fill".to_string());
+    }
+    if props.justified {
+        classes.push("nav-justified".to_string());
+    }
+    if props.vertical {
+        classes.push("flex-column".to_string());
+    }
+    if !props.class.is_empty() {
+        classes.push(props.class.clone());
+    }
+    let full_class = classes.join(" ");
+
+    rsx! {
+        ul { class: "{full_class}",
+            {props.children}
+        }
+    }
+}
+
 /// Bootstrap Navbar component.
 ///
 /// ```rust

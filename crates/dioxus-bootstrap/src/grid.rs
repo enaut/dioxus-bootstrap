@@ -98,6 +98,36 @@ pub struct ColProps {
     /// Column size at xxl breakpoint.
     #[props(default)]
     pub xxl: Option<ColumnSize>,
+    /// Offset at xs breakpoint.
+    #[props(default)]
+    pub offset: Option<u8>,
+    /// Offset at sm breakpoint.
+    #[props(default)]
+    pub offset_sm: Option<u8>,
+    /// Offset at md breakpoint.
+    #[props(default)]
+    pub offset_md: Option<u8>,
+    /// Offset at lg breakpoint.
+    #[props(default)]
+    pub offset_lg: Option<u8>,
+    /// Offset at xl breakpoint.
+    #[props(default)]
+    pub offset_xl: Option<u8>,
+    /// Offset at xxl breakpoint.
+    #[props(default)]
+    pub offset_xxl: Option<u8>,
+    /// Column order (0-5 or "first"/"last" via class prop).
+    #[props(default)]
+    pub order: Option<u8>,
+    /// Column order at sm breakpoint.
+    #[props(default)]
+    pub order_sm: Option<u8>,
+    /// Column order at md breakpoint.
+    #[props(default)]
+    pub order_md: Option<u8>,
+    /// Column order at lg breakpoint.
+    #[props(default)]
+    pub order_lg: Option<u8>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -131,6 +161,40 @@ pub fn Col(props: ColProps) -> Element {
     // Default to "col" if no breakpoints specified
     if classes.is_empty() {
         classes.push("col".to_string());
+    }
+
+    // Offsets
+    if let Some(n) = props.offset {
+        classes.push(format!("offset-{n}"));
+    }
+    if let Some(n) = props.offset_sm {
+        classes.push(format!("offset-sm-{n}"));
+    }
+    if let Some(n) = props.offset_md {
+        classes.push(format!("offset-md-{n}"));
+    }
+    if let Some(n) = props.offset_lg {
+        classes.push(format!("offset-lg-{n}"));
+    }
+    if let Some(n) = props.offset_xl {
+        classes.push(format!("offset-xl-{n}"));
+    }
+    if let Some(n) = props.offset_xxl {
+        classes.push(format!("offset-xxl-{n}"));
+    }
+
+    // Order
+    if let Some(n) = props.order {
+        classes.push(format!("order-{n}"));
+    }
+    if let Some(n) = props.order_sm {
+        classes.push(format!("order-sm-{n}"));
+    }
+    if let Some(n) = props.order_md {
+        classes.push(format!("order-md-{n}"));
+    }
+    if let Some(n) = props.order_lg {
+        classes.push(format!("order-lg-{n}"));
     }
 
     if !props.class.is_empty() {

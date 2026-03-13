@@ -27,6 +27,9 @@ pub struct TableProps {
     /// Striped rows.
     #[props(default)]
     pub striped: bool,
+    /// Striped columns instead of rows.
+    #[props(default)]
+    pub striped_columns: bool,
     /// Highlight rows on hover.
     #[props(default)]
     pub hover: bool,
@@ -45,6 +48,12 @@ pub struct TableProps {
     /// Wrap in a responsive container for horizontal scrolling.
     #[props(default)]
     pub responsive: bool,
+    /// Caption text (displayed above or below the table).
+    #[props(default)]
+    pub caption: String,
+    /// Place caption at the top (default is bottom per Bootstrap).
+    #[props(default)]
+    pub caption_top: bool,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -58,6 +67,12 @@ pub fn Table(props: TableProps) -> Element {
 
     if props.striped {
         classes.push("table-striped".to_string());
+    }
+    if props.striped_columns {
+        classes.push("table-striped-columns".to_string());
+    }
+    if props.caption_top {
+        classes.push("caption-top".to_string());
     }
     if props.hover {
         classes.push("table-hover".to_string());
@@ -80,15 +95,27 @@ pub fn Table(props: TableProps) -> Element {
 
     let full_class = classes.join(" ");
 
+    let caption = props.caption.clone();
+
     if props.responsive {
         rsx! {
             div { class: "table-responsive",
-                table { class: "{full_class}", {props.children} }
+                table { class: "{full_class}",
+                    if !caption.is_empty() {
+                        caption { "{caption}" }
+                    }
+                    {props.children}
+                }
             }
         }
     } else {
         rsx! {
-            table { class: "{full_class}", {props.children} }
+            table { class: "{full_class}",
+                if !caption.is_empty() {
+                    caption { "{caption}" }
+                }
+                {props.children}
+            }
         }
     }
 }
