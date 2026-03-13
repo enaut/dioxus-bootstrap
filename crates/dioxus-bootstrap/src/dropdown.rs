@@ -85,12 +85,23 @@ pub fn Dropdown(props: DropdownProps) -> Element {
     };
 
     rsx! {
+        // Invisible overlay to close on outside click (only when open)
+        if is_open {
+            div {
+                style: "position: fixed; inset: 0; z-index: 990;",
+                onclick: move |_| open_signal.set(false),
+            }
+        }
         div { class: "{container_class}",
+            style: if is_open { "position: relative; z-index: 991;" } else { "" },
             button {
                 class: "{toggle_class}",
                 r#type: "button",
                 "aria-expanded": if is_open { "true" } else { "false" },
-                onclick: move |_| open_signal.set(!is_open),
+                onclick: move |evt| {
+                    evt.stop_propagation();
+                    open_signal.set(!is_open);
+                },
                 {props.toggle}
             }
             ul { class: "{menu_class}",
