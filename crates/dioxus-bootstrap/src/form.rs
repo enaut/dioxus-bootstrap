@@ -504,7 +504,11 @@ pub struct FormFeedbackProps {
 
 #[component]
 pub fn FormFeedback(props: FormFeedbackProps) -> Element {
-    let base = if props.valid { "valid-feedback" } else { "invalid-feedback" };
+    let base = if props.valid {
+        "valid-feedback"
+    } else {
+        "invalid-feedback"
+    };
     let full_class = if props.class.is_empty() {
         base.to_string()
     } else {

@@ -75,17 +75,33 @@ pub fn Popover(props: PopoverProps) -> Element {
     };
 
     let position_style = match props.placement {
-        PopoverPlacement::Top => "position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 0.5rem;",
-        PopoverPlacement::Bottom => "position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 0.5rem;",
-        PopoverPlacement::Start => "position: absolute; right: 100%; top: 50%; transform: translateY(-50%); margin-right: 0.5rem;",
-        PopoverPlacement::End => "position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 0.5rem;",
+        PopoverPlacement::Top => {
+            "position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 0.5rem;"
+        }
+        PopoverPlacement::Bottom => {
+            "position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 0.5rem;"
+        }
+        PopoverPlacement::Start => {
+            "position: absolute; right: 100%; top: 50%; transform: translateY(-50%); margin-right: 0.5rem;"
+        }
+        PopoverPlacement::End => {
+            "position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 0.5rem;"
+        }
     };
 
     let arrow_placement = match props.placement {
-        PopoverPlacement::Top => "bottom: calc(-0.5rem - 1px); left: 50%; transform: translateX(-50%);",
-        PopoverPlacement::Bottom => "top: calc(-0.5rem - 1px); left: 50%; transform: translateX(-50%);",
-        PopoverPlacement::Start => "right: calc(-0.5rem - 1px); top: 50%; transform: translateY(-50%);",
-        PopoverPlacement::End => "left: calc(-0.5rem - 1px); top: 50%; transform: translateY(-50%);",
+        PopoverPlacement::Top => {
+            "bottom: calc(-0.5rem - 1px); left: 50%; transform: translateX(-50%);"
+        }
+        PopoverPlacement::Bottom => {
+            "top: calc(-0.5rem - 1px); left: 50%; transform: translateX(-50%);"
+        }
+        PopoverPlacement::Start => {
+            "right: calc(-0.5rem - 1px); top: 50%; transform: translateY(-50%);"
+        }
+        PopoverPlacement::End => {
+            "left: calc(-0.5rem - 1px); top: 50%; transform: translateY(-50%);"
+        }
     };
 
     rsx! {

@@ -2,12 +2,11 @@ use dioxus::prelude::*;
 use dioxus_bootstrap_css::prelude::*;
 
 fn scroll_to(id: &str) {
-    if let Some(window) = web_sys::window() {
-        if let Some(doc) = window.document() {
-            if let Some(el) = doc.get_element_by_id(id) {
-                el.scroll_into_view();
-            }
-        }
+    if let Some(window) = web_sys::window()
+        && let Some(doc) = window.document()
+        && let Some(el) = doc.get_element_by_id(id)
+    {
+        el.scroll_into_view();
     }
 }
 
@@ -345,7 +344,7 @@ fn FormsSection() -> Element {
     let mut password = use_signal(String::new);
     let mut message = use_signal(String::new);
     let mut accept = use_signal(|| false);
-    let mut selected = use_signal(|| String::new());
+    let mut selected = use_signal(String::new);
     let mut switch_on = use_signal(|| true);
     let mut range_val = use_signal(|| "50".to_string());
 

@@ -58,10 +58,7 @@ pub fn Placeholder(props: PlaceholderProps) -> Element {
     let full_class = if props.class.is_empty() {
         format!("placeholder {col}{color_class}{size_class}")
     } else {
-        format!(
-            "placeholder {col}{color_class}{size_class} {}",
-            props.class
-        )
+        format!("placeholder {col}{color_class}{size_class} {}", props.class)
     };
 
     let animation = if props.wave {

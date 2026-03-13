@@ -67,7 +67,10 @@ pub fn Button(props: ButtonProps) -> Element {
     let full_class = if props.class.is_empty() {
         format!("btn {color_class}{size_class}{active_class}")
     } else {
-        format!("btn {color_class}{size_class}{active_class} {}", props.class)
+        format!(
+            "btn {color_class}{size_class}{active_class} {}",
+            props.class
+        )
     };
 
     rsx! {
