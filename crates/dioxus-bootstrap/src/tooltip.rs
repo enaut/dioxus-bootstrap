@@ -72,10 +72,18 @@ pub fn Tooltip(props: TooltipProps) -> Element {
 
     // Position styles based on placement
     let position_style = match props.placement {
-        TooltipPlacement::Top => "position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 0.4rem;",
-        TooltipPlacement::Bottom => "position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 0.4rem;",
-        TooltipPlacement::Start => "position: absolute; right: 100%; top: 50%; transform: translateY(-50%); margin-right: 0.4rem;",
-        TooltipPlacement::End => "position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 0.4rem;",
+        TooltipPlacement::Top => {
+            "position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 0.4rem;"
+        }
+        TooltipPlacement::Bottom => {
+            "position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 0.4rem;"
+        }
+        TooltipPlacement::Start => {
+            "position: absolute; right: 100%; top: 50%; transform: translateY(-50%); margin-right: 0.4rem;"
+        }
+        TooltipPlacement::End => {
+            "position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 0.4rem;"
+        }
     };
 
     let arrow_placement = match props.placement {

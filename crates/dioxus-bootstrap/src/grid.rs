@@ -24,7 +24,11 @@ pub struct ContainerProps {
 
 #[component]
 pub fn Container(props: ContainerProps) -> Element {
-    let base = if props.fluid { "container-fluid" } else { "container" };
+    let base = if props.fluid {
+        "container-fluid"
+    } else {
+        "container"
+    };
     let full_class = if props.class.is_empty() {
         base.to_string()
     } else {

@@ -99,10 +99,18 @@ pub fn Carousel(props: CarouselProps) -> Element {
         let cur = *active_signal.read();
         let to = match direction {
             SlideDirection::Next => {
-                if cur + 1 >= total { 0 } else { cur + 1 }
+                if cur + 1 >= total {
+                    0
+                } else {
+                    cur + 1
+                }
             }
             SlideDirection::Prev => {
-                if cur == 0 { total - 1 } else { cur - 1 }
+                if cur == 0 {
+                    total - 1
+                } else {
+                    cur - 1
+                }
             }
         };
         transitioning.set(Some((cur, to, direction)));
@@ -264,20 +272,22 @@ fn build_slide_class(
                 } else {
                     "carousel-item".to_string()
                 }
-            } else {
-                if index == from {
-                    match direction {
-                        SlideDirection::Next => "carousel-item active carousel-item-start".to_string(),
-                        SlideDirection::Prev => "carousel-item active carousel-item-end".to_string(),
-                    }
-                } else if index == to {
-                    match direction {
-                        SlideDirection::Next => "carousel-item carousel-item-next carousel-item-start".to_string(),
-                        SlideDirection::Prev => "carousel-item carousel-item-prev carousel-item-end".to_string(),
-                    }
-                } else {
-                    "carousel-item".to_string()
+            } else if index == from {
+                match direction {
+                    SlideDirection::Next => "carousel-item active carousel-item-start".to_string(),
+                    SlideDirection::Prev => "carousel-item active carousel-item-end".to_string(),
                 }
+            } else if index == to {
+                match direction {
+                    SlideDirection::Next => {
+                        "carousel-item carousel-item-next carousel-item-start".to_string()
+                    }
+                    SlideDirection::Prev => {
+                        "carousel-item carousel-item-prev carousel-item-end".to_string()
+                    }
+                }
+            } else {
+                "carousel-item".to_string()
             }
         }
         None => {
