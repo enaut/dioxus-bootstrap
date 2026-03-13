@@ -4,9 +4,11 @@ Bootstrap 5.3 components for Dioxus — type-safe RSX wrappers powered by Bootst
 
 ## What is this?
 
-A Rust crate that provides Dioxus components matching Bootstrap 5.3.3 — pixel-perfect,
-offline-capable, zero JavaScript. Bootstrap's CSS does all the styling. Dioxus signals
-replace Bootstrap's JS for interactive components (modals, tabs, dropdowns, collapse).
+A strict 1-to-1 mapping of Bootstrap 5.3 for Dioxus. Real Bootstrap CSS, real Bootstrap Icons,
+zero JavaScript. Dioxus signals replace Bootstrap JS for interactive components.
+
+> **Design rule:** If Bootstrap does it, we do it. If Bootstrap doesn't, we don't.
+> See [docs/DESIGN.md](docs/DESIGN.md) for details.
 
 ## Quick start
 
