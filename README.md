@@ -2,17 +2,20 @@
 
 [![Crates.io](https://img.shields.io/crates/v/dioxus-bootstrap-css.svg)](https://crates.io/crates/dioxus-bootstrap-css)
 [![License](https://img.shields.io/crates/l/dioxus-bootstrap-css.svg)](LICENSE)
+[![CI](https://github.com/mik-tf/dioxus-bootstrap/actions/workflows/ci.yml/badge.svg)](https://github.com/mik-tf/dioxus-bootstrap/actions/workflows/ci.yml)
 
 A strict 1-to-1 mapping of [Bootstrap 5.3](https://getbootstrap.com/) for [Dioxus](https://dioxuslabs.com/).
 
 Real Bootstrap CSS. Real Bootstrap Icons. Zero JavaScript. Dioxus signals replace Bootstrap JS.
+
+**[Live Showcase](https://mik-tf.github.io/dioxus-bootstrap/)**
 
 > **Design rule:** If Bootstrap does it, we do it. If Bootstrap doesn't, we don't.
 
 ## Why?
 
 - **Pixel-perfect** — Uses the actual Bootstrap 5.3.3 CSS, not a reimplementation
-- **Zero JavaScript** — Modals, dropdowns, tabs, collapse, accordion, offcanvas — all driven by Dioxus signals
+- **Zero JavaScript** — Modals, dropdowns, tabs, collapse, accordion, offcanvas, carousel — all driven by Dioxus signals
 - **Offline-first** — CSS and icon fonts bundled as static assets via `asset!()`
 - **Type-safe** — Bootstrap classes become Rust enums and props; no magic strings
 - **Drop-in migration** — Convert Bootstrap HTML templates to RSX with minimal changes
@@ -24,7 +27,7 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.1.5"
+dioxus-bootstrap-css = "0.1.6"
 ```
 
 ```rust
@@ -85,7 +88,7 @@ fn app() -> Element {
 | Component | Description |
 |-----------|-------------|
 | `Button` | All Bootstrap button variants, sizes, outlines |
-| `ButtonGroup` | Button groups |
+| `ButtonGroup` / `ButtonToolbar` | Button groups and toolbars |
 | `Card` | Cards with `header`, `body`, `footer` slots |
 | `Alert` | Dismissible alerts with all color variants |
 | `Badge` | Badges and pills |
@@ -93,12 +96,14 @@ fn app() -> Element {
 | `Spinner` | Border and grow spinners |
 | `Progress` / `ProgressBar` | Progress bars (striped, animated, stacked) |
 | `Placeholder` / `PlaceholderParagraph` | Loading placeholder elements |
+| `Figure` | Figures with captions |
+| `Ratio` | Responsive aspect ratio embeds |
 
 ### Data Display
 | Component | Description |
 |-----------|-------------|
-| `Table` | Striped, hover, bordered, responsive tables |
-| `ListGroup` / `ListGroupItem` | List groups (flush, active, disabled) |
+| `Table` | Striped, striped-columns, hover, bordered, responsive tables |
+| `ListGroup` / `ListGroupItem` | List groups (flush, active, disabled, colored) |
 | `Pagination` | Page navigation with ellipsis |
 
 ### Forms
@@ -108,26 +113,33 @@ fn app() -> Element {
 | `Input` | Text inputs with all HTML types |
 | `Select` | Select dropdowns |
 | `Textarea` | Multi-line text input |
-| `Checkbox` / `Radio` | Check and radio inputs |
+| `Checkbox` / `Radio` / `Switch` | Check, radio, and switch inputs |
+| `Range` | Range slider |
+| `FloatingLabel` | Floating label inputs |
 | `InputGroup` / `InputGroupText` | Input groups with addons |
+| `FormFeedback` / `FormText` | Validation feedback and help text |
 
-### Interactive (Signal-Driven)
+### Interactive (Signal-Driven, Zero JS)
 | Component | Bootstrap JS Replaced |
 |-----------|----------------------|
-| `Modal` | `data-bs-toggle="modal"` |
+| `Modal` | `data-bs-toggle="modal"` (sizes, fullscreen, centered, scrollable) |
 | `Dropdown` / `DropdownItem` / `DropdownDivider` / `DropdownHeader` | `data-bs-toggle="dropdown"` + click-outside-to-close |
 | `Collapse` | `data-bs-toggle="collapse"` |
-| `Tabs` / `Tab` / `TabList` | Tab switching logic |
+| `Tabs` / `Tab` / `TabList` | Tab switching (pills, fill, justified, vertical) |
 | `Accordion` / `AccordionItem` | Accordion toggle logic |
-| `Offcanvas` | `data-bs-toggle="offcanvas"` |
+| `Offcanvas` | `data-bs-toggle="offcanvas"` (placements, responsive) |
 | `Toast` / `ToastContainer` | Toast show/dismiss |
+| `Carousel` | Slide/fade transitions, auto-play, pause-on-hover, keyboard nav, touch swipe |
+| `Tooltip` | CSS-positioned tooltips (top, bottom, start, end) |
+| `Popover` | Click-to-toggle popovers with click-outside-to-close |
+| `Scrollspy` | Scroll-aware section tracking via signals |
 
 ### Navigation
 | Component | Description |
 |-----------|-------------|
 | `Navbar` | Responsive navbar with color schemes |
 | `NavbarToggler` / `NavbarCollapse` | Mobile hamburger toggle |
-| `NavItem` / `NavLink` | Nav items and links |
+| `Nav` / `NavItem` / `NavLink` | Nav (pills, tabs, underline, fill, justified, vertical) |
 | `Breadcrumb` / `BreadcrumbItem` | Breadcrumb navigation |
 
 ## Dark Mode
@@ -164,18 +176,11 @@ rsx! {
 - **Signals** — Replace all Bootstrap JS behaviors; no `<script>` tags needed
 - **Components** — Type-safe RSX wrappers that emit standard Bootstrap HTML classes
 
-## Roadmap
-
-Not yet implemented:
-- Carousel
-- Tooltips / Popovers
-- Scrollspy
-
 ## Examples
 
 See the [`examples/`](https://github.com/mik-tf/dioxus-bootstrap/tree/development/examples) directory:
 
-- **showcase** — Every component demonstrated in a tabbed interface
+- **[showcase](https://mik-tf.github.io/dioxus-bootstrap/)** — Every component demonstrated in a tabbed interface ([live demo](https://mik-tf.github.io/dioxus-bootstrap/))
 - **dashboard** — Realistic admin dashboard with navbar, tables, modals, charts
 
 ## Migration from Bootstrap HTML
