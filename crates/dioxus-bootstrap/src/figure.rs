@@ -2,13 +2,34 @@ use dioxus::prelude::*;
 
 /// Bootstrap Figure component — image with optional caption.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <figure class="figure">
+///   <img src="/photo.jpg" class="figure-img img-fluid rounded" alt="Photo">
+///   <figcaption class="figure-caption text-end">A caption.</figcaption>
+/// </figure>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
-///     Figure { src: "/img/photo.jpg", alt: "A photo",
+///     Figure { src: "/photo.jpg", alt: "A photo",
 ///         caption: "A caption for the image.",
+///         caption_align: "end",
+///         rounded: true,
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `src` — image URL
+/// - `alt` — alt text
+/// - `caption` / `caption_align` — caption text and alignment
+/// - `fluid` — responsive image (default: true)
+/// - `rounded` — rounded corners
+/// - `thumbnail` — thumbnail border
 #[derive(Clone, PartialEq, Props)]
 pub struct FigureProps {
     /// Image source URL.
@@ -84,13 +105,29 @@ pub fn Figure(props: FigureProps) -> Element {
 
 /// Bootstrap responsive embed / aspect ratio wrapper.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="ratio ratio-16x9">
+///   <iframe src="https://www.youtube.com/embed/..."></iframe>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Ratio { aspect: "16x9",
 ///         iframe { src: "https://www.youtube.com/embed/..." }
 ///     }
+///     Ratio { aspect: "1x1",
+///         div { class: "bg-primary text-white d-flex align-items-center justify-content-center", "1:1" }
+///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `aspect` — "1x1", "4x3", "16x9", "21x9"
 #[derive(Clone, PartialEq, Props)]
 pub struct RatioProps {
     /// Aspect ratio: "1x1", "4x3", "16x9", "21x9".

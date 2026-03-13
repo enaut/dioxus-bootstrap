@@ -1,16 +1,40 @@
 use dioxus::prelude::*;
 
-/// Bootstrap Offcanvas component — signal-driven, no JavaScript.
+/// Bootstrap Offcanvas (slide-in sidebar) — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <button data-bs-toggle="offcanvas" data-bs-target="#sidebar">Open</button>
+/// <div class="offcanvas offcanvas-start" id="sidebar">
+///   <div class="offcanvas-header"><h5>Menu</h5><button class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+///   <div class="offcanvas-body">Content</div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// let show = use_signal(|| false);
 /// rsx! {
 ///     Button { onclick: move |_| show.set(true), "Open Sidebar" }
 ///     Offcanvas { show: show, title: "Menu", placement: OffcanvasPlacement::Start,
-///         p { "Sidebar content" }
+///         Nav { vertical: true, pills: true,
+///             NavItem { NavLink { active: true, "Home" } }
+///             NavItem { NavLink { "Settings" } }
+///         }
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `show` — `Signal<bool>` controlling visibility
+/// - `title` — header title
+/// - `placement` — `OffcanvasPlacement::Start`, `End`, `Top`, `Bottom`
+/// - `backdrop` — show backdrop overlay (default: true)
+/// - `backdrop_close` — close on backdrop click (default: true)
+/// - `responsive` — responsive variant breakpoint (e.g., "lg")
 #[derive(Clone, PartialEq, Props)]
 pub struct OffcanvasProps {
     /// Signal controlling visibility.

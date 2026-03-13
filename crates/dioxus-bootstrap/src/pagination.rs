@@ -2,14 +2,38 @@ use dioxus::prelude::*;
 
 use crate::types::Size;
 
-/// Bootstrap Pagination component.
+/// Bootstrap Pagination component — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// Automatically generates page numbers with ellipsis, prev/next buttons,
+/// and highlights the active page.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (manual) -->
+/// <nav><ul class="pagination pagination-sm">
+///   <li class="page-item"><button class="page-link">‹</button></li>
+///   <li class="page-item active"><button class="page-link">1</button></li>
+///   <li class="page-item"><button class="page-link">2</button></li>
+///   <li class="page-item"><button class="page-link">›</button></li>
+/// </ul></nav>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent — fully automatic
 /// let page = use_signal(|| 1usize);
 /// rsx! {
-///     Pagination { current: page, total: 10 }
+///     Pagination { current: page, total: 20, window: 2, size: Size::Sm }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `current` — `Signal<usize>` for current page (1-based)
+/// - `total` — total number of pages
+/// - `window` — number of page links around current (default: 2)
+/// - `size` — `Size::Sm`, `Md`, `Lg`
+/// - `show_prev_next` — show prev/next buttons (default: true)
 #[derive(Clone, PartialEq, Props)]
 pub struct PaginationProps {
     /// Signal controlling the current page (1-based).

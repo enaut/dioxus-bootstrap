@@ -4,15 +4,33 @@ use crate::types::Color;
 
 /// Bootstrap Progress container.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="progress">
+///   <div class="progress-bar bg-success" style="width: 75%">75%</div>
+/// </div>
+/// <!-- Stacked bars -->
+/// <div class="progress">
+///   <div class="progress-bar" style="width: 30%"></div>
+///   <div class="progress-bar bg-warning" style="width: 20%"></div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Progress {
-///         ProgressBar { value: 75.0, color: Color::Success }
+///         ProgressBar { value: 75.0, color: Color::Success, show_label: true }
 ///     }
 ///     // Stacked bars
 ///     Progress {
 ///         ProgressBar { value: 30.0, color: Color::Primary }
 ///         ProgressBar { value: 20.0, color: Color::Warning }
+///     }
+///     // Striped animated
+///     Progress {
+///         ProgressBar { value: 50.0, striped: true, animated: true }
 ///     }
 /// }
 /// ```

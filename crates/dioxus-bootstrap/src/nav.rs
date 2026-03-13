@@ -2,16 +2,43 @@ use dioxus::prelude::*;
 
 use crate::types::{Color, NavbarExpand};
 
-/// Bootstrap Nav component — standalone nav (not inside a Navbar).
+/// Bootstrap Nav component — standalone navigation (not inside a Navbar).
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <ul class="nav nav-pills nav-fill">
+///   <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+///   <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
+///   <li class="nav-item"><a class="nav-link disabled">Disabled</a></li>
+/// </ul>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Nav { pills: true, fill: true,
 ///         NavItem { NavLink { active: true, "Home" } }
 ///         NavItem { NavLink { "Profile" } }
+///         NavItem { NavLink { disabled: true, "Disabled" } }
 ///     }
+///     // Tabs style
+///     Nav { tabs: true, /* ... */ }
+///     // Underline style
+///     Nav { underline: true, /* ... */ }
+///     // Vertical with pills
+///     Nav { pills: true, vertical: true, /* ... */ }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `pills` — pill style
+/// - `tabs` — tab style
+/// - `underline` — underline style
+/// - `fill` — fill available width
+/// - `justified` — equal-width items
+/// - `vertical` — vertical layout
 #[derive(Clone, PartialEq, Props)]
 pub struct NavProps {
     /// Use pill style.
@@ -74,11 +101,30 @@ pub fn Nav(props: NavProps) -> Element {
 
 /// Bootstrap Navbar component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
+///   <div class="container-fluid">
+///     <a class="navbar-brand" href="#">MyApp</a>
+///     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
+///       <span class="navbar-toggler-icon"></span>
+///     </button>
+///     <div class="collapse navbar-collapse" id="nav">
+///       <ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="/">Home</a></li></ul>
+///     </div>
+///   </div>
+/// </nav>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// let collapsed = use_signal(|| true);
 /// rsx! {
-///     Navbar { color: Color::Dark, expand: NavbarExpand::Lg,
-///         brand: rsx! { a { class: "navbar-brand", href: "#", "My App" } },
+///     Navbar { expand: NavbarExpand::Lg, class: "bg-body sticky-top",
+///         brand: rsx! { a { class: "navbar-brand", href: "#", "MyApp" } },
+///         NavbarToggler { collapsed: collapsed }
 ///         NavbarCollapse { collapsed: collapsed,
 ///             NavItem { NavLink { href: "/", active: true, "Home" } }
 ///             NavItem { NavLink { href: "/about", "About" } }

@@ -2,19 +2,41 @@ use dioxus::prelude::*;
 
 /// Bootstrap Accordion component — signal-driven, no JavaScript.
 ///
-/// ```rust
-/// let open = use_signal(|| Some(0usize)); // First item open by default
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <div class="accordion">
+///   <div class="accordion-item">
+///     <h2 class="accordion-header">
+///       <button class="accordion-button" data-bs-toggle="collapse">Section 1</button>
+///     </h2>
+///     <div class="accordion-collapse collapse show">
+///       <div class="accordion-body">Content 1</div>
+///     </div>
+///   </div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
+/// let open = use_signal(|| Some(0usize));
 /// rsx! {
-///     Accordion { open: open,
-///         AccordionItem { index: 0, title: "Section 1",
+///     Accordion { open: open, flush: true,
+///         AccordionItem { index: 0, title: "Section 1", open: open,
 ///             p { "Content for section 1" }
 ///         }
-///         AccordionItem { index: 1, title: "Section 2",
+///         AccordionItem { index: 1, title: "Section 2", open: open,
 ///             p { "Content for section 2" }
 ///         }
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `open` — `Signal<Option<usize>>` controlling which item is open (None = all closed)
+/// - `flush` — remove borders and rounded corners
 #[derive(Clone, PartialEq, Props)]
 pub struct AccordionProps {
     /// Signal controlling which item is open (None = all closed).

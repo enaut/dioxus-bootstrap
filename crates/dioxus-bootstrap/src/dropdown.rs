@@ -2,20 +2,52 @@ use dioxus::prelude::*;
 
 /// Bootstrap Dropdown component — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// Replaces Bootstrap's dropdown JavaScript plugin with signal-controlled open/close.
+/// Supports split buttons, drop directions, and auto-closes on outside click.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <div class="dropdown">
+///   <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">Menu</button>
+///   <ul class="dropdown-menu">
+///     <li><button class="dropdown-item">Action</button></li>
+///     <li><hr class="dropdown-divider"></li>
+///     <li><button class="dropdown-item">Other</button></li>
+///   </ul>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// let open = use_signal(|| false);
 /// rsx! {
 ///     Dropdown { open: open,
-///         toggle: rsx! { "Actions" },
+///         toggle: rsx! { "Menu" },
 ///         menu: rsx! {
-///             DropdownItem { onclick: handler1, "Edit" }
-///             DropdownItem { onclick: handler2, "Delete" }
+///             DropdownItem { "Action" }
 ///             DropdownDivider {}
-///             DropdownItem { disabled: true, "Archived" }
+///             DropdownItem { "Other" }
 ///         },
+///     }
+///     // Split button variant
+///     Dropdown { open: open, split: true, color: Color::Danger,
+///         toggle: rsx! { "Delete" },
+///         menu: rsx! { DropdownItem { "Confirm Delete" } },
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `open` — `Signal<bool>` controlling open state
+/// - `toggle` — toggle button content (Element)
+/// - `menu` — dropdown menu content (Element)
+/// - `split` — split button mode (separate action button + caret toggle)
+/// - `color` — button color in split mode
+/// - `direction` — `DropDirection::Down`, `Up`, `Start`, `End`
+/// - `align_end` — align menu to the right
 #[derive(Clone, PartialEq, Props)]
 pub struct DropdownProps {
     /// Signal controlling dropdown open state.

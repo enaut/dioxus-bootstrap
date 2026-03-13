@@ -4,11 +4,21 @@ use crate::types::{Color, Size};
 
 /// Bootstrap Button component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<button class="btn btn-primary">` | `Button { color: Color::Primary, "Text" }` |
+/// | `<button class="btn btn-outline-danger btn-sm">` | `Button { color: Color::Danger, outline: true, size: Size::Sm, "Text" }` |
+/// | `<button class="btn btn-success btn-lg" disabled>` | `Button { color: Color::Success, size: Size::Lg, disabled: true, "Text" }` |
+/// | `<button class="btn btn-primary active">` | `Button { color: Color::Primary, active: true, "Text" }` |
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Button { color: Color::Primary, "Click me" }
 ///     Button { color: Color::Danger, outline: true, size: Size::Sm, "Delete" }
 ///     Button { color: Color::Success, disabled: true, "Saved" }
+///     Button { color: Color::Warning, onclick: move |_| { /* handler */ }, "Action" }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]

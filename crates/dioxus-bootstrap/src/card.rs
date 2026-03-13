@@ -2,7 +2,19 @@ use dioxus::prelude::*;
 
 /// Bootstrap Card component with optional header, body, and footer slots.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="card">
+///   <div class="card-header">Title</div>
+///   <div class="card-body"><p>Content</p></div>
+///   <div class="card-footer">Footer</div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// rsx! {
 ///     Card {
 ///         header: rsx! { "Card Title" },
@@ -10,8 +22,11 @@ use dioxus::prelude::*;
 ///         footer: rsx! { "Last updated 3 mins ago" },
 ///     }
 ///     // Body-only card
-///     Card {
-///         body: rsx! { "Simple card" },
+///     Card { body: rsx! { "Simple card" } }
+///     // Custom layout (children go inside card, outside body)
+///     Card { class: "text-center",
+///         img { class: "card-img-top", src: "/photo.jpg" }
+///         div { class: "card-body", h5 { "Title" } p { "Text" } }
 ///     }
 /// }
 /// ```

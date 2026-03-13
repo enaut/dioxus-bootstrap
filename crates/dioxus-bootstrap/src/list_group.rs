@@ -4,12 +4,34 @@ use crate::types::Color;
 
 /// Bootstrap ListGroup component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <ul class="list-group list-group-flush">
+///   <li class="list-group-item active">Active</li>
+///   <li class="list-group-item">Normal</li>
+///   <li class="list-group-item list-group-item-danger">Danger</li>
+///   <li class="list-group-item disabled">Disabled</li>
+/// </ul>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
+///     ListGroup { flush: true,
+///         ListGroupItem { active: true, "Active" }
+///         ListGroupItem { "Normal" }
+///         ListGroupItem { color: Color::Danger, "Danger" }
+///         ListGroupItem { disabled: true, "Disabled" }
+///     }
+///     // Clickable list group
 ///     ListGroup {
-///         ListGroupItem { "Item 1" }
-///         ListGroupItem { active: true, "Item 2 (active)" }
-///         ListGroupItem { color: Color::Danger, "Item 3 (danger)" }
+///         ListGroupItem { onclick: handler, "Click me" }
+///     }
+///     // Numbered list
+///     ListGroup { numbered: true,
+///         ListGroupItem { "First" }
+///         ListGroupItem { "Second" }
 ///     }
 /// }
 /// ```

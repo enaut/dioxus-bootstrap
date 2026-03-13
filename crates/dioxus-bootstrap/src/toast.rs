@@ -2,16 +2,41 @@ use dioxus::prelude::*;
 
 use crate::types::Color;
 
-/// Bootstrap Toast component — signal-driven, no JavaScript.
+/// Bootstrap Toast notification — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <div class="toast show">
+///   <div class="toast-header">
+///     <strong class="me-auto">Notification</strong>
+///     <small>just now</small>
+///     <button class="btn-close" data-bs-dismiss="toast"></button>
+///   </div>
+///   <div class="toast-body">You have a new message.</div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// let show = use_signal(|| true);
 /// rsx! {
-///     Toast { show: show, title: "Notification",
-///         "You have a new message."
+///     ToastContainer { position: ToastPosition::TopEnd,
+///         Toast { show: show, title: "Notification", subtitle: "just now",
+///             "You have a new message."
+///         }
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `show` — `Signal<bool>` controlling visibility
+/// - `title` — toast header title
+/// - `subtitle` — small text in header (e.g., "just now")
+/// - `color` — background color variant
+/// - `show_close` — show close button (default: true)
 #[derive(Clone, PartialEq, Props)]
 pub struct ToastProps {
     /// Signal controlling visibility.

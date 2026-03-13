@@ -2,7 +2,16 @@ use dioxus::prelude::*;
 
 /// Bootstrap Collapse component — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <button data-bs-toggle="collapse" data-bs-target="#content">Toggle</button>
+/// <div class="collapse" id="content">Hidden content</div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// let expanded = use_signal(|| false);
 /// rsx! {
 ///     Button { onclick: move |_| expanded.toggle(), "Toggle Content" }
@@ -11,6 +20,11 @@ use dioxus::prelude::*;
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `expanded` — `Signal<bool>` controlling expanded/collapsed state
+/// - `horizontal` — horizontal collapse instead of vertical
 #[derive(Clone, PartialEq, Props)]
 pub struct CollapseProps {
     /// Signal controlling expanded/collapsed state.
