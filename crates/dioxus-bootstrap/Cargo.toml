@@ -1,0 +1,13 @@
+[package]
+name = "dioxus-bootstrap"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Bootstrap 5.3 components for Dioxus — type-safe RSX wrappers powered by Bootstrap CSS"
+repository = "https://github.com/mik-tf/dioxus-bootstrap"
+keywords = ["dioxus", "bootstrap", "wasm", "ui", "components"]
+categories = ["gui", "wasm", "web-programming"]
+
+[dependencies]
+dioxus = { version = "0.7", default-features = false }
