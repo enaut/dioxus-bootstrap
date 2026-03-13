@@ -24,7 +24,7 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.1.4"
+dioxus-bootstrap-css = "0.1.5"
 ```
 
 ```rust
@@ -146,17 +146,17 @@ rsx! {
 ## How It Works
 
 ```
-┌─────────────────────────────────────┐
-│          Your Dioxus App            │
-│  ┌───────────────────────────────┐  │
-│  │    dioxus-bootstrap-css       │  │
-│  │  ┌─────────┐ ┌─────────────┐ │  │
-│  │  │Bootstrap │ │  Dioxus RSX │ │  │
-│  │  │ 5.3 CSS  │ │  Components │ │  │
-│  │  │ + Icons  │ │  + Signals  │ │  │
-│  │  └─────────┘ └─────────────┘ │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
++-------------------------------------+
+|          Your Dioxus App            |
+|  +-------------------------------+  |
+|  |    dioxus-bootstrap-css       |  |
+|  |  +-----------+ +------------+ |  |
+|  |  | Bootstrap | | Dioxus RSX | |  |
+|  |  | 5.3 CSS   | | Components | |  |
+|  |  | + Icons   | | + Signals  | |  |
+|  |  +-----------+ +------------+ |  |
+|  +-------------------------------+  |
++-------------------------------------+
 ```
 
 - **CSS** — Real `bootstrap.min.css` and `bootstrap-icons.min.css`, bundled via `asset!()`
