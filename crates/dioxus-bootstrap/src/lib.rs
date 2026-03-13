@@ -21,6 +21,7 @@ pub mod progress;
 pub mod spinner;
 pub mod table;
 pub mod tabs;
+pub mod theme;
 pub mod toast;
 pub mod types;
 
@@ -49,6 +50,7 @@ pub mod prelude {
     pub use crate::spinner::*;
     pub use crate::table::*;
     pub use crate::tabs::*;
+    pub use crate::theme::*;
     pub use crate::toast::*;
     pub use crate::types::*;
 }
