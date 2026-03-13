@@ -4,11 +4,9 @@
 [![License](https://img.shields.io/crates/l/dioxus-bootstrap-css.svg)](LICENSE)
 [![CI](https://github.com/mik-tf/dioxus-bootstrap/actions/workflows/ci.yml/badge.svg)](https://github.com/mik-tf/dioxus-bootstrap/actions/workflows/ci.yml)
 
-A strict 1-to-1 mapping of [Bootstrap 5.3](https://getbootstrap.com/) for [Dioxus](https://dioxuslabs.com/).
+Complete 1-to-1 [Bootstrap 5.3](https://getbootstrap.com/) component library for [Dioxus](https://dioxuslabs.com/). 50+ components covering every Bootstrap CSS class and JS behavior — modals, dropdowns, carousel, accordion, offcanvas, tooltips, and more — all driven by Dioxus signals. Zero JavaScript. Offline-first. Type-safe.
 
-Real Bootstrap CSS. Real Bootstrap Icons. Zero JavaScript. Dioxus signals replace Bootstrap JS.
-
-**[Live Showcase](https://mik-tf.github.io/dioxus-bootstrap/)**
+**[Live Showcase](https://mik-tf.github.io/dioxus-bootstrap/)** | **[API Docs](https://docs.rs/dioxus-bootstrap-css)**
 
 > **Design rule:** If Bootstrap does it, we do it. If Bootstrap doesn't, we don't.
 
