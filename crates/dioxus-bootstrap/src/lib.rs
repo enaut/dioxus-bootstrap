@@ -24,7 +24,7 @@ pub mod tabs;
 pub mod toast;
 pub mod types;
 
-/// Prelude — import everything with `use dioxus_bootstrap::prelude::*`.
+/// Prelude — import everything with `use dioxus_bootstrap_css::prelude::*`.
 pub mod prelude {
     pub use crate::accordion::*;
     pub use crate::alert::*;

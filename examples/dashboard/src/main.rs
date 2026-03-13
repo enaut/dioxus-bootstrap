@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_bootstrap::prelude::*;
+use dioxus_bootstrap_css::prelude::*;
 
 fn main() {
     dioxus::launch(app);

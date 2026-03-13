@@ -1,4 +1,4 @@
-# dioxus-bootstrap
+# dioxus-bootstrap-css
 
 Bootstrap 5.3 components for Dioxus — type-safe RSX wrappers powered by Bootstrap CSS.
 
@@ -12,7 +12,7 @@ replace Bootstrap's JS for interactive components (modals, tabs, dropdowns, coll
 
 ```rust
 use dioxus::prelude::*;
-use dioxus_bootstrap::prelude::*;
+use dioxus_bootstrap_css::prelude::*;
 
 fn app() -> Element {
     rsx! {
