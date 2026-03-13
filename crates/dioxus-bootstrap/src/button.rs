@@ -42,11 +42,7 @@ pub struct ButtonProps {
 pub fn Button(props: ButtonProps) -> Element {
     let style = if props.outline { "btn-outline" } else { "btn" };
     let color = props.color;
-    let color_class = if props.outline {
-        format!("{style}-{color}")
-    } else {
-        format!("{style}-{color}")
-    };
+    let color_class = format!("{style}-{color}");
 
     let size_class = match props.size {
         Size::Md => String::new(),

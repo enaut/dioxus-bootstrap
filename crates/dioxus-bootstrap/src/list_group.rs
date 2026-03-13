@@ -96,7 +96,7 @@ pub fn ListGroupItem(props: ListGroupItemProps) -> Element {
     let full_class = classes.join(" ");
 
     if let Some(handler) = &props.onclick {
-        let handler = handler.clone();
+        let handler = *handler;
         rsx! {
             button {
                 class: "{full_class}",

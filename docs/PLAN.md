@@ -209,76 +209,76 @@ Consumers do NOT need `bootstrap.bundle.min.js`. This is a core design principle
 
 Goal: Crate scaffold, asset bundling, core types, first component.
 
-- [ ] Workspace `Cargo.toml` with `crates/dioxus-bootstrap/`
-- [ ] Dioxus 0.7 dependency
-- [ ] `types.rs` — `Color`, `Size`, `ColumnSize` enums with `Display` impls
-- [ ] `assets/` — bundle `bootstrap.min.css` and `bootstrap-icons.min.css`
-- [ ] `head.rs` — `BootstrapHead` component
-- [ ] `button.rs` — `Button` and `ButtonGroup` as the proof-of-concept component
-- [ ] `icon.rs` — `Icon` component
-- [ ] `lib.rs` — re-export everything
-- [ ] Basic example app that renders buttons + icons with correct Bootstrap styling
-- [ ] Verify: loads offline, correct visual output, no JS needed
+- [x] Workspace `Cargo.toml` with `crates/dioxus-bootstrap/`
+- [x] Dioxus 0.7 dependency
+- [x] `types.rs` — `Color`, `Size`, `ColumnSize` enums with `Display` impls
+- [x] `assets/` — bundle `bootstrap.min.css` and `bootstrap-icons.min.css`
+- [x] `head.rs` — `BootstrapHead` component
+- [x] `button.rs` — `Button` and `ButtonGroup` as the proof-of-concept component
+- [x] `icon.rs` — `Icon` component
+- [x] `lib.rs` — re-export everything
+- [x] Basic example app that renders buttons + icons with correct Bootstrap styling
+- [x] Verify: loads offline, correct visual output, no JS needed
 
 ### Phase 2: CSS-Only Components
 
 Goal: All layout and display components that need no interactive JS logic.
 
-- [ ] `grid.rs` — `Container`, `Row`, `Col` with responsive breakpoint props
-- [ ] `card.rs` — `Card` with header/body/footer slots
-- [ ] `alert.rs` — `Alert` with color + dismissible (dismiss is a signal, not JS)
-- [ ] `badge.rs` — `Badge` with color + pill option
-- [ ] `spinner.rs` — `Spinner` (border and grow variants)
-- [ ] `progress.rs` — `Progress` and `ProgressBar` with value/color props
-- [ ] `table.rs` — `Table` with striped/hover/bordered/responsive props
-- [ ] `form.rs` — `FormGroup`, `Input`, `Select`, `Textarea`, `Checkbox`, `Radio`
-- [ ] `list_group.rs` — `ListGroup`, `ListGroupItem`
-- [ ] Dashboard example using all Phase 2 components
+- [x] `grid.rs` — `Container`, `Row`, `Col` with responsive breakpoint props
+- [x] `card.rs` — `Card` with header/body/footer slots
+- [x] `alert.rs` — `Alert` with color + dismissible (dismiss is a signal, not JS)
+- [x] `badge.rs` — `Badge` with color + pill option
+- [x] `spinner.rs` — `Spinner` (border and grow variants)
+- [x] `progress.rs` — `Progress` and `ProgressBar` with value/color props
+- [x] `table.rs` — `Table` with striped/hover/bordered/responsive props
+- [x] `form.rs` — `FormGroup`, `Input`, `Select`, `Textarea`, `Checkbox`, `Radio`
+- [x] `list_group.rs` — `ListGroup`, `ListGroupItem`
+- [x] Dashboard example using all Phase 2 components
 
 ### Phase 3: Interactive Components
 
 Goal: Signal-driven replacements for Bootstrap JS components.
 
-- [ ] `tabs.rs` — `Tabs`, `TabPane` with active signal
-- [ ] `modal.rs` — `Modal` with show signal, backdrop click-to-close, ESC key handling
-- [ ] `dropdown.rs` — `Dropdown` with open signal, click-outside-to-close
-- [ ] `collapse.rs` — `Collapse` with expanded signal, CSS height transition
-- [ ] `alert.rs` update — wire dismissible alert to use Collapse internally
-- [ ] Showcase example demonstrating all interactive components
+- [x] `tabs.rs` — `Tabs`, `TabPane` with active signal
+- [x] `modal.rs` — `Modal` with show signal, backdrop click-to-close, ESC key handling
+- [x] `dropdown.rs` — `Dropdown` with open signal, click-outside-to-close
+- [x] `collapse.rs` — `Collapse` with expanded signal, CSS height transition
+- [x] `alert.rs` update — wire dismissible alert to use Collapse internally
+- [x] Showcase example demonstrating all interactive components
 
 ### Phase 4: Navigation Components
 
 Goal: Navbar and structural navigation.
 
-- [ ] `nav.rs` — `Navbar`, `NavBrand`, `NavItem`, `NavLink`, `NavDropdown`
-- [ ] `nav.rs` — responsive collapse (hamburger menu) using Phase 3 Collapse
-- [ ] `breadcrumb.rs` — `Breadcrumb`, `BreadcrumbItem`
-- [ ] Full dashboard example with navbar + sidebar + tabs + cards
+- [x] `nav.rs` — `Navbar`, `NavBrand`, `NavItem`, `NavLink`, `NavDropdown`
+- [x] `nav.rs` — responsive collapse (hamburger menu) using Phase 3 Collapse
+- [x] `breadcrumb.rs` — `Breadcrumb`, `BreadcrumbItem`
+- [x] Full dashboard example with navbar + sidebar + tabs + cards
 
 ### Phase 5: Theme Integration & Migration Guide
 
 Goal: CSS variable bridging for apps that use custom design systems, and a guide
 for migrating existing Bootstrap HTML templates to dioxus-bootstrap.
 
-- [ ] Document the CSS custom property bridge pattern:
+- [x] Document the CSS custom property bridge pattern:
       how to map a parent app's CSS variables to Bootstrap's `--bs-*` variables
-- [ ] Document `data-bs-theme` light/dark mode switching from Dioxus
-- [ ] `docs/MIGRATION.md` — step-by-step guide for converting Bootstrap HTML
+- [x] Document `data-bs-theme` light/dark mode switching from Dioxus
+- [x] `docs/MIGRATION.md` — step-by-step guide for converting Bootstrap HTML
       templates (Tera, Askama, Jinja2) to dioxus-bootstrap RSX
-- [ ] Common patterns catalog: two-column layout, tabbed dashboard, card grid,
+- [x] Common patterns catalog: two-column layout, tabbed dashboard, card grid,
       form with validation, modal confirmation flow
-- [ ] Example: theme-aware component that responds to CSS variable changes
+- [x] Example: theme-aware component that responds to CSS variable changes
 
 ### Phase 6: Polish & Publish
 
 Goal: Production-ready crate on crates.io.
 
-- [ ] API review — consistent naming, prop conventions, documentation
-- [ ] All components have doc comments with usage examples
-- [ ] All components have basic tests
-- [ ] README with quick-start, component gallery screenshots
-- [ ] `cargo publish` to crates.io
-- [ ] GitHub repo with CI (build + test + clippy)
+- [x] API review — consistent naming, prop conventions, documentation
+- [x] All components have doc comments with usage examples
+- [x] All components have basic tests
+- [x] README with quick-start, component gallery screenshots
+- [x] `cargo publish` to crates.io
+- [x] GitHub repo with CI (build + test + clippy)
 
 ## Component API Reference
 
