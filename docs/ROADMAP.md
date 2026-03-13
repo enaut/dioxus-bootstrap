@@ -26,7 +26,8 @@ FloatingLabel, InputGroup/InputGroupText, FormFeedback, FormText
 Modal (sizes, fullscreen, centered, scrollable), Dropdown (split, directions),
 Collapse, Tabs/Tab/TabList (pills, fill, justified, vertical),
 Accordion/AccordionItem, Offcanvas (placements, responsive), Toast/ToastContainer,
-Carousel (indicators, controls, fade, dark), Tooltip, Popover, Scrollspy
+Carousel (indicators, controls, fade, dark, auto-play, pause-on-hover,
+keyboard nav, touch swipe, slide/fade transitions), Tooltip, Popover, Scrollspy
 
 **Navigation:**
 Navbar, NavbarToggler, NavbarCollapse, Nav (pills, tabs, underline, fill,
@@ -43,6 +44,14 @@ justified, vertical), NavItem, NavLink, Breadcrumb/BreadcrumbItem
 
 - **Scrollspy** uses `document::eval` with a scroll event listener to track
   visible sections and update a signal with the active section id.
+
+### Next Steps
+
+- [ ] Playwright E2E tests (local + CI)
+- [ ] CI workflow (cargo fmt, clippy, WASM build check)
+- [ ] Publish v0.1.6 to crates.io
+- [ ] Optional: deploy showcase to GitHub Pages
+- [ ] Optional: rustdoc examples on key components
 
 ### Design Principles
 
