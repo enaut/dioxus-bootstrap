@@ -10,18 +10,33 @@ pub enum TooltipPlacement {
     End,
 }
 
-/// Bootstrap Tooltip component — signal-driven, no JavaScript.
+/// Bootstrap Tooltip component — CSS-positioned, no JavaScript.
 ///
-/// Wraps a child element and shows a tooltip on hover.
-/// Uses Bootstrap's tooltip CSS classes with positioning calculated via eval.
+/// Shows a tooltip on hover. Uses CSS-based positioning relative to the trigger element.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript + Popper.js) -->
+/// <button data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip text">Hover me</button>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent — no JavaScript needed
 /// rsx! {
 ///     Tooltip { text: "Save your work", placement: TooltipPlacement::Top,
 ///         Button { color: Color::Primary, "Save" }
 ///     }
+///     Tooltip { text: "More info", placement: TooltipPlacement::End,
+///         Icon { name: "info-circle" }
+///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `text` — tooltip text content
+/// - `placement` — `TooltipPlacement::Top`, `Bottom`, `Start`, `End`
 #[derive(Clone, PartialEq, Props)]
 pub struct TooltipProps {
     /// Tooltip text content.

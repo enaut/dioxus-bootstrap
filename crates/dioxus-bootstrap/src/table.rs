@@ -4,24 +4,44 @@ use crate::types::{Color, Size};
 
 /// Bootstrap Table component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="table-responsive">
+///   <table class="table table-striped table-hover">
+///     <caption>List of users</caption>
+///     <thead><tr><th>Name</th><th>Role</th></tr></thead>
+///     <tbody><tr><td>Alice</td><td>Admin</td></tr></tbody>
+///   </table>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent
 /// rsx! {
 ///     Table { striped: true, hover: true, responsive: true,
+///         caption: "List of users", caption_top: true,
 ///         thead {
-///             tr {
-///                 th { "Name" }
-///                 th { "Status" }
-///             }
+///             tr { th { "Name" } th { "Role" } }
 ///         }
 ///         tbody {
-///             tr {
-///                 td { "Service A" }
-///                 td { "Running" }
-///             }
+///             tr { td { "Alice" } td { "Admin" } }
 ///         }
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `striped` — striped rows
+/// - `striped_columns` — striped columns instead of rows
+/// - `hover` — highlight rows on hover
+/// - `bordered` — borders on all cells
+/// - `responsive` — horizontal scroll wrapper
+/// - `caption` / `caption_top` — table caption text and position
+/// - `size` — `Size::Sm` for compact table
+/// - `color` — table color variant
 #[derive(Clone, PartialEq, Props)]
 pub struct TableProps {
     /// Striped rows.

@@ -4,10 +4,19 @@ use crate::types::Color;
 
 /// Bootstrap Badge component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<span class="badge text-bg-primary">New</span>` | `Badge { color: Color::Primary, "New" }` |
+/// | `<span class="badge rounded-pill text-bg-danger">99+</span>` | `Badge { color: Color::Danger, pill: true, "99+" }` |
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Badge { color: Color::Primary, "New" }
 ///     Badge { color: Color::Danger, pill: true, "99+" }
+///     // Inside a heading
+///     h1 { "Messages " Badge { color: Color::Info, "4" } }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]

@@ -4,10 +4,20 @@ use crate::types::Color;
 
 /// Bootstrap Alert component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="alert alert-success">` | `Alert { color: Color::Success, "Text" }` |
+/// | `<div class="alert alert-danger alert-dismissible">` | `Alert { color: Color::Danger, dismissible: true, "Text" }` |
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Alert { color: Color::Success, "Operation completed!" }
-///     Alert { color: Color::Danger, dismissible: true, "Something went wrong." }
+///     Alert { color: Color::Danger, dismissible: true,
+///         strong { "Error! " }
+///         "Something went wrong."
+///     }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]

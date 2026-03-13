@@ -10,21 +10,34 @@ pub enum PopoverPlacement {
     End,
 }
 
-/// Bootstrap Popover component — signal-driven, no JavaScript.
+/// Bootstrap Popover component — CSS-positioned, no JavaScript.
 ///
-/// Wraps a child element and shows a popover on click.
-/// Uses Bootstrap's popover CSS classes with CSS-based positioning.
+/// Shows a popover with title and body on click. Click outside to close.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript + Popper.js) -->
+/// <button data-bs-toggle="popover" title="Title" data-bs-content="Content">Click</button>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent — no JavaScript needed
 /// rsx! {
 ///     Popover {
 ///         title: "Popover Title",
-///         body: rsx! { p { "Some popover content here." } },
+///         body: rsx! { p { "Rich content here." } },
 ///         placement: PopoverPlacement::Top,
-///         Button { color: Color::Danger, "Click me" }
+///         Button { color: Color::Info, "Click for details" }
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `title` — popover header text
+/// - `body` — popover body content (Element)
+/// - `placement` — `PopoverPlacement::Top`, `Bottom`, `Start`, `End`
 #[derive(Clone, PartialEq, Props)]
 pub struct PopoverProps {
     /// Popover title (header).

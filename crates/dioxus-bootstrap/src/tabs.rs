@@ -15,19 +15,42 @@ pub struct TabDef {
 
 /// Bootstrap Tabs component — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <ul class="nav nav-tabs">
+///   <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab">Home</button></li>
+///   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab">Profile</button></li>
+/// </ul>
+/// <div class="tab-content">
+///   <div class="tab-pane active">Home content</div>
+///   <div class="tab-pane">Profile content</div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent — use Tab children or TabList with TabDef
 /// let active = use_signal(|| 0usize);
 /// rsx! {
 ///     Tabs { active: active,
-///         Tab { label: "Home",
+///         Tab { label: "Home", index: 0, active: active,
 ///             p { "Home content" }
 ///         }
-///         Tab { label: "Profile", icon: "person",
+///         Tab { label: "Profile", index: 1, active: active, icon: "person",
 ///             p { "Profile content" }
 ///         }
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `active` — `Signal<usize>` controlling active tab index
+/// - `pills` — pill style instead of tabs
+/// - `fill` — fill available width
+/// - `justified` — equal-width items
+/// - `vertical` — vertical tab layout
 #[derive(Clone, PartialEq, Props)]
 pub struct TabsProps {
     /// Signal controlling the active tab index.

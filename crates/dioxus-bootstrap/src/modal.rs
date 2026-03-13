@@ -24,14 +24,34 @@ pub enum ModalFullscreen {
 
 /// Bootstrap Modal component — signal-driven, no JavaScript.
 ///
-/// ```rust
+/// Replaces Bootstrap's `<div class="modal">` + JavaScript with a signal-controlled component.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (requires JavaScript) -->
+/// <div class="modal fade" tabindex="-1">
+///   <div class="modal-dialog modal-lg modal-dialog-centered">
+///     <div class="modal-content">
+///       <div class="modal-header"><h5 class="modal-title">Title</h5></div>
+///       <div class="modal-body"><p>Body</p></div>
+///       <div class="modal-footer"><button class="btn btn-primary">OK</button></div>
+///     </div>
+///   </div>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus equivalent — no JavaScript needed
 /// let show = use_signal(|| false);
 /// rsx! {
 ///     Button { onclick: move |_| show.set(true), "Open Modal" }
 ///     Modal {
 ///         show: show,
 ///         title: "Confirm Action",
-///         body: rsx! { p { "Are you sure you want to proceed?" } },
+///         size: ModalSize::Lg,
+///         centered: true,
+///         body: rsx! { p { "Are you sure?" } },
 ///         footer: rsx! {
 ///             Button { color: Color::Secondary, onclick: move |_| show.set(false), "Cancel" }
 ///             Button { color: Color::Primary, "Confirm" }
@@ -39,6 +59,18 @@ pub enum ModalFullscreen {
 ///     }
 /// }
 /// ```
+///
+/// # Props
+///
+/// - `show` — `Signal<bool>` controlling visibility
+/// - `title` — modal title text
+/// - `body` — modal body content (Element)
+/// - `footer` — modal footer content (Element)
+/// - `size` — `ModalSize::Sm`, `Default`, `Lg`, `Xl`
+/// - `fullscreen` — `ModalFullscreen::Off`, `Always`, `SmDown`..`XxlDown`
+/// - `centered` — vertically center the modal
+/// - `scrollable` — scrollable modal body
+/// - `backdrop_close` — close when clicking backdrop (default: true)
 #[derive(Clone, PartialEq, Props)]
 pub struct ModalProps {
     /// Signal controlling modal visibility.

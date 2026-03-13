@@ -1,3 +1,48 @@
+//! # dioxus-bootstrap-css
+//!
+//! Type-safe Bootstrap 5.3 components for [Dioxus](https://dioxuslabs.com/).
+//!
+//! This crate provides a 1-to-1 mapping of every Bootstrap 5.3 component as Dioxus RSX
+//! components. All interactive behaviors (modals, dropdowns, accordions, carousels, etc.)
+//! are driven by Dioxus signals — **zero JavaScript required**.
+//!
+//! ## Quick Start
+//!
+//! ```rust,no_run
+//! use dioxus::prelude::*;
+//! use dioxus_bootstrap_css::prelude::*;
+//!
+//! fn app() -> Element {
+//!     let theme = use_signal(|| Theme::Dark);
+//!     rsx! {
+//!         ThemeProvider { theme }
+//!         BootstrapHead {}
+//!         Container {
+//!             h1 { "Hello Bootstrap!" }
+//!             Button { color: Color::Primary, "Click me" }
+//!         }
+//!     }
+//! }
+//! ```
+//!
+//! ## Bootstrap HTML → Dioxus RSX
+//!
+//! | Bootstrap HTML | Dioxus RSX |
+//! |---|---|
+//! | `<div class="container">` | `Container { }` |
+//! | `<div class="row"><div class="col-md-6">` | `Row { Col { md: ColumnSize::Span(6) } }` |
+//! | `<button class="btn btn-primary">` | `Button { color: Color::Primary }` |
+//! | `<div class="card"><div class="card-body">` | `Card { body: rsx! { } }` |
+//! | `<div class="alert alert-danger">` | `Alert { color: Color::Danger }` |
+//! | `<div class="modal">` + JS | `Modal { show: signal, title: "..." }` |
+//! | `<div class="dropdown">` + JS | `Dropdown { open: signal, toggle: rsx! { }, menu: rsx! { } }` |
+//! | `<div class="carousel">` + JS | `Carousel { active: signal, slides: vec![...] }` |
+//! | `<div class="accordion">` + JS | `Accordion { open: signal }` |
+//!
+//! ## Modules
+//!
+//! Every Bootstrap component has its own module. Import everything via the [`prelude`].
+
 pub mod accordion;
 pub mod alert;
 pub mod badge;

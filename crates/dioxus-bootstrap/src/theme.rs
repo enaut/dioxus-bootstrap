@@ -34,17 +34,25 @@ impl std::fmt::Display for Theme {
     }
 }
 
-/// Applies `data-bs-theme` to the document root element.
+/// Applies `data-bs-theme` to the document root for Bootstrap dark/light mode.
 ///
-/// Place this component in your app to enable Bootstrap dark/light mode.
-/// It sets the `data-bs-theme` attribute on `<html>` reactively.
+/// Place this at the top of your app. It reactively sets `data-bs-theme` on `<html>`.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML (manual) -->
+/// <html data-bs-theme="dark">
+/// ```
+///
+/// ```rust,no_run
+/// // Dioxus — reactive theme switching
 /// let theme = use_signal(|| Theme::Dark);
 /// rsx! {
-///     ThemeProvider { theme: theme }
+///     ThemeProvider { theme }
 ///     BootstrapHead {}
-///     // your app
+///     ThemeToggle { theme }  // sun/moon toggle button
+///     // your app content
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]

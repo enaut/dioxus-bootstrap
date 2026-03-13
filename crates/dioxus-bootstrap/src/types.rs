@@ -1,6 +1,18 @@
 use std::fmt;
 
 /// Bootstrap contextual color variants.
+///
+/// Maps to Bootstrap's color classes: `primary`, `secondary`, `success`,
+/// `danger`, `warning`, `info`, `light`, `dark`.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `btn-primary` | `Button { color: Color::Primary }` |
+/// | `alert-danger` | `Alert { color: Color::Danger }` |
+/// | `text-bg-success` | `Badge { color: Color::Success }` |
+/// | `bg-warning` | `Toast { color: Color::Warning }` |
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum Color {
     #[default]
@@ -29,7 +41,16 @@ impl fmt::Display for Color {
     }
 }
 
-/// Bootstrap size variants.
+/// Bootstrap component size variants.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `btn-sm` | `Button { size: Size::Sm }` |
+/// | `btn-lg` | `Button { size: Size::Lg }` |
+/// | `form-control-sm` | `Input { size: Size::Sm }` |
+/// | `pagination-lg` | `Pagination { size: Size::Lg }` |
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum Size {
     Sm,
@@ -48,7 +69,16 @@ impl fmt::Display for Size {
     }
 }
 
-/// Bootstrap column span (1-12 or auto).
+/// Bootstrap column span (1–12 or auto).
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `col-6` | `Col { xs: ColumnSize::Span(6) }` |
+/// | `col-md-4` | `Col { md: ColumnSize::Span(4) }` |
+/// | `col-auto` | `Col { xs: ColumnSize::Auto }` |
+/// | `col-lg-auto` | `Col { lg: ColumnSize::Auto }` |
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ColumnSize {
     Auto,
@@ -64,7 +94,16 @@ impl fmt::Display for ColumnSize {
     }
 }
 
-/// Bootstrap navbar expand breakpoints.
+/// Bootstrap navbar responsive expand breakpoints.
+///
+/// Controls when the navbar switches from collapsed (hamburger) to expanded (horizontal).
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `navbar-expand-lg` | `Navbar { expand: NavbarExpand::Lg }` |
+/// | `navbar-expand` | `Navbar { expand: NavbarExpand::Always }` |
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum NavbarExpand {
     Sm,
@@ -90,6 +129,15 @@ impl fmt::Display for NavbarExpand {
 }
 
 /// Bootstrap modal size.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `modal-sm` | `Modal { size: ModalSize::Sm }` |
+/// | (default) | `Modal { size: ModalSize::Default }` |
+/// | `modal-lg` | `Modal { size: ModalSize::Lg }` |
+/// | `modal-xl` | `Modal { size: ModalSize::Xl }` |
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum ModalSize {
     Sm,
@@ -99,7 +147,14 @@ pub enum ModalSize {
     Xl,
 }
 
-/// Spinner style variant.
+/// Spinner animation style.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `spinner-border` | `Spinner { style: SpinnerStyle::Border }` |
+/// | `spinner-grow` | `Spinner { style: SpinnerStyle::Grow }` |
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum SpinnerStyle {
     #[default]

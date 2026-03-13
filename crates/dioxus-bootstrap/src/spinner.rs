@@ -2,9 +2,17 @@ use dioxus::prelude::*;
 
 use crate::types::{Color, Size, SpinnerStyle};
 
-/// Bootstrap Spinner component.
+/// Bootstrap Spinner (loading indicator) component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="spinner-border">` | `Spinner {}` |
+/// | `<div class="spinner-grow text-success">` | `Spinner { style: SpinnerStyle::Grow, color: Color::Success }` |
+/// | `<div class="spinner-border spinner-border-sm">` | `Spinner { size: Size::Sm }` |
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Spinner {}
 ///     Spinner { color: Color::Success, style: SpinnerStyle::Grow }

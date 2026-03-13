@@ -2,9 +2,19 @@ use dioxus::prelude::*;
 
 use crate::types::Size;
 
-/// Bootstrap FormGroup — label + control wrapper with spacing.
+/// Bootstrap FormGroup — label + control wrapper.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="mb-3">
+///   <label class="form-label">Email</label>
+///   <input type="email" class="form-control" placeholder="you@example.com">
+/// </div>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
 ///     FormGroup { label: "Email",
 ///         Input { r#type: "email", placeholder: "you@example.com" }
@@ -43,10 +53,19 @@ pub fn FormGroup(props: FormGroupProps) -> Element {
 
 /// Bootstrap Input component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<input class="form-control" type="text">` | `Input { r#type: "text" }` |
+/// | `<input class="form-control form-control-sm" type="email">` | `Input { r#type: "email", size: Size::Sm }` |
+/// | `<input class="form-control" disabled>` | `Input { disabled: true }` |
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Input { r#type: "text", value: "hello", placeholder: "Enter text" }
-///     Input { r#type: "password", size: Size::Sm }
+///     Input { r#type: "email", size: Size::Sm, oninput: move |evt| { /* handle */ } }
+///     Input { r#type: "password", disabled: true }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]
@@ -107,11 +126,21 @@ pub fn Input(props: InputProps) -> Element {
     }
 }
 
-/// Bootstrap Select component.
+/// Bootstrap Select (dropdown) component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <select class="form-select">
+///   <option value="opt1">Option 1</option>
+///   <option value="opt2" selected>Option 2</option>
+/// </select>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
-///     Select { value: "opt1",
+///     Select { value: "opt2", onchange: move |evt| { /* handle */ },
 ///         option { value: "opt1", "Option 1" }
 ///         option { value: "opt2", "Option 2" }
 ///     }
@@ -225,9 +254,21 @@ pub fn Textarea(props: TextareaProps) -> Element {
 
 /// Bootstrap Checkbox component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="form-check">
+///   <input class="form-check-input" type="checkbox" checked>
+///   <label class="form-check-label">Accept terms</label>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
-///     Checkbox { checked: true, label: "Accept terms" }
+///     Checkbox { checked: true, label: "Accept terms",
+///         onchange: move |evt| { /* handle */ },
+///     }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]
@@ -279,9 +320,21 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
 
 /// Bootstrap Switch (toggle) component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="form-check form-switch">
+///   <input class="form-check-input" type="checkbox" role="switch" checked>
+///   <label class="form-check-label">Enable notifications</label>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
-///     Switch { checked: true, label: "Enable notifications" }
+///     Switch { checked: true, label: "Enable notifications",
+///         onchange: move |evt| { /* handle */ },
+///     }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]
@@ -493,9 +546,23 @@ pub fn FormText(props: FormTextProps) -> Element {
     }
 }
 
-/// Bootstrap Radio component.
+/// Bootstrap Radio button component.
 ///
-/// ```rust
+/// # Bootstrap HTML → Dioxus
+///
+/// ```html
+/// <!-- Bootstrap HTML -->
+/// <div class="form-check">
+///   <input class="form-check-input" type="radio" name="color" checked>
+///   <label class="form-check-label">Red</label>
+/// </div>
+/// <div class="form-check">
+///   <input class="form-check-input" type="radio" name="color">
+///   <label class="form-check-label">Blue</label>
+/// </div>
+/// ```
+///
+/// ```rust,no_run
 /// rsx! {
 ///     Radio { name: "color", label: "Red", checked: true }
 ///     Radio { name: "color", label: "Blue" }
