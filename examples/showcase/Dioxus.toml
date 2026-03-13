@@ -3,3 +3,4 @@ name = "showcase"
 
 [web.app]
 title = "dioxus-bootstrap Showcase"
+base_path = "dioxus-bootstrap"
