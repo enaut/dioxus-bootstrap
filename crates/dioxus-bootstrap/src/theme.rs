@@ -55,13 +55,18 @@ pub struct ThemeProviderProps {
 
 #[component]
 pub fn ThemeProvider(props: ThemeProviderProps) -> Element {
-    let theme = *props.theme.read();
-    let theme_str = theme.as_str();
+    let theme_signal = props.theme;
 
-    // Use a script to set data-bs-theme on the root <html> element
-    rsx! {
-        document::Script { "document.documentElement.setAttribute('data-bs-theme', '{theme_str}');" }
-    }
+    // Reactively set data-bs-theme on <html> whenever the signal changes.
+    use_effect(move || {
+        let theme = *theme_signal.read();
+        let theme_str = theme.as_str();
+        document::eval(&format!(
+            "document.documentElement.setAttribute('data-bs-theme', '{theme_str}');"
+        ));
+    });
+
+    rsx! {}
 }
 
 /// A toggle button that switches between light and dark mode.
