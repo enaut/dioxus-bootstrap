@@ -1,3 +1,4 @@
+pub mod accordion;
 pub mod alert;
 pub mod badge;
 pub mod breadcrumb;
@@ -9,17 +10,23 @@ pub mod form;
 pub mod grid;
 pub mod head;
 pub mod icon;
+pub mod input_group;
 pub mod list_group;
 pub mod modal;
 pub mod nav;
+pub mod offcanvas;
+pub mod pagination;
+pub mod placeholder;
 pub mod progress;
 pub mod spinner;
 pub mod table;
 pub mod tabs;
+pub mod toast;
 pub mod types;
 
 /// Prelude — import everything with `use dioxus_bootstrap::prelude::*`.
 pub mod prelude {
+    pub use crate::accordion::*;
     pub use crate::alert::*;
     pub use crate::badge::*;
     pub use crate::breadcrumb::*;
@@ -31,12 +38,17 @@ pub mod prelude {
     pub use crate::grid::*;
     pub use crate::head::*;
     pub use crate::icon::*;
+    pub use crate::input_group::*;
     pub use crate::list_group::*;
     pub use crate::modal::*;
     pub use crate::nav::*;
+    pub use crate::offcanvas::*;
+    pub use crate::pagination::*;
+    pub use crate::placeholder::*;
     pub use crate::progress::*;
     pub use crate::spinner::*;
     pub use crate::table::*;
     pub use crate::tabs::*;
+    pub use crate::toast::*;
     pub use crate::types::*;
 }

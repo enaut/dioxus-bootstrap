@@ -51,16 +51,16 @@ fn app() -> Element {
 `Button`, `ButtonGroup`, `Card`, `Alert`, `Badge`, `Icon`
 
 ### Data
-`Table`, `ListGroup`, `ListGroupItem`, `Spinner`, `Progress`, `ProgressBar`
+`Table`, `ListGroup`, `ListGroupItem`, `Spinner`, `Progress`, `ProgressBar`, `Pagination`, `Placeholder`
 
 ### Forms
-`FormGroup`, `Input`, `Select`, `Textarea`, `Checkbox`, `Radio`
+`FormGroup`, `Input`, `Select`, `Textarea`, `Checkbox`, `Radio`, `InputGroup`, `InputGroupText`
 
 ### Interactive (signal-driven, no JS)
-`Tabs`, `TabPane`, `Modal`, `Dropdown`, `DropdownItem`, `Collapse`
+`Tabs`, `Tab`, `TabList`, `Modal`, `Dropdown`, `DropdownItem`, `Collapse`, `Accordion`, `AccordionItem`, `Toast`, `ToastContainer`, `Offcanvas`
 
 ### Navigation
-`Navbar`, `NavItem`, `NavLink`, `Breadcrumb`, `BreadcrumbItem`
+`Navbar`, `NavbarToggler`, `NavbarCollapse`, `NavItem`, `NavLink`, `Breadcrumb`, `BreadcrumbItem`
 
 ## License
 
