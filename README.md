@@ -24,7 +24,7 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.1"
+dioxus-bootstrap-css = "0.1.4"
 ```
 
 ```rust
@@ -92,7 +92,7 @@ fn app() -> Element {
 | `Icon` | Bootstrap Icons (`bi-{name}`) |
 | `Spinner` | Border and grow spinners |
 | `Progress` / `ProgressBar` | Progress bars (striped, animated, stacked) |
-| `Placeholder` | Loading placeholder elements |
+| `Placeholder` / `PlaceholderParagraph` | Loading placeholder elements |
 
 ### Data Display
 | Component | Description |
@@ -115,7 +115,7 @@ fn app() -> Element {
 | Component | Bootstrap JS Replaced |
 |-----------|----------------------|
 | `Modal` | `data-bs-toggle="modal"` |
-| `Dropdown` / `DropdownItem` | `data-bs-toggle="dropdown"` + click-outside-to-close |
+| `Dropdown` / `DropdownItem` / `DropdownDivider` / `DropdownHeader` | `data-bs-toggle="dropdown"` + click-outside-to-close |
 | `Collapse` | `data-bs-toggle="collapse"` |
 | `Tabs` / `Tab` / `TabList` | Tab switching logic |
 | `Accordion` / `AccordionItem` | Accordion toggle logic |
