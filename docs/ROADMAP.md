@@ -50,9 +50,9 @@ justified, vertical), NavItem, NavLink, Breadcrumb/BreadcrumbItem
 - [x] CI workflow (cargo fmt, clippy, WASM build check)
 - [x] Deploy showcase to GitHub Pages
 - [x] Rustdoc examples on key components
-- [ ] Playwright E2E tests (local + CI)
-- [ ] Update README with live demo link
-- [ ] Publish v0.1.6 to crates.io
+- [x] Playwright E2E tests (local + CI)
+- [x] Update README with live demo link
+- [x] Publish v0.1.6 to crates.io
 
 ### Design Principles
 
