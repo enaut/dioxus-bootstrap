@@ -53,6 +53,9 @@ pub struct ToastProps {
     /// Toast color variant (applied as bg class).
     #[props(default)]
     pub color: Option<Color>,
+    /// Callback when the toast is dismissed.
+    #[props(default)]
+    pub on_dismiss: Option<EventHandler<()>>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -64,10 +67,18 @@ pub struct ToastProps {
 pub fn Toast(props: ToastProps) -> Element {
     let is_shown = *props.show.read();
     let mut show_signal = props.show;
+    let on_dismiss = props.on_dismiss.clone();
 
     if !is_shown {
         return rsx! {};
     }
+
+    let dismiss = move |_| {
+        show_signal.set(false);
+        if let Some(handler) = &on_dismiss {
+            handler.call(());
+        }
+    };
 
     let color_class = match &props.color {
         Some(c) => format!(" text-bg-{c}"),
@@ -80,6 +91,13 @@ pub fn Toast(props: ToastProps) -> Element {
         format!("toast show{color_class} {}", props.class)
     };
 
+    // Determine close button class — use white variant for colored toasts
+    let close_class = if props.color.is_some() {
+        "btn-close btn-close-white me-2 m-auto"
+    } else {
+        "btn-close"
+    };
+
     rsx! {
         div {
             class: "{full_class}",
@@ -87,6 +105,7 @@ pub fn Toast(props: ToastProps) -> Element {
             "aria-live": "assertive",
             "aria-atomic": "true",
             if !props.title.is_empty() {
+                // Header mode: title + subtitle + close button
                 div { class: "toast-header",
                     strong { class: "me-auto", "{props.title}" }
                     if !props.subtitle.is_empty() {
@@ -97,12 +116,26 @@ pub fn Toast(props: ToastProps) -> Element {
                             class: "btn-close",
                             r#type: "button",
                             "aria-label": "Close",
-                            onclick: move |_| show_signal.set(false),
+                            onclick: dismiss,
                         }
                     }
                 }
+                div { class: "toast-body", {props.children} }
+            } else if props.show_close {
+                // Headerless mode with close button: d-flex layout (Bootstrap 5.3 pattern)
+                div { class: "d-flex",
+                    div { class: "toast-body", {props.children} }
+                    button {
+                        class: "{close_class}",
+                        r#type: "button",
+                        "aria-label": "Close",
+                        onclick: move |_| show_signal.set(false),
+                    }
+                }
+            } else {
+                // Simple body-only toast
+                div { class: "toast-body", {props.children} }
             }
-            div { class: "toast-body", {props.children} }
         }
     }
 }
