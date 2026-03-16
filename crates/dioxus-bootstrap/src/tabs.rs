@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 
-use crate::types::Color;
 
 /// Definition for a single tab.
 ///
