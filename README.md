@@ -25,7 +25,7 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.2.1"
+dioxus-bootstrap-css = "0.2.2"
 ```
 
 ```rust
@@ -85,7 +85,7 @@ fn app() -> Element {
 ### Content
 | Component | Description |
 |-----------|-------------|
-| `Button` | All Bootstrap button variants, sizes, outlines |
+| `Button` | All Bootstrap button variants, sizes, outlines; `href` prop for link-buttons |
 | `ButtonGroup` / `ButtonToolbar` | Button groups and toolbars |
 | `Card` | Cards with `header`, `body`, `footer` slots |
 | `Alert` | Dismissible alerts with all color variants |
