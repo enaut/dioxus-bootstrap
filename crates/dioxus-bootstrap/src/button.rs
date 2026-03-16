@@ -18,6 +18,7 @@ use crate::types::{Color, Size};
 /// | `<button class="btn btn-outline-danger btn-sm">` | `Button { color: Color::Danger, outline: true, size: Size::Sm, "Text" }` |
 /// | `<button class="btn btn-success btn-lg" disabled>` | `Button { color: Color::Success, size: Size::Lg, disabled: true, "Text" }` |
 /// | `<a class="btn btn-primary" href="/page">` | `Button { color: Color::Primary, href: "/page", "Link" }` |
+/// | `<a class="btn btn-sm" href="f.json" target="_blank" download="f.json">` | `Button { size: Size::Sm, href: "f.json", target: "_blank", download: "f.json", "DL" }` |
 /// | `<button class="btn btn-primary" title="Tip">` | `Button { color: Color::Primary, title: "Tip", "Text" }` |
 ///
 /// ```rust,no_run
@@ -50,6 +51,12 @@ pub struct ButtonProps {
     /// When set, renders an `<a>` element instead of `<button>` (link-button pattern).
     #[props(default)]
     pub href: Option<String>,
+    /// Link target (e.g., `"_blank"`). Only used when `href` is set.
+    #[props(default)]
+    pub target: Option<String>,
+    /// Download filename. Only used when `href` is set.
+    #[props(default)]
+    pub download: Option<String>,
     /// HTML button type attribute (ignored when `href` is set).
     #[props(default = "button".to_string())]
     pub r#type: String,
@@ -95,11 +102,15 @@ pub fn Button(props: ButtonProps) -> Element {
         // Link-button: render <a> with role="button"
         let disabled_class = if props.disabled { " disabled" } else { "" };
         let link_class = format!("{full_class}{disabled_class}");
+        let target = props.target.clone();
+        let download = props.download.clone();
         rsx! {
             a {
                 class: "{link_class}",
                 href: "{href}",
                 role: "button",
+                target: target,
+                download: download,
                 onclick: move |evt| {
                     if let Some(handler) = &props.onclick {
                         handler.call(evt);
