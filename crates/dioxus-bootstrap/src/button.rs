@@ -44,6 +44,9 @@ pub struct ButtonProps {
     /// Active (pressed) state.
     #[props(default)]
     pub active: bool,
+    /// Tooltip text (HTML title attribute).
+    #[props(default)]
+    pub title: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -78,6 +81,7 @@ pub fn Button(props: ButtonProps) -> Element {
             class: "{full_class}",
             r#type: "{props.r#type}",
             disabled: props.disabled,
+            title: if !props.title.is_empty() { "{props.title}" } else { "" },
             onclick: move |evt| {
                 if let Some(handler) = &props.onclick {
                     handler.call(evt);
