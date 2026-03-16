@@ -18,6 +18,11 @@ use crate::types::Color;
 ///         strong { "Error! " }
 ///         "Something went wrong."
 ///     }
+///     // With dismiss callback:
+///     Alert { color: Color::Warning, dismissible: true,
+///         on_dismiss: move |_| { /* clear error state */ },
+///         "Dismissible with callback."
+///     }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]
@@ -28,6 +33,9 @@ pub struct AlertProps {
     /// Show a dismiss button. When clicked, the alert hides itself.
     #[props(default)]
     pub dismissible: bool,
+    /// Callback when the dismiss button is clicked. Use this to clear external state.
+    #[props(default)]
+    pub on_dismiss: Option<EventHandler<()>>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -69,7 +77,12 @@ pub fn Alert(props: AlertProps) -> Element {
                     class: "btn-close",
                     r#type: "button",
                     "aria-label": "Close",
-                    onclick: move |_| visible.set(false),
+                    onclick: move |_| {
+                        visible.set(false);
+                        if let Some(handler) = &props.on_dismiss {
+                            handler.call(());
+                        }
+                    },
                 }
             }
         }
