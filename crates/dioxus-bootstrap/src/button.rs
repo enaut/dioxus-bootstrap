@@ -4,6 +4,9 @@ use crate::types::{Color, Size};
 
 /// Bootstrap Button component.
 ///
+/// Accepts all standard HTML button attributes via `extends = GlobalAttributes`.
+/// This means `title`, `data-bs-toggle`, `aria-label`, `id`, etc. all work.
+///
 /// # Bootstrap HTML → Dioxus
 ///
 /// | HTML | Dioxus |
@@ -11,7 +14,8 @@ use crate::types::{Color, Size};
 /// | `<button class="btn btn-primary">` | `Button { color: Color::Primary, "Text" }` |
 /// | `<button class="btn btn-outline-danger btn-sm">` | `Button { color: Color::Danger, outline: true, size: Size::Sm, "Text" }` |
 /// | `<button class="btn btn-success btn-lg" disabled>` | `Button { color: Color::Success, size: Size::Lg, disabled: true, "Text" }` |
-/// | `<button class="btn btn-primary active">` | `Button { color: Color::Primary, active: true, "Text" }` |
+/// | `<button class="btn btn-primary" title="Tip">` | `Button { color: Color::Primary, title: "Tip", "Text" }` |
+/// | `<button class="btn btn-sm" data-bs-toggle="dropdown">` | `Button { size: Size::Sm, "data-bs-toggle": "dropdown", "Text" }` |
 ///
 /// ```rust,no_run
 /// rsx! {
@@ -19,6 +23,9 @@ use crate::types::{Color, Size};
 ///     Button { color: Color::Danger, outline: true, size: Size::Sm, "Delete" }
 ///     Button { color: Color::Success, disabled: true, "Saved" }
 ///     Button { color: Color::Warning, onclick: move |_| { /* handler */ }, "Action" }
+///     // HTML attributes work directly:
+///     Button { color: Color::Secondary, title: "Tooltip text", "Hover me" }
+///     Button { color: Color::Primary, "data-bs-toggle": "modal", "Open Modal" }
 /// }
 /// ```
 #[derive(Clone, PartialEq, Props)]
@@ -44,12 +51,12 @@ pub struct ButtonProps {
     /// Active (pressed) state.
     #[props(default)]
     pub active: bool,
-    /// Tooltip text (HTML title attribute).
-    #[props(default)]
-    pub title: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes (title, data-bs-toggle, aria-*, id, etc.)
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -81,12 +88,12 @@ pub fn Button(props: ButtonProps) -> Element {
             class: "{full_class}",
             r#type: "{props.r#type}",
             disabled: props.disabled,
-            title: if !props.title.is_empty() { "{props.title}" } else { "" },
             onclick: move |evt| {
                 if let Some(handler) = &props.onclick {
                     handler.call(evt);
                 }
             },
+            ..props.attributes,
             {props.children}
         }
     }
@@ -94,7 +101,7 @@ pub fn Button(props: ButtonProps) -> Element {
 
 /// Bootstrap ButtonGroup component.
 ///
-/// ```rust
+/// ```rust,no_run
 /// rsx! {
 ///     ButtonGroup {
 ///         Button { color: Color::Primary, "Left" }
@@ -139,7 +146,7 @@ pub fn ButtonGroup(props: ButtonGroupProps) -> Element {
 
 /// Bootstrap ButtonToolbar — groups multiple ButtonGroups.
 ///
-/// ```rust
+/// ```rust,no_run
 /// rsx! {
 ///     ButtonToolbar {
 ///         ButtonGroup {
