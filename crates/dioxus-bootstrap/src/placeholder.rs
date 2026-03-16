@@ -4,6 +4,15 @@ use crate::types::{Color, Size};
 
 /// Bootstrap Placeholder component — loading skeleton.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<span class="placeholder col-6">` | `Placeholder { width: 6 }` |
+/// | `<span class="placeholder col-8 bg-primary placeholder-lg">` | `Placeholder { width: 8, color: Color::Primary, size: Size::Lg }` |
+/// | `<p class="placeholder-glow"><span class="placeholder col-7">` | `Placeholder { width: 7, glow: true }` |
+/// | `<p class="placeholder-wave"><span class="placeholder col-5">` | `Placeholder { width: 5, wave: true }` |
+///
 /// ```rust
 /// rsx! {
 ///     Placeholder { width: 75 }

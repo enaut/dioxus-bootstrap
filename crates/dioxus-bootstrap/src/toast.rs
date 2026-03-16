@@ -30,13 +30,27 @@ use crate::types::Color;
 /// }
 /// ```
 ///
+/// # Headerless Mode
+///
+/// Omit `title` and set `show_close: true` to render a headerless toast with
+/// a side-aligned close button (Bootstrap 5.3 `d-flex` pattern):
+///
+/// ```rust,no_run
+/// rsx! {
+///     Toast { show: signal, show_close: true, color: Color::Primary,
+///         "Body-only toast with close button."
+///     }
+/// }
+/// ```
+///
 /// # Props
 ///
 /// - `show` — `Signal<bool>` controlling visibility
-/// - `title` — toast header title
+/// - `title` — toast header title (omit for headerless mode)
 /// - `subtitle` — small text in header (e.g., "just now")
 /// - `color` — background color variant
 /// - `show_close` — show close button (default: true)
+/// - `on_dismiss` — callback when the toast is dismissed
 #[derive(Clone, PartialEq, Props)]
 pub struct ToastProps {
     /// Signal controlling visibility.

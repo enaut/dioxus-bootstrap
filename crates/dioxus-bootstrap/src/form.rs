@@ -209,6 +209,13 @@ pub fn Select(props: SelectProps) -> Element {
 
 /// Bootstrap Textarea component.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<textarea class="form-control" rows="5">` | `Textarea { rows: 5 }` |
+/// | `<textarea class="form-control" placeholder="..." disabled>` | `Textarea { placeholder: "...", disabled: true }` |
+///
 /// ```rust
 /// rsx! {
 ///     Textarea { rows: 5, placeholder: "Enter description..." }
@@ -411,6 +418,13 @@ pub fn Switch(props: SwitchProps) -> Element {
 
 /// Bootstrap Range (slider) input.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<input type="range" class="form-range" min="0" max="100">` | `Range { min: "0", max: "100" }` |
+/// | `<input type="range" class="form-range" step="5" disabled>` | `Range { step: "5".into(), disabled: true }` |
+///
 /// ```rust
 /// rsx! {
 ///     Range { value: "50", min: "0", max: "100" }
@@ -476,6 +490,12 @@ pub fn Range(props: RangeProps) -> Element {
 /// Wraps an Input or Textarea with a floating label that moves
 /// above the control when focused or filled.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="form-floating"><input class="form-control" placeholder="..."><label>Email</label></div>` | `FloatingLabel { label: "Email", Input { placeholder: "..." } }` |
+///
 /// ```rust
 /// rsx! {
 ///     FloatingLabel { label: "Email address",
@@ -515,6 +535,13 @@ pub fn FloatingLabel(props: FloatingLabelProps) -> Element {
 }
 
 /// Bootstrap form validation feedback text.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="valid-feedback">Looks good!</div>` | `FormFeedback { valid: true, "Looks good!" }` |
+/// | `<div class="invalid-feedback">Required.</div>` | `FormFeedback { "Required." }` |
 ///
 /// ```rust
 /// rsx! {
@@ -556,6 +583,12 @@ pub fn FormFeedback(props: FormFeedbackProps) -> Element {
 }
 
 /// Bootstrap form text (help text below a control).
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="form-text">Must be 8-20 characters.</div>` | `FormText { "Must be 8-20 characters." }` |
 ///
 /// ```rust
 /// rsx! {

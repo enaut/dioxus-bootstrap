@@ -4,6 +4,13 @@ use dioxus::prelude::*;
 ///
 /// Renders a Bootstrap Icon by name. See https://icons.getbootstrap.com/ for available icons.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<i class="bi bi-search">` | `Icon { name: "search" }` |
+/// | `<i class="bi bi-shield-lock me-2 fs-4">` | `Icon { name: "shield-lock", class: "me-2 fs-4" }` |
+///
 /// ```rust
 /// rsx! {
 ///     Icon { name: "search" }

@@ -6,6 +6,13 @@ use dioxus::prelude::*;
 /// (by CSS selector) and updates the `active` signal with the `id` of the
 /// currently visible section.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<body data-bs-spy="scroll" data-bs-target="#nav" data-bs-offset="80">` | `Scrollspy { target: "body", active: signal, offset: 80 }` |
+/// | Check active section via JS | `if *active.read() == "intro" { "active" }` |
+///
 /// ```rust
 /// let active_section = use_signal(|| String::new());
 /// rsx! {

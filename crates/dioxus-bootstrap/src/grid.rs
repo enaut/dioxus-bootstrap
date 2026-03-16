@@ -4,6 +4,14 @@ use crate::types::ColumnSize;
 
 /// Bootstrap Container component.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="container">` | `Container { }` |
+/// | `<div class="container-fluid">` | `Container { fluid: true }` |
+/// | `<div class="container py-4">` | `Container { class: "py-4" }` |
+///
 /// ```rust
 /// rsx! {
 ///     Container { "Fixed width content" }
@@ -45,6 +53,14 @@ pub fn Container(props: ContainerProps) -> Element {
 
 /// Bootstrap Row component.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="row">` | `Row { }` |
+/// | `<div class="row g-3">` | `Row { class: "g-3" }` |
+/// | `<div class="row align-items-center">` | `Row { class: "align-items-center" }` |
+///
 /// ```rust
 /// rsx! {
 ///     Row { class: "g-3",
@@ -79,6 +95,16 @@ pub fn Row(props: RowProps) -> Element {
 }
 
 /// Bootstrap Col (column) component with responsive breakpoint props.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="col">` | `Col { }` |
+/// | `<div class="col-lg-3">` | `Col { lg: ColumnSize::Span(3) }` |
+/// | `<div class="col-md-6 col-lg-4">` | `Col { md: ColumnSize::Span(6), lg: ColumnSize::Span(4) }` |
+/// | `<div class="col-auto">` | `Col { xs: ColumnSize::Auto }` |
+/// | `<div class="col-md-6 offset-md-3">` | `Col { md: ColumnSize::Span(6), offset_md: Some(3) }` |
 ///
 /// ```rust
 /// rsx! {

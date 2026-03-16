@@ -9,14 +9,15 @@ Add the dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-dioxus-bootstrap = "0.1"
+dioxus = { version = "0.7", features = ["web"] }
+dioxus-bootstrap-css = "0.2.5"
 ```
 
 Import the prelude in your Dioxus app:
 
 ```rust
 use dioxus::prelude::*;
-use dioxus_bootstrap::prelude::*;
+use dioxus_bootstrap_css::prelude::*;
 ```
 
 Add `BootstrapHead` at the top of your app to load the bundled CSS:
@@ -497,6 +498,68 @@ let document = web_sys::window().unwrap().document().unwrap();
 let root = document.document_element().unwrap();
 root.set_attribute("data-bs-theme", "dark").unwrap();
 ```
+
+## Utility Classes Over Custom CSS
+
+Prefer Bootstrap utility classes over custom CSS. The library exposes the full Bootstrap 5.3 CSS, so classes like `py-2`, `small`, `mb-0`, `btn-sm`, `d-flex`, `text-muted`, and `gap-2` all work directly via the `class` prop.
+
+**Instead of custom CSS:**
+```css
+/* Don't do this */
+.my-compact-card-header { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+```
+
+**Use Bootstrap utilities:**
+```rust
+Card {
+    header_class: "py-1 small",
+    body_class: "py-2",
+    header: rsx! { span { class: "small", "Title" } },
+    body: rsx! { /* ... */ },
+}
+```
+
+Use component props (`header_class`, `body_class`, `responsive: true`, `fluid: true`) instead of adding wrapper divs.
+
+## Gold Standard Migration Pattern
+
+This pattern demonstrates the recommended way to structure a dashboard-style layout:
+
+```rust
+Navbar { expand: NavbarExpand::Lg, class: "bg-body-tertiary border-bottom",
+    brand: rsx! { a { class: "navbar-brand", href: "#", "MyApp" } },
+}
+Container { fluid: true, class: "py-4",
+    Row { class: "g-3",
+        Col { lg: ColumnSize::Span(3),
+            Card { class: "mb-3", header_class: "py-2", body_class: "py-2",
+                header: rsx! { span { class: "small", "Server Status" } },
+                body: rsx! {
+                    Table { size: Size::Sm, class: "mb-0 small",
+                        tbody {
+                            tr { td { "API" } td { Badge { color: Color::Success, "Up" } } }
+                            tr { td { "DB" } td { Badge { color: Color::Success, "Up" } } }
+                        }
+                    }
+                },
+            }
+        }
+        Col { lg: ColumnSize::Span(9),
+            TabList { active: active_tab, tabs: vec![
+                TabDef { label: "Overview".into(), icon: Some("speedometer2".into()),
+                    content: rsx! { /* ... */ } },
+                TabDef { label: "Settings".into(), icon: Some("gear".into()),
+                    content: rsx! { /* ... */ } },
+            ] }
+        }
+    }
+}
+```
+
+Key principles in this pattern:
+- Bootstrap utility classes (`py-2`, `small`, `mb-0`, `g-3`) replace custom CSS
+- Component props (`header_class`, `body_class`, `fluid: true`) replace wrapper divs
+- Signals replace all JavaScript behaviors
 
 ## Key Differences from Bootstrap HTML
 

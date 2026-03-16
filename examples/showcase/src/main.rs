@@ -203,6 +203,14 @@ fn BasicsSection() -> Element {
                 Button { color: Color::Primary, size: Size::Lg, "Large" }
                 Button { color: Color::Primary, disabled: true, "Disabled" }
                 Button { color: Color::Success, active: true, "Active" }
+                Button { color: Color::Primary, href: "https://getbootstrap.com/", target: "_blank",
+                    Icon { name: "box-arrow-up-right", class: "me-1" }
+                    "Link Button"
+                }
+                Button { size: Size::Sm, href: "/example.json", download: "example.json",
+                    Icon { name: "download", class: "me-1" }
+                    "Download"
+                }
             }
 
             // Button Group & Toolbar
@@ -298,6 +306,11 @@ fn BasicsSection() -> Element {
             Alert { color: Color::Success, "A simple success alert." }
             Alert { color: Color::Danger, dismissible: true, "A dismissible danger alert." }
             Alert { color: Color::Warning, dismissible: true, "A dismissible warning alert." }
+            Alert { color: Color::Info, dismissible: true,
+                on_dismiss: move |_| { /* handle dismiss, e.g., clear state */ },
+                Icon { name: "info-circle", class: "me-2" }
+                "Dismissible with on_dismiss callback — check the console."
+            }
 
             // Badges
             h3 { class: "mb-3 mt-4", "Badges" }
@@ -650,6 +663,7 @@ fn InteractiveSection() -> Element {
     let mut collapse_expanded = use_signal(|| false);
     let accordion_open = use_signal(|| Some(0usize));
     let mut toast_show = use_signal(|| false);
+    let mut toast_headerless_show = use_signal(|| false);
     let mut offcanvas_show = use_signal(|| false);
 
     rsx! {
@@ -781,13 +795,24 @@ fn InteractiveSection() -> Element {
             // Toast
             h3 { class: "mb-3 mt-4", "Toast" }
             div { class: "mb-4",
-                Button { color: Color::Success, onclick: move |_| toast_show.set(true),
-                    Icon { name: "bell", class: "me-1" }
-                    "Show Toast"
+                div { class: "d-flex flex-wrap gap-2",
+                    Button { color: Color::Success, onclick: move |_| toast_show.set(true),
+                        Icon { name: "bell", class: "me-1" }
+                        "Show Toast"
+                    }
+                    Button { color: Color::Primary, onclick: move |_| toast_headerless_show.set(true),
+                        Icon { name: "chat-square-text", class: "me-1" }
+                        "Headerless Toast"
+                    }
                 }
                 ToastContainer { position: ToastPosition::TopEnd,
                     Toast { show: toast_show, title: "Notification".to_string(), subtitle: "just now".to_string(),
+                        on_dismiss: move |_| { /* handle dismiss */ },
                         "This toast is controlled by a Dioxus signal. No JavaScript!"
+                    }
+                    Toast { show: toast_headerless_show, show_close: true, color: Color::Primary,
+                        on_dismiss: move |_| { /* handle dismiss */ },
+                        "A headerless toast with the d-flex close button pattern."
                     }
                 }
             }

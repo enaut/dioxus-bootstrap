@@ -32,12 +32,26 @@
 //! | `<div class="container">` | `Container { }` |
 //! | `<div class="row"><div class="col-md-6">` | `Row { Col { md: ColumnSize::Span(6) } }` |
 //! | `<button class="btn btn-primary">` | `Button { color: Color::Primary }` |
+//! | `<a class="btn btn-primary" href="/page">` | `Button { color: Color::Primary, href: "/page" }` |
 //! | `<div class="card"><div class="card-body">` | `Card { body: rsx! { } }` |
 //! | `<div class="alert alert-danger">` | `Alert { color: Color::Danger }` |
+//! | `<span class="badge text-bg-success">` | `Badge { color: Color::Success }` |
+//! | `<i class="bi bi-search">` | `Icon { name: "search" }` |
 //! | `<div class="modal">` + JS | `Modal { show: signal, title: "..." }` |
 //! | `<div class="dropdown">` + JS | `Dropdown { open: signal, toggle: rsx! { }, menu: rsx! { } }` |
 //! | `<div class="carousel">` + JS | `Carousel { active: signal, slides: vec![...] }` |
 //! | `<div class="accordion">` + JS | `Accordion { open: signal }` |
+//! | `<div class="toast">` + JS | `Toast { show: signal, title: "..." }` |
+//! | `<div class="offcanvas">` + JS | `Offcanvas { show: signal, title: "..." }` |
+//! | `<div class="tooltip">` + JS | `Tooltip { text: "...", children }` |
+//! | `<div class="popover">` + JS | `Popover { title: "...", body: rsx! { }, children }` |
+//! | `<html data-bs-theme="dark">` | `ThemeProvider { theme: signal }` |
+//! | `<nav><ol class="breadcrumb">` | `Breadcrumb { BreadcrumbItem { } }` |
+//! | `<ul class="list-group">` | `ListGroup { ListGroupItem { } }` |
+//! | `<div class="input-group">` | `InputGroup { InputGroupText { }, Input { } }` |
+//! | `<div class="progress">` | `Progress { ProgressBar { value: 50.0 } }` |
+//! | `<div class="spinner-border">` | `Spinner { }` |
+//! | `data-bs-spy="scroll"` | `Scrollspy { target: "body", active: signal }` |
 //!
 //! ## Modules
 //!

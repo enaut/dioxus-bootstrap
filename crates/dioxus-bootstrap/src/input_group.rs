@@ -4,6 +4,14 @@ use crate::types::Size;
 
 /// Bootstrap InputGroup component.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="input-group">` | `InputGroup { ... }` |
+/// | `<div class="input-group input-group-sm">` | `InputGroup { size: Size::Sm, ... }` |
+/// | `<span class="input-group-text">@</span>` | `InputGroupText { "@" }` |
+///
 /// ```rust
 /// rsx! {
 ///     InputGroup {
