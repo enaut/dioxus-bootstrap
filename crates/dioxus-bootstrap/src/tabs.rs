@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 
-
 /// Definition for a single tab.
 ///
 /// Used with [`TabList`] to define tab labels, icons, and content.
