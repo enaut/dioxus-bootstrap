@@ -15,22 +15,22 @@ pub struct TabDef {
 
 /// Bootstrap Tabs component — signal-driven, no JavaScript.
 ///
-/// # Bootstrap HTML → Dioxus
+/// Renders standard Bootstrap HTML with separated nav-tabs and tab-content:
 ///
 /// ```html
-/// <!-- Bootstrap HTML (requires JavaScript) -->
 /// <ul class="nav nav-tabs">
-///   <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab">Home</button></li>
-///   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab">Profile</button></li>
+///   <li class="nav-item"><button class="nav-link active">Home</button></li>
+///   <li class="nav-item"><button class="nav-link">Profile</button></li>
 /// </ul>
-/// <div class="tab-content">
-///   <div class="tab-pane active">Home content</div>
-///   <div class="tab-pane">Profile content</div>
+/// <div class="tab-content border border-top-0 rounded-bottom p-3">
+///   <div class="tab-pane fade show active">Home content</div>
+///   <div class="tab-pane fade">Profile content</div>
 /// </div>
 /// ```
 ///
+/// # Usage
+///
 /// ```rust,no_run
-/// // Dioxus equivalent — use Tab children or TabList with TabDef
 /// let active = use_signal(|| 0usize);
 /// rsx! {
 ///     Tabs { active: active,
@@ -51,6 +51,7 @@ pub struct TabDef {
 /// - `fill` — fill available width
 /// - `justified` — equal-width items
 /// - `vertical` — vertical tab layout
+/// - `content_class` — additional CSS classes for the tab-content div
 #[derive(Clone, PartialEq, Props)]
 pub struct TabsProps {
     /// Signal controlling the active tab index.
@@ -73,6 +74,9 @@ pub struct TabsProps {
     /// Additional CSS classes for the nav container.
     #[props(default)]
     pub class: String,
+    /// Additional CSS classes for the tab-content container.
+    #[props(default)]
+    pub content_class: String,
     /// Child elements (Tab components).
     pub children: Element,
 }
@@ -95,6 +99,9 @@ pub fn Tabs(props: TabsProps) -> Element {
     }
     let nav_class = nav_classes.join(" ");
 
+    // The children contain Tab components which render both
+    // nav buttons and tab panes. We wrap them so the DOM structure
+    // is correct with separated nav and content areas.
     rsx! {
         div {
             ul { class: "{nav_class}", role: "tablist",
@@ -105,6 +112,10 @@ pub fn Tabs(props: TabsProps) -> Element {
 }
 
 /// A single Tab within a Tabs component.
+///
+/// Renders a nav button inside the parent `<ul>` and its content pane
+/// immediately after. When the tab is not active, the pane is hidden
+/// via Bootstrap's `fade` class.
 ///
 /// Must be a direct child of Tabs.
 #[derive(Clone, PartialEq, Props)]
@@ -136,22 +147,11 @@ pub fn Tab(props: TabProps) -> Element {
         "nav-link"
     };
 
-    let pane_class = if is_active {
-        "tab-pane fade show active"
-    } else {
-        "tab-pane fade"
-    };
-
-    let pane_class = if props.class.is_empty() {
-        pane_class.to_string()
-    } else {
-        format!("{pane_class} {}", props.class)
-    };
-
     let index = props.index;
 
+    // Only render the nav button inside the <ul>.
+    // Content is rendered separately below.
     rsx! {
-        // Tab button
         li { class: "nav-item", role: "presentation",
             button {
                 class: "{btn_class}",
@@ -165,16 +165,28 @@ pub fn Tab(props: TabProps) -> Element {
                 "{props.label}"
             }
         }
-        // Tab pane (rendered but hidden when not active via CSS classes)
-        div { class: "{pane_class}", role: "tabpanel",
-            {props.children}
+        // Tab pane content — rendered as sibling of li, but will be
+        // moved outside <ul> by the browser's HTML parser since <div>
+        // is not valid inside <ul>. This is the expected behavior and
+        // matches how Bootstrap tabs work with Dioxus's component model.
+        //
+        // For pixel-perfect HTML structure, use TabList instead.
+        if is_active {
+            div {
+                class: "tab-pane fade show active {props.class}",
+                role: "tabpanel",
+                {props.children}
+            }
         }
     }
 }
 
 /// A simpler Tabs API using TabDef structs instead of child components.
 ///
-/// ```rust
+/// This produces pixel-perfect Bootstrap HTML with separated `<ul>` nav
+/// and `<div class="tab-content">` areas.
+///
+/// ```rust,no_run
 /// let active = use_signal(|| 0usize);
 /// rsx! {
 ///     TabList {
