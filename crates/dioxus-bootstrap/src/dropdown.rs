@@ -74,6 +74,9 @@ pub struct DropdownProps {
     /// Color for split button mode (used for the main button).
     #[props(default)]
     pub color: Option<crate::types::Color>,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 /// Dropdown direction.
@@ -139,6 +142,7 @@ pub fn Dropdown(props: DropdownProps) -> Element {
         }
         div { class: "{container_class}",
             style: if is_open { "position: relative; z-index: 991;" } else { "" },
+            ..props.attributes,
             // Split mode: main button + separate toggle caret
             if props.split {
                 button {
@@ -186,6 +190,9 @@ pub struct DropdownItemProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -215,6 +222,7 @@ pub fn DropdownItem(props: DropdownItemProps) -> Element {
                         handler.call(evt);
                     }
                 },
+                ..props.attributes,
                 {props.children}
             }
         }
@@ -232,12 +240,15 @@ pub fn DropdownDivider() -> Element {
 /// Dropdown menu header text.
 #[derive(Clone, PartialEq, Props)]
 pub struct DropdownHeaderProps {
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     pub children: Element,
 }
 
 #[component]
 pub fn DropdownHeader(props: DropdownHeaderProps) -> Element {
     rsx! {
-        li { h6 { class: "dropdown-header", {props.children} } }
+        li { h6 { class: "dropdown-header", ..props.attributes, {props.children} } }
     }
 }

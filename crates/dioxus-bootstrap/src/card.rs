@@ -66,6 +66,9 @@ pub struct CardProps {
     /// Additional CSS classes for the card-footer div.
     #[props(default)]
     pub footer_class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (rendered inside card, outside body — for custom layouts).
     #[props(default)]
     pub children: Element,
@@ -99,6 +102,7 @@ pub fn Card(props: CardProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             if let Some(header) = props.header {
                 div { class: "{header_class}", {header} }
             }

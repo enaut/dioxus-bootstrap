@@ -105,6 +105,9 @@ pub struct ModalProps {
     /// Additional CSS classes for the modal-dialog.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (alternative to body prop for custom layout).
     #[props(default)]
     pub children: Element,
@@ -181,6 +184,7 @@ pub fn Modal(props: ModalProps) -> Element {
                     show_signal.set(false);
                 }
             },
+            ..props.attributes,
             div {
                 class: "{dialog_class}",
                 // Stop click propagation so clicking inside the modal doesn't close it

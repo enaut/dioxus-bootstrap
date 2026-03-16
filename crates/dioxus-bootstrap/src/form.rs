@@ -29,6 +29,9 @@ pub struct FormGroupProps {
     /// Additional CSS classes for the wrapper div.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (form control).
     pub children: Element,
 }
@@ -43,6 +46,7 @@ pub fn FormGroup(props: FormGroupProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             if !props.label.is_empty() {
                 label { class: "form-label", "{props.label}" }
             }
@@ -94,6 +98,9 @@ pub struct InputProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -122,6 +129,7 @@ pub fn Input(props: InputProps) -> Element {
                     handler.call(evt);
                 }
             },
+            ..props.attributes,
         }
     }
 }
@@ -163,6 +171,9 @@ pub struct SelectProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (option elements).
     pub children: Element,
 }
@@ -190,6 +201,7 @@ pub fn Select(props: SelectProps) -> Element {
                     handler.call(evt);
                 }
             },
+            ..props.attributes,
             {props.children}
         }
     }
@@ -225,6 +237,9 @@ pub struct TextareaProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -248,6 +263,7 @@ pub fn Textarea(props: TextareaProps) -> Element {
                     handler.call(evt);
                 }
             },
+            ..props.attributes,
         }
     }
 }
@@ -288,6 +304,9 @@ pub struct CheckboxProps {
     /// Additional CSS classes for the wrapper.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -300,6 +319,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             input {
                 class: "form-check-input",
                 r#type: "checkbox",
@@ -354,6 +374,9 @@ pub struct SwitchProps {
     /// Additional CSS classes for the wrapper.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -366,6 +389,7 @@ pub fn Switch(props: SwitchProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             input {
                 class: "form-check-input",
                 r#type: "checkbox",
@@ -415,6 +439,9 @@ pub struct RangeProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -439,6 +466,7 @@ pub fn Range(props: RangeProps) -> Element {
                     handler.call(evt);
                 }
             },
+            ..props.attributes,
         }
     }
 }
@@ -462,6 +490,9 @@ pub struct FloatingLabelProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child element (Input or Textarea).
     pub children: Element,
 }
@@ -476,6 +507,7 @@ pub fn FloatingLabel(props: FloatingLabelProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             {props.children}
             label { "{props.label}" }
         }
@@ -498,6 +530,9 @@ pub struct FormFeedbackProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Feedback text.
     pub children: Element,
 }
@@ -516,7 +551,7 @@ pub fn FormFeedback(props: FormFeedbackProps) -> Element {
     };
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -533,6 +568,9 @@ pub struct FormTextProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Help text content.
     pub children: Element,
 }
@@ -546,7 +584,7 @@ pub fn FormText(props: FormTextProps) -> Element {
     };
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -591,6 +629,9 @@ pub struct RadioProps {
     /// Additional CSS classes for the wrapper.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -603,6 +644,7 @@ pub fn Radio(props: RadioProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             input {
                 class: "form-check-input",
                 r#type: "radio",

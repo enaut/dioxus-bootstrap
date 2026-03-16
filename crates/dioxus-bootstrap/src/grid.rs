@@ -18,6 +18,9 @@ pub struct ContainerProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -36,7 +39,7 @@ pub fn Container(props: ContainerProps) -> Element {
     };
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -55,6 +58,9 @@ pub struct RowProps {
     /// Additional CSS classes (e.g., "g-3", "align-items-center").
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -68,7 +74,7 @@ pub fn Row(props: RowProps) -> Element {
     };
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -135,6 +141,9 @@ pub struct ColProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -208,6 +217,6 @@ pub fn Col(props: ColProps) -> Element {
     let full_class = classes.join(" ");
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }

@@ -39,6 +39,9 @@ pub struct ProgressProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (ProgressBar components).
     pub children: Element,
 }
@@ -52,7 +55,7 @@ pub fn Progress(props: ProgressProps) -> Element {
     };
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -77,6 +80,9 @@ pub struct ProgressBarProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -120,6 +126,7 @@ pub fn ProgressBar(props: ProgressBarProps) -> Element {
             "aria-valuenow": "{props.value}",
             "aria-valuemin": "0",
             "aria-valuemax": "100",
+            ..props.attributes,
             "{label}"
         }
     }

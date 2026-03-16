@@ -31,6 +31,9 @@ pub struct AlertProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -59,6 +62,7 @@ pub fn Alert(props: AlertProps) -> Element {
         div {
             class: "{full_class}",
             role: "alert",
+            ..props.attributes,
             {props.children}
             if props.dismissible {
                 button {

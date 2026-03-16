@@ -48,6 +48,9 @@ pub struct AccordionProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (AccordionItem components).
     pub children: Element,
 }
@@ -62,7 +65,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
     };
 
     rsx! {
-        div { class: "{full_class}", {props.children} }
+        div { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -78,6 +81,9 @@ pub struct AccordionItemProps {
     /// Additional CSS classes for the accordion item.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Content (shown when expanded).
     pub children: Element,
 }
@@ -108,6 +114,7 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             h2 { class: "accordion-header",
                 button {
                     class: "{button_class}",

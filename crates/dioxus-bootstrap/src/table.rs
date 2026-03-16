@@ -77,6 +77,9 @@ pub struct TableProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (thead, tbody, etc.).
     pub children: Element,
 }
@@ -121,6 +124,7 @@ pub fn Table(props: TableProps) -> Element {
         rsx! {
             div { class: "table-responsive",
                 table { class: "{full_class}",
+                    ..props.attributes,
                     if !caption.is_empty() {
                         caption { "{caption}" }
                     }
@@ -131,6 +135,7 @@ pub fn Table(props: TableProps) -> Element {
     } else {
         rsx! {
             table { class: "{full_class}",
+                ..props.attributes,
                 if !caption.is_empty() {
                     caption { "{caption}" }
                 }
