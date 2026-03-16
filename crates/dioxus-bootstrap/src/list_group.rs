@@ -46,6 +46,9 @@ pub struct ListGroupProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (ListGroupItem components).
     pub children: Element,
 }
@@ -66,11 +69,11 @@ pub fn ListGroup(props: ListGroupProps) -> Element {
 
     if props.numbered {
         rsx! {
-            ol { class: "{full_class}", {props.children} }
+            ol { class: "{full_class}", ..props.attributes, {props.children} }
         }
     } else {
         rsx! {
-            ul { class: "{full_class}", {props.children} }
+            ul { class: "{full_class}", ..props.attributes, {props.children} }
         }
     }
 }
@@ -93,6 +96,9 @@ pub struct ListGroupItemProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -125,12 +131,13 @@ pub fn ListGroupItem(props: ListGroupItemProps) -> Element {
                 r#type: "button",
                 disabled: props.disabled,
                 onclick: move |evt| handler.call(evt),
+                ..props.attributes,
                 {props.children}
             }
         }
     } else {
         rsx! {
-            li { class: "{full_class}", {props.children} }
+            li { class: "{full_class}", ..props.attributes, {props.children} }
         }
     }
 }

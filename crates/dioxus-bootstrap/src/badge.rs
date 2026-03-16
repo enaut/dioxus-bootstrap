@@ -30,6 +30,9 @@ pub struct BadgeProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -44,6 +47,6 @@ pub fn Badge(props: BadgeProps) -> Element {
     };
 
     rsx! {
-        span { class: "{full_class}", {props.children} }
+        span { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }

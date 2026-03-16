@@ -25,7 +25,7 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.2.0"
+dioxus-bootstrap-css = "0.2.1"
 ```
 
 ```rust

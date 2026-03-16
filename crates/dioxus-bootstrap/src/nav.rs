@@ -62,6 +62,9 @@ pub struct NavProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (NavItems).
     pub children: Element,
 }
@@ -94,6 +97,7 @@ pub fn Nav(props: NavProps) -> Element {
 
     rsx! {
         ul { class: "{full_class}",
+            ..props.attributes,
             {props.children}
         }
     }
@@ -146,6 +150,9 @@ pub struct NavbarProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (nav items, collapse, etc.).
     pub children: Element,
 }
@@ -177,6 +184,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
 
     rsx! {
         nav { class: "{full_class}",
+            ..props.attributes,
             div { class: "container-fluid",
                 if let Some(brand) = props.brand {
                     {brand}
@@ -201,6 +209,9 @@ pub struct NavbarTogglerProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -221,6 +232,7 @@ pub fn NavbarToggler(props: NavbarTogglerProps) -> Element {
             "aria-expanded": if !is_collapsed { "true" } else { "false" },
             "aria-label": "Toggle navigation",
             onclick: move |_| signal.set(!is_collapsed),
+            ..props.attributes,
             span { class: "navbar-toggler-icon" }
         }
     }
@@ -244,6 +256,9 @@ pub struct NavbarCollapseProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -261,6 +276,7 @@ pub fn NavbarCollapse(props: NavbarCollapseProps) -> Element {
 
     rsx! {
         div { class: "{full_class}",
+            ..props.attributes,
             ul { class: "navbar-nav me-auto mb-2 mb-lg-0",
                 {props.children}
             }
@@ -274,6 +290,9 @@ pub struct NavItemProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements (NavLink).
     pub children: Element,
 }
@@ -287,7 +306,7 @@ pub fn NavItem(props: NavItemProps) -> Element {
     };
 
     rsx! {
-        li { class: "{full_class}", {props.children} }
+        li { class: "{full_class}", ..props.attributes, {props.children} }
     }
 }
 
@@ -315,6 +334,9 @@ pub struct NavLinkProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
 }
@@ -343,6 +365,7 @@ pub fn NavLink(props: NavLinkProps) -> Element {
                     handler.call(evt);
                 }
             },
+            ..props.attributes,
             {props.children}
         }
     }

@@ -33,6 +33,9 @@ pub struct SpinnerProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     /// Screen reader text (child elements).
     #[props(default)]
     pub children: Element,
@@ -65,6 +68,7 @@ pub fn Spinner(props: SpinnerProps) -> Element {
         div {
             class: "{full_class}",
             role: "status",
+            ..props.attributes,
             span { class: "visually-hidden", {props.children} }
         }
     }
