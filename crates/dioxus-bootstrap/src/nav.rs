@@ -197,6 +197,12 @@ pub fn Navbar(props: NavbarProps) -> Element {
 
 /// Navbar toggler button (hamburger menu) for responsive collapse.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">` | `NavbarToggler { collapsed: signal }` |
+///
 /// ```rust
 /// rsx! {
 ///     NavbarToggler { collapsed: collapsed_signal }
@@ -239,6 +245,12 @@ pub fn NavbarToggler(props: NavbarTogglerProps) -> Element {
 }
 
 /// Navbar collapsible content area.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="collapse navbar-collapse" id="nav">` | `NavbarCollapse { collapsed: signal, ... }` |
 ///
 /// ```rust
 /// let collapsed = use_signal(|| true);
@@ -285,6 +297,12 @@ pub fn NavbarCollapse(props: NavbarCollapseProps) -> Element {
 }
 
 /// Bootstrap NavItem component.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<li class="nav-item">` | `NavItem { ... }` |
 #[derive(Clone, PartialEq, Props)]
 pub struct NavItemProps {
     /// Additional CSS classes.
@@ -311,6 +329,13 @@ pub fn NavItem(props: NavItemProps) -> Element {
 }
 
 /// Bootstrap NavLink component.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<a class="nav-link active" href="/">Home</a>` | `NavLink { href: "/", active: true, "Home" }` |
+/// | `<a class="nav-link disabled">Disabled</a>` | `NavLink { disabled: true, "Disabled" }` |
 ///
 /// ```rust
 /// rsx! {

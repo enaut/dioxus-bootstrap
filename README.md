@@ -25,7 +25,7 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.2.5"
+dioxus-bootstrap-css = "0.2.6"
 ```
 
 ```rust
@@ -85,10 +85,10 @@ fn app() -> Element {
 ### Content
 | Component | Description |
 |-----------|-------------|
-| `Button` | All Bootstrap button variants, sizes, outlines; `href` prop for link-buttons |
+| `Button` | All variants, sizes, outlines; link-buttons via `href`, `target`, `download` |
 | `ButtonGroup` / `ButtonToolbar` | Button groups and toolbars |
 | `Card` | Cards with `header`, `body`, `footer` slots |
-| `Alert` | Dismissible alerts with all color variants |
+| `Alert` | Dismissible alerts with `on_dismiss` callback |
 | `Badge` | Badges and pills |
 | `Icon` | Bootstrap Icons (`bi-{name}`) |
 | `Spinner` | Border and grow spinners |
@@ -126,7 +126,7 @@ fn app() -> Element {
 | `Tabs` / `Tab` / `TabList` | Tab switching (pills, fill, justified, vertical) |
 | `Accordion` / `AccordionItem` | Accordion toggle logic |
 | `Offcanvas` | `data-bs-toggle="offcanvas"` (placements, responsive) |
-| `Toast` / `ToastContainer` | Toast show/dismiss |
+| `Toast` / `ToastContainer` | Toast show/dismiss with headerless mode and `on_dismiss` callback |
 | `Carousel` | Slide/fade transitions, auto-play, pause-on-hover, keyboard nav, touch swipe |
 | `Tooltip` | CSS-positioned tooltips (top, bottom, start, end) |
 | `Popover` | Click-to-toggle popovers with click-outside-to-close |
@@ -183,7 +183,38 @@ See the [`examples/`](https://github.com/mik-tf/dioxus-bootstrap/tree/developmen
 
 ## Migration from Bootstrap HTML
 
-See [docs/MIGRATION.md](https://github.com/mik-tf/dioxus-bootstrap/blob/development/docs/MIGRATION.md) for a complete HTML-to-RSX migration guide.
+Convert Bootstrap HTML to Dioxus RSX by replacing HTML elements with typed components:
+
+```rust
+Navbar { expand: NavbarExpand::Lg, class: "bg-body-tertiary border-bottom",
+    brand: rsx! { a { class: "navbar-brand", href: "#", "MyApp" } },
+}
+Container { fluid: true, class: "py-4",
+    Row { class: "g-3",
+        Col { lg: ColumnSize::Span(3),
+            Card { class: "mb-3", header_class: "py-2", body_class: "py-2",
+                header: rsx! { span { class: "small", "Title" } },
+                body: rsx! { Table { size: Size::Sm, class: "mb-0 small", /* ... */ } },
+            }
+        }
+        Col { lg: ColumnSize::Span(9),
+            TabList { active: active_tab, tabs: vec![/* ... */] }
+        }
+    }
+}
+```
+
+**Key principles:**
+
+- **Use Bootstrap utility classes** (`small`, `py-2`, `btn-sm`, `mb-0`) instead of custom CSS
+- **Use component props** (`header_class`, `body_class`, `responsive: true`) instead of wrapper divs
+- **Signals replace JavaScript** — `Signal<bool>` for modals/dropdowns, `Signal<usize>` for tabs/carousel
+
+See [docs/MIGRATION.md](https://github.com/mik-tf/dioxus-bootstrap/blob/development/docs/MIGRATION.md) for the complete HTML-to-RSX migration guide.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## License
 

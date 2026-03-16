@@ -2,6 +2,13 @@ use dioxus::prelude::*;
 
 /// Bootstrap Breadcrumb component.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/">Home</a></li>...` | `Breadcrumb { BreadcrumbItem { href: "/", "Home" } ... }` |
+/// | `<li class="breadcrumb-item active" aria-current="page">Current</li>` | `BreadcrumbItem { active: true, "Current" }` |
+///
 /// ```rust
 /// rsx! {
 ///     Breadcrumb {

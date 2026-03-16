@@ -18,6 +18,15 @@ pub struct CarouselSlide {
 /// Supports slide/fade transitions, auto-play with configurable interval,
 /// pause on hover, keyboard navigation (arrow keys), and touch swipe.
 ///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="carousel slide" data-bs-ride="carousel">` | `Carousel { active: signal, ride: true, slides: vec![...] }` |
+/// | `<div class="carousel-item"><img src="..." class="d-block w-100">` | `CarouselSlide { src: "...".into(), alt: "...".into(), ... }` |
+/// | `<div class="carousel slide carousel-fade">` | `Carousel { fade: true, ... }` |
+/// | `data-bs-interval="3000"` | `interval: 3000` |
+///
 /// ```rust
 /// let active = use_signal(|| 0usize);
 /// rsx! {
