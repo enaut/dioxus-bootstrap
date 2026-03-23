@@ -289,9 +289,7 @@ pub fn NavbarCollapse(props: NavbarCollapseProps) -> Element {
     rsx! {
         div { class: "{full_class}",
             ..props.attributes,
-            ul { class: "navbar-nav me-auto mb-2 mb-lg-0",
-                {props.children}
-            }
+            {props.children}
         }
     }
 }
