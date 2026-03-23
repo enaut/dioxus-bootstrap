@@ -4,6 +4,48 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.0] — Breaking Changes
+
+### Breaking
+
+- **NavbarCollapse** no longer wraps children in `<ul class="navbar-nav me-auto">`. Children render directly inside the collapse div. Users must provide their own `<ul>` elements for left/right navbar grouping. This matches Bootstrap 5.3's documented HTML structure where the collapse div contains multiple `<ul>` groups.
+
+**Before (0.2.x):**
+```rust
+NavbarCollapse { collapsed,
+    // All items wrapped in one <ul class="me-auto"> — can't right-align
+    li { Link { to: "/", "Home" } }
+    li { Link { to: "/login", "Login" } }
+}
+```
+
+**After (0.3.0):**
+```rust
+NavbarCollapse { collapsed,
+    ul { class: "navbar-nav me-auto",
+        li { Link { to: "/", "Home" } }
+    }
+    ul { class: "navbar-nav",
+        li { Link { to: "/login", "Login" } }
+    }
+}
+```
+
+### Fixed
+
+- **Navbar** dark color variant now uses `data-bs-theme="dark"` HTML attribute instead of pushing `[data-bs-theme=dark]` as a CSS class (which was invalid and produced broken output)
+
+### Audit
+
+Full audit of all 32 component files against Bootstrap 5.3 HTML docs:
+- 30 of 32 components produce correct Bootstrap HTML
+- 2 bugs fixed (this release)
+- Crate is production-ready (proven via Project Mycelium Marketplace conversion — 65 templates, pixel-perfect)
+
+## [0.2.6]
+
+- Documentation update — comprehensive migration tables, showcase examples
+
 ## [0.2.5]
 
 - Toast supports headerless mode with close button (Bootstrap 5.3 `d-flex` pattern): omit `title` and set `show_close: true`
