@@ -161,11 +161,12 @@ pub struct NavbarProps {
 pub fn Navbar(props: NavbarProps) -> Element {
     let mut classes = vec!["navbar".to_string(), props.expand.to_string()];
 
+    let is_dark = matches!(props.color.as_ref(), Some(Color::Dark));
+
     if let Some(ref color) = props.color {
         match color {
             Color::Dark => {
                 classes.push("bg-dark".to_string());
-                classes.push("[data-bs-theme=dark]".to_string());
             }
             Color::Light => {
                 classes.push("bg-light".to_string());
@@ -183,7 +184,10 @@ pub fn Navbar(props: NavbarProps) -> Element {
     let full_class = classes.join(" ");
 
     rsx! {
-        nav { class: "{full_class}",
+        nav {
+            class: "{full_class}",
+            // Bootstrap 5.3: dark theme via HTML attribute, not CSS class
+            "data-bs-theme": if is_dark { "dark" } else { "" },
             ..props.attributes,
             div { class: "container-fluid",
                 if let Some(brand) = props.brand {
