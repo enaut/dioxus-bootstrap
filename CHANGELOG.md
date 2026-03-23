@@ -4,6 +4,22 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.1] — Configurable Bootstrap CSS Loading
+
+### Added
+
+- `BootstrapCss` enum: `Bundled` (default), `Url(String)`, `Cdn(String)`, `None`
+- `BootstrapIcons` enum: `Bundled` (default), `Url(String)`, `None`
+- `BootstrapHead` now accepts `css` and `icons` props for full control over CSS loading
+- Default behavior unchanged — `BootstrapHead {}` still loads bundled Bootstrap 5.3.3
+
+### Use cases
+
+- **New projects**: `BootstrapHead {}` — zero config, bundled CSS (same as before)
+- **SSR migration**: `BootstrapHead { css: BootstrapCss::Url("/static/vendor/bootstrap.min.css".into()) }` — pixel-perfect match with existing SSR
+- **CDN**: `BootstrapHead { css: BootstrapCss::Cdn("5.3.3".into()) }` — load from jsDelivr
+- **Full control**: `BootstrapHead { css: BootstrapCss::None }` — user loads CSS themselves
+
 ## [0.3.0] — Breaking Changes
 
 ### Breaking
