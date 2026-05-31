@@ -3,8 +3,13 @@ use dioxus::prelude::*;
 /// Runtime Bootstrap CSS variable theme overrides.
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct BootstrapTheme {
+    /// Default token set, used as the light theme when `light` is not provided.
     pub colors: ThemeColors,
+    /// Default surface token set, used as the light theme when `light` is not provided.
     pub surfaces: SurfaceColors,
+    /// Optional explicit light-mode overrides.
+    pub light: Option<ThemeModeTokens>,
+    /// Optional explicit dark-mode overrides.
     pub dark: Option<ThemeModeTokens>,
 }
 
@@ -97,12 +102,18 @@ pub fn BootstrapThemeProvider(props: BootstrapThemeProviderProps) -> Element {
 
 fn build_theme_css(theme: &BootstrapTheme) -> String {
     let mut out = String::new();
+    let light_colors =
+        merge_theme_colors(&theme.colors, theme.light.as_ref().map(|mode| &mode.colors));
+    let light_surfaces = merge_surface_colors(
+        &theme.surfaces,
+        theme.light.as_ref().map(|mode| &mode.surfaces),
+    );
 
     push_mode_css(
         &mut out,
         ":root",
-        &theme.colors,
-        &theme.surfaces,
+        &light_colors,
+        &light_surfaces,
         ThemeVariant::Light,
     );
 
@@ -117,6 +128,45 @@ fn build_theme_css(theme: &BootstrapTheme) -> String {
     }
 
     out
+}
+
+fn merge_theme_colors(base: &ThemeColors, overrides: Option<&ThemeColors>) -> ThemeColors {
+    let Some(overrides) = overrides else {
+        return base.clone();
+    };
+
+    ThemeColors {
+        primary: merge_option(&base.primary, &overrides.primary),
+        secondary: merge_option(&base.secondary, &overrides.secondary),
+        success: merge_option(&base.success, &overrides.success),
+        info: merge_option(&base.info, &overrides.info),
+        warning: merge_option(&base.warning, &overrides.warning),
+        danger: merge_option(&base.danger, &overrides.danger),
+        light: merge_option(&base.light, &overrides.light),
+        dark: merge_option(&base.dark, &overrides.dark),
+    }
+}
+
+fn merge_surface_colors(base: &SurfaceColors, overrides: Option<&SurfaceColors>) -> SurfaceColors {
+    let Some(overrides) = overrides else {
+        return base.clone();
+    };
+
+    SurfaceColors {
+        body_bg: merge_option(&base.body_bg, &overrides.body_bg),
+        body_color: merge_option(&base.body_color, &overrides.body_color),
+        secondary_bg: merge_option(&base.secondary_bg, &overrides.secondary_bg),
+        secondary_color: merge_option(&base.secondary_color, &overrides.secondary_color),
+        tertiary_bg: merge_option(&base.tertiary_bg, &overrides.tertiary_bg),
+        tertiary_color: merge_option(&base.tertiary_color, &overrides.tertiary_color),
+        border_color: merge_option(&base.border_color, &overrides.border_color),
+        link_color: merge_option(&base.link_color, &overrides.link_color),
+        link_hover_color: merge_option(&base.link_hover_color, &overrides.link_hover_color),
+    }
+}
+
+fn merge_option<T: Clone>(base: &Option<T>, overrides: &Option<T>) -> Option<T> {
+    overrides.clone().or_else(|| base.clone())
 }
 
 fn push_mode_css(
@@ -319,6 +369,7 @@ mod tests {
                 body_color: Some("#1d2b1f".into()),
                 ..SurfaceColors::default()
             },
+            light: None,
             dark: Some(ThemeModeTokens {
                 colors: ThemeColors {
                     primary: Some(SemanticColorScale::new("#4e9f53")),
@@ -345,6 +396,41 @@ mod tests {
         assert!(css.contains("  --bs-primary-rgb: 78, 159, 83;"));
         assert!(css.contains("  --bs-body-bg: #0b120c;"));
         assert!(css.contains("  --bs-body-color: #e6efe7;"));
+    }
+
+    #[test]
+    fn supports_explicit_light_and_dark_mode_tokens() {
+        let theme = BootstrapTheme {
+            light: Some(ThemeModeTokens {
+                colors: ThemeColors {
+                    primary: Some(SemanticColorScale::new("#165317")),
+                    ..ThemeColors::default()
+                },
+                surfaces: SurfaceColors {
+                    body_bg: Some("#f7fbf7".into()),
+                    ..SurfaceColors::default()
+                },
+            }),
+            dark: Some(ThemeModeTokens {
+                colors: ThemeColors {
+                    primary: Some(SemanticColorScale::new("#4e9f53")),
+                    ..ThemeColors::default()
+                },
+                surfaces: SurfaceColors {
+                    body_bg: Some("#0b120c".into()),
+                    ..SurfaceColors::default()
+                },
+            }),
+            ..BootstrapTheme::default()
+        };
+
+        let css = build_theme_css(&theme);
+
+        assert!(css.contains(":root {\n  --bs-primary: #165317;"));
+        assert!(css.contains("  --bs-body-bg: #f7fbf7;"));
+        assert!(css.contains(r#"[data-bs-theme="dark"] {"#));
+        assert!(css.contains("  --bs-primary: #4e9f53;"));
+        assert!(css.contains("  --bs-body-bg: #0b120c;"));
     }
 
     #[test]
