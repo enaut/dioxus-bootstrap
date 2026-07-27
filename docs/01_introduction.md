@@ -41,7 +41,6 @@ documentation — never normalized as downstream raw Bootstrap workarounds.
 - **Migrating with an AI agent** — handing the conversion to a coding agent.
 - **Governance** — where development happens and maintainer expectations.
 - **Release** — the release checklist.
-- **Adoption** — what has been assessed from downstream forks, adopted or declined.
 - **Troubleshooting** — common issues and how to resolve them.
 
 Throughout, the short name `dbcss` stands for `dioxus-bootstrap-css`; the full

@@ -30,15 +30,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   other outputs are already covered natively: `pages.yml` builds on push to
   `development`, and `release.yml` fires on tag push.
 
-### Added
-
-- **An Adoption Log chapter** (`docs/10_adoption.md`) recording what has been
-  assessed from downstream forks, adopted or declined, by content hash — so
-  "we took the good parts" is checkable rather than untracked divergence. First
-  entry assesses `ui_components` 0.6.0: the widget layer is declined in full
-  against the Design chapter's parity contract, and the element layer carries an
-  additive delta (2 components, 2 enums, 27 props) queued for adoption in its own
-  release.
+- **An adoption policy** in the Governance chapter: the crate is Apache-2.0, so
+  anything worth having from a downstream fork is adopted by implementing it here
+  rather than vendoring it — recorded by content, never by adding a remote,
+  submodule or path dependency. Adoptions are justified by what Bootstrap defines,
+  which is the only reason anything belongs in this crate.
 
 ## [0.5.15] — `Range` reflects its controlled value
 

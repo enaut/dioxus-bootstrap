@@ -26,11 +26,14 @@ upstream state.
 
 Two rules keep that honest:
 
-- **Content, never an address.** Record what came in by content hash in the
-  [Adoption Log](10_adoption.md). Do not add a fork as a git remote, submodule,
-  or path dependency, and do not point crate metadata or documentation at one. A
-  dependency on somebody else's hosting is a dependency we do not have today
-  and should not acquire.
+- **Content, never an address.** Do not add a fork as a git remote, submodule, or
+  path dependency, and do not point crate metadata or documentation at one. A
+  dependency on somebody else's hosting is a dependency we do not have today and
+  should not acquire.
+- **Merit, not provenance.** Anything adopted is justified in the changelog by
+  what Bootstrap defines, because that is the actual reason it belongs here. Where
+  an idea was first seen is maintenance trivia, not a reason, and not something
+  this crate's documentation tracks.
 - **The parity contract still decides.** A fork's additions are adopted only if
   they pass the Design chapter's test — Bootstrap defines it, so we express it.
   Application-level arrangements do not become crate API because a fork put
