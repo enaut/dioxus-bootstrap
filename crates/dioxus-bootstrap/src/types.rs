@@ -41,6 +41,83 @@ impl fmt::Display for Color {
     }
 }
 
+/// How a badge takes its colour.
+///
+/// Bootstrap 5.3 offers three distinct colour idioms for a badge, and they are
+/// not interchangeable. `text-bg-*` sets a background **and** a contrasting
+/// foreground; `bg-*` sets only the background and lets the text colour be
+/// inherited; the subtle pair is a background and text colour that are designed
+/// together. Without this choice a caller can only get the first, and reaching
+/// for the others means hand-writing the classes the component exists to type.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML class | Dioxus |
+/// |---|---|
+/// | `badge text-bg-primary` | `Badge { color: Color::Primary }` |
+/// | `badge bg-secondary` | `Badge { color: Color::Secondary, fill: BadgeFill::Bg }` |
+/// | `badge bg-info-subtle text-info-emphasis` | `Badge { color: Color::Info, fill: BadgeFill::Subtle }` |
+/// | `badge` | `Badge { fill: BadgeFill::None }` |
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum BadgeFill {
+    /// `text-bg-<color>` — background plus contrasting text. Bootstrap's badge
+    /// helper, and the default, so omitting the prop changes nothing.
+    #[default]
+    TextBg,
+    /// `bg-<color>` — the background utility alone, text colour inherited.
+    Bg,
+    /// `bg-<color>-subtle text-<color>-emphasis` — Bootstrap's low-contrast
+    /// pair. Both classes together: the subtle background is near-invisible
+    /// without its matching emphasis foreground, so this is one idiom rather
+    /// than two utilities a caller should have to remember to combine.
+    Subtle,
+    /// No colour idiom — a bare `badge`, the chip geometry only. Use this when
+    /// painting the background yourself: `text-bg-*` also sets a foreground, so
+    /// an inline background override would otherwise inherit a text colour it
+    /// never asked for.
+    None,
+}
+
+/// The container a navbar wraps its contents in.
+///
+/// Bootstrap's navbar examples put the brand and links inside a `.container` or
+/// `.container-fluid`; the gutter belongs to that container, not to `<nav>`.
+/// A navbar that supplies its own padding needs to be able to omit it.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<div class="container-fluid">` | `Navbar { container: NavbarContainer::Fluid }` |
+/// | `<div class="container">` | `Navbar { container: NavbarContainer::Fixed }` |
+/// | (no wrapper) | `Navbar { container: NavbarContainer::None }` |
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum NavbarContainer {
+    /// `container-fluid` — full width with gutters. Bootstrap's own default and
+    /// this component's, so omitting the prop is unchanged behaviour.
+    #[default]
+    Fluid,
+    /// `container` — the responsive fixed-width container.
+    Fixed,
+    /// No container element at all: brand and children are direct children of
+    /// `<nav>`.
+    None,
+}
+
+impl NavbarContainer {
+    /// The container class, or `None` when no wrapper element should be
+    /// emitted. Returning an `Option` rather than an empty string keeps
+    /// "no class" and "no element" from being the same answer — an empty
+    /// `<div class="">` is still a box in the layout.
+    pub fn class(&self) -> Option<&'static str> {
+        match self {
+            NavbarContainer::Fluid => Some("container-fluid"),
+            NavbarContainer::Fixed => Some("container"),
+            NavbarContainer::None => None,
+        }
+    }
+}
+
 /// Bootstrap component size variants.
 ///
 /// # Bootstrap HTML → Dioxus

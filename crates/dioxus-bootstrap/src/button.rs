@@ -71,6 +71,21 @@ pub struct ButtonProps {
     /// Link target (e.g., `"_blank"`). Only used when `href` is set.
     #[props(default)]
     pub target: Option<String>,
+    /// Link relationship (e.g., `"noopener noreferrer"`). Only used when `href`
+    /// is set — and the pairing that makes `target: "_blank"` safe, so the two
+    /// belong together.
+    #[props(default)]
+    pub rel: Option<String>,
+    /// ARIA role. Overrides the `role="button"` a link-button renders by
+    /// default; unset on a real `<button>`, which needs none.
+    ///
+    /// This has to be a prop rather than something the caller passes through
+    /// `attributes`: the spread is *appended*, not merged, so a `role` supplied
+    /// that way emits `role="button" role="link"` — and HTML keeps the first
+    /// duplicate, so the override is silently discarded while looking exactly
+    /// like it worked.
+    #[props(default)]
+    pub role: Option<String>,
     /// Download filename. Only used when `href` is set.
     #[props(default)]
     pub download: Option<String>,
@@ -80,6 +95,11 @@ pub struct ButtonProps {
     /// Click event handler.
     #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Mouse-down handler. A toolbar button needs it to `prevent_default` and
+    /// keep the caret in the field it acts on. `GlobalAttributes` carries
+    /// attributes, not listeners, so this cannot ride along in `attributes`.
+    #[props(default)]
+    pub onmousedown: Option<EventHandler<MouseEvent>>,
     /// Active (pressed) state.
     #[props(default)]
     pub active: bool,
@@ -130,15 +150,26 @@ pub fn Button(props: ButtonProps) -> Element {
         let link_class = format!("{full_class}{disabled_class}");
         let target = props.target.clone();
         let download = props.download.clone();
+        let rel = props.rel.clone();
+        // A link-button is `role="button"` unless the caller says otherwise;
+        // the default has to survive an unset prop or every existing caller
+        // loses its role.
+        let role = props.role.clone().unwrap_or_else(|| "button".to_string());
         rsx! {
             a {
                 class: "{link_class}",
                 href: "{href}",
-                role: "button",
+                role: "{role}",
                 target: target,
+                rel: rel,
                 download: download,
                 onclick: move |evt| {
                     if let Some(handler) = &props.onclick {
+                        handler.call(evt);
+                    }
+                },
+                onmousedown: move |evt| {
+                    if let Some(handler) = &props.onmousedown {
                         handler.call(evt);
                     }
                 },
@@ -147,13 +178,20 @@ pub fn Button(props: ButtonProps) -> Element {
             }
         }
     } else {
+        let role = props.role.clone();
         rsx! {
             button {
                 class: "{full_class}",
                 r#type: "{props.r#type}",
+                role: role,
                 disabled: props.disabled,
                 onclick: move |evt| {
                     if let Some(handler) = &props.onclick {
+                        handler.call(evt);
+                    }
+                },
+                onmousedown: move |evt| {
+                    if let Some(handler) = &props.onmousedown {
                         handler.call(evt);
                     }
                 },

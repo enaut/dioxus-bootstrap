@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::types::Color;
+use crate::types::{BadgeFill, Color};
 
 /// Bootstrap Badge component.
 ///
@@ -10,6 +10,8 @@ use crate::types::Color;
 /// |---|---|
 /// | `<span class="badge text-bg-primary">New</span>` | `Badge { color: Color::Primary, "New" }` |
 /// | `<span class="badge rounded-pill text-bg-danger">99+</span>` | `Badge { color: Color::Danger, pill: true, "99+" }` |
+/// | `<span class="badge bg-secondary">Alias</span>` | `Badge { color: Color::Secondary, fill: BadgeFill::Bg, "Alias" }` |
+/// | `<span class="badge bg-info-subtle text-info-emphasis">2 fields</span>` | `Badge { color: Color::Info, fill: BadgeFill::Subtle, "2 fields" }` |
 /// | `<span class="badge text-bg-secondary" role="button">Open</span>` | `Badge { color: Color::Secondary, onclick: move |_| {}, "Open" }` |
 ///
 /// ```rust,no_run
@@ -19,6 +21,7 @@ use crate::types::Color;
 /// rsx! {
 ///     Badge { color: Color::Primary, "New" }
 ///     Badge { color: Color::Danger, pill: true, "99+" }
+///     Badge { color: Color::Info, fill: BadgeFill::Subtle, "2 fields" }
 ///     // Inside a heading
 ///     h1 { "Messages " Badge { color: Color::Info, "4" } }
 /// }
@@ -29,6 +32,10 @@ pub struct BadgeProps {
     /// Badge color variant.
     #[props(default = Color::Primary)]
     pub color: Color,
+    /// Which Bootstrap colour idiom to paint the badge with. Defaults to
+    /// `text-bg-<color>`, so existing callers are unchanged.
+    #[props(default)]
+    pub fill: BadgeFill,
     /// Use pill (rounded) style.
     #[props(default)]
     pub pill: bool,
@@ -45,14 +52,27 @@ pub struct BadgeProps {
     pub children: Element,
 }
 
+/// The badge's class string. Extracted so the colour idioms are assertable
+/// without rendering — the whole point of the `fill` prop is which classes come
+/// out, so that is what the tests pin.
+fn badge_class(color: Color, fill: BadgeFill, pill: bool, class: &str) -> String {
+    let color_classes = match fill {
+        BadgeFill::TextBg => format!(" text-bg-{color}"),
+        BadgeFill::Bg => format!(" bg-{color}"),
+        BadgeFill::Subtle => format!(" bg-{color}-subtle text-{color}-emphasis"),
+        BadgeFill::None => String::new(),
+    };
+    let pill = if pill { " rounded-pill" } else { "" };
+    if class.is_empty() {
+        format!("badge{color_classes}{pill}")
+    } else {
+        format!("badge{color_classes}{pill} {class}")
+    }
+}
+
 #[component]
 pub fn Badge(props: BadgeProps) -> Element {
-    let pill = if props.pill { " rounded-pill" } else { "" };
-    let full_class = if props.class.is_empty() {
-        format!("badge text-bg-{}{pill}", props.color)
-    } else {
-        format!("badge text-bg-{}{pill} {}", props.color, props.class)
-    };
+    let full_class = badge_class(props.color, props.fill, props.pill, &props.class);
 
     rsx! {
         span {
@@ -65,5 +85,58 @@ pub fn Badge(props: BadgeProps) -> Element {
             ..props.attributes,
             {props.children}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn badge_default_fill_is_text_bg() {
+        // The default must stay `text-bg-*`: it is what every existing caller
+        // renders today, so the new prop has to be invisible when unset.
+        assert_eq!(
+            badge_class(Color::Primary, BadgeFill::default(), false, ""),
+            "badge text-bg-primary"
+        );
+    }
+
+    #[test]
+    fn badge_bg_fill_omits_the_foreground() {
+        assert_eq!(
+            badge_class(Color::Secondary, BadgeFill::Bg, false, ""),
+            "badge bg-secondary"
+        );
+    }
+
+    #[test]
+    fn badge_subtle_fill_emits_both_halves_of_the_pair() {
+        // Subtle is one idiom, not two utilities: the background is unreadable
+        // without the emphasis foreground, so both must always appear together.
+        assert_eq!(
+            badge_class(Color::Info, BadgeFill::Subtle, false, ""),
+            "badge bg-info-subtle text-info-emphasis"
+        );
+    }
+
+    #[test]
+    fn badge_none_fill_emits_geometry_only() {
+        assert_eq!(
+            badge_class(Color::Primary, BadgeFill::None, false, ""),
+            "badge"
+        );
+    }
+
+    #[test]
+    fn badge_pill_and_extra_classes_survive_every_fill() {
+        assert_eq!(
+            badge_class(Color::Danger, BadgeFill::TextBg, true, "ms-2"),
+            "badge text-bg-danger rounded-pill ms-2"
+        );
+        assert_eq!(
+            badge_class(Color::Danger, BadgeFill::None, true, "ms-2"),
+            "badge rounded-pill ms-2"
+        );
     }
 }

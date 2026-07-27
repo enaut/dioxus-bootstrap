@@ -84,6 +84,13 @@ pub struct ModalProps {
     /// Modal title.
     #[props(default)]
     pub title: String,
+    /// Rich header content, rendered inside `.modal-header` in place of the
+    /// plain `title`. Bootstrap's header holds whatever markup the caller
+    /// wants — an icon and a title, a title and a badge — and a `String` title
+    /// cannot express that. [`Card`](crate::card::Card) already has this slot,
+    /// for the same reason.
+    #[props(default)]
+    pub header: Option<Element>,
     /// Modal body content.
     #[props(default)]
     pub body: Option<Element>,
@@ -114,6 +121,25 @@ pub struct ModalProps {
     /// Additional CSS classes for the modal-dialog.
     #[props(default)]
     pub class: String,
+    /// Additional CSS classes for the modal-content div.
+    ///
+    /// This and the three below exist because `.modal-content`,
+    /// `.modal-header`, `.modal-body` and `.modal-footer` are the elements a
+    /// caller most often needs to reach — a border, a padding override, a
+    /// scroll height. Without them the only route is hand-written Bootstrap
+    /// markup, which is what the typed component replaces.
+    /// [`Card`](crate::card::Card) already carries the equivalent set.
+    #[props(default)]
+    pub content_class: String,
+    /// Additional CSS classes for the modal-header div.
+    #[props(default)]
+    pub header_class: String,
+    /// Additional CSS classes for the modal-body div.
+    #[props(default)]
+    pub body_class: String,
+    /// Additional CSS classes for the modal-footer div.
+    #[props(default)]
+    pub footer_class: String,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -172,6 +198,20 @@ pub fn Modal(props: ModalProps) -> Element {
     let backdrop_close = props.backdrop_close;
     let keyboard_close = props.keyboard_close;
 
+    // Each inner element keeps its Bootstrap class first, with the caller's
+    // additions appended — same composition Card uses.
+    let with_extra = |base: &str, extra: &str| {
+        if extra.is_empty() {
+            base.to_string()
+        } else {
+            format!("{base} {extra}")
+        }
+    };
+    let content_class = with_extra("modal-content", &props.content_class);
+    let header_class = with_extra("modal-header", &props.header_class);
+    let body_class = with_extra("modal-body", &props.body_class);
+    let footer_class = with_extra("modal-footer", &props.footer_class);
+
     rsx! {
         // Backdrop
         div {
@@ -211,11 +251,14 @@ pub fn Modal(props: ModalProps) -> Element {
                 class: "{dialog_class}",
                 // Stop click propagation so clicking inside the modal doesn't close it
                 onclick: move |evt| evt.stop_propagation(),
-                div { class: "modal-content",
-                    // Header
-                    if !props.title.is_empty() || props.show_close {
-                        div { class: "modal-header",
-                            if !props.title.is_empty() {
+                div { class: "{content_class}",
+                    // Header — the rich `header` slot replaces the plain title
+                    // when given; the close button is independent of both.
+                    if props.header.is_some() || !props.title.is_empty() || props.show_close {
+                        div { class: "{header_class}",
+                            if let Some(header) = props.header {
+                                {header}
+                            } else if !props.title.is_empty() {
                                 h5 { class: "modal-title", "{props.title}" }
                             }
                             if props.show_close {
@@ -230,12 +273,12 @@ pub fn Modal(props: ModalProps) -> Element {
                     }
                     // Body
                     if let Some(body) = props.body {
-                        div { class: "modal-body", {body} }
+                        div { class: "{body_class}", {body} }
                     }
                     {props.children}
                     // Footer
                     if let Some(footer) = props.footer {
-                        div { class: "modal-footer", {footer} }
+                        div { class: "{footer_class}", {footer} }
                     }
                 }
             }

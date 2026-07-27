@@ -34,6 +34,13 @@ pub struct AlertProps {
     /// Alert color variant.
     #[props(default = Color::Primary)]
     pub color: Color,
+    /// Optional heading, rendered as Bootstrap's `.alert-heading` above the
+    /// body. Bootstrap documents this class for exactly this case — a titled
+    /// callout whose heading inherits the alert's colour — so expressing it is
+    /// the crate's job. Empty (the default) renders no heading at all, leaving
+    /// a flat-text alert byte-identical to what it was before.
+    #[props(default)]
+    pub heading: String,
     /// Show a dismiss button. When clicked, the alert hides itself.
     #[props(default)]
     pub dismissible: bool,
@@ -75,6 +82,9 @@ pub fn Alert(props: AlertProps) -> Element {
             class: "{full_class}",
             role: "alert",
             ..props.attributes,
+            if !props.heading.is_empty() {
+                h4 { class: "alert-heading", "{props.heading}" }
+            }
             {props.children}
             if props.dismissible {
                 button {

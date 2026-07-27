@@ -91,9 +91,30 @@ pub struct CardProps {
     /// Additional CSS classes for the card body.
     #[props(default)]
     pub body_class: String,
+    /// `id` for the card-body div. A scroll container or a scrollspy target
+    /// needs to be addressable, and the body is the element that scrolls — the
+    /// alternative, hand-writing `div { class: "card-body" }` in `children`, is
+    /// the raw Bootstrap this component exists to replace.
+    #[props(default)]
+    pub body_id: Option<String>,
+    /// Inline `style` for the card-body div — the inline-style sibling of
+    /// `body_class`, for the case where the value is computed rather than named
+    /// (a `max-height` a class cannot express). Without it the panel grows
+    /// unbounded instead of scrolling, which is a visible failure rather than a
+    /// dropped attribute.
+    #[props(default)]
+    pub body_style: Option<String>,
     /// Additional CSS classes for the card-footer div.
     #[props(default)]
     pub footer_class: String,
+    /// Click handler for the whole card. A selectable card is a Bootstrap
+    /// pattern (the docs' clickable card examples); without a handler the only
+    /// way to get one is the `href` form, which navigates.
+    #[props(default)]
+    pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Right-click / context-menu handler, for a per-card menu.
+    #[props(default)]
+    pub oncontextmenu: Option<EventHandler<MouseEvent>>,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -140,7 +161,12 @@ pub fn Card(props: CardProps) -> Element {
             div { class: "{header_class}", {header} }
         }
         if let Some(body) = props.body {
-            div { class: "{body_class}", {body} }
+            div {
+                class: "{body_class}",
+                id: props.body_id.clone(),
+                style: props.body_style.clone(),
+                {body}
+            }
         }
         {props.children}
         if let Some(footer) = props.footer {
@@ -153,7 +179,20 @@ pub fn Card(props: CardProps) -> Element {
     if let Some(href) = props.href.clone() {
         let target = props.target.clone();
         return rsx! {
-            a { class: "{full_class}", href: "{href}", target: target,
+            a {
+                class: "{full_class}",
+                href: "{href}",
+                target: target,
+                onclick: move |evt| {
+                    if let Some(handler) = &props.onclick {
+                        handler.call(evt);
+                    }
+                },
+                oncontextmenu: move |evt| {
+                    if let Some(handler) = &props.oncontextmenu {
+                        handler.call(evt);
+                    }
+                },
                 ..props.attributes,
                 {inner}
             }
@@ -161,7 +200,18 @@ pub fn Card(props: CardProps) -> Element {
     }
 
     rsx! {
-        div { class: "{full_class}",
+        div {
+            class: "{full_class}",
+            onclick: move |evt| {
+                if let Some(handler) = &props.onclick {
+                    handler.call(evt);
+                }
+            },
+            oncontextmenu: move |evt| {
+                if let Some(handler) = &props.oncontextmenu {
+                    handler.call(evt);
+                }
+            },
             ..props.attributes,
             {inner}
         }

@@ -210,9 +210,15 @@ pub fn Toast(props: ToastProps) -> Element {
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ToastContainerProps {
-    /// Position on screen.
+    /// Position on screen. Ignored when `positioned` is false.
     #[props(default)]
     pub position: ToastPosition,
+    /// Emit the fixed-position utilities. Set false when the host's own CSS
+    /// places the stack: `position-fixed` and its offsets are `!important`
+    /// utilities and would otherwise win, leaving the container pinned to the
+    /// viewport instead of sitting where the page put it.
+    #[props(default = true)]
+    pub positioned: bool,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -251,16 +257,63 @@ impl std::fmt::Display for ToastPosition {
     }
 }
 
+/// The toast container's class string. Extracted so the positioned/unpositioned
+/// split is assertable without rendering — the whole point of `positioned` is
+/// which classes are absent.
+fn toast_container_class(positioned: bool, position: ToastPosition, class: &str) -> String {
+    let placement = if positioned {
+        format!(" position-fixed p-3 {position}")
+    } else {
+        String::new()
+    };
+    if class.is_empty() {
+        format!("toast-container{placement}")
+    } else {
+        format!("toast-container{placement} {class}")
+    }
+}
+
 #[component]
 pub fn ToastContainer(props: ToastContainerProps) -> Element {
-    let pos = props.position;
-    let full_class = if props.class.is_empty() {
-        format!("toast-container position-fixed p-3 {pos}")
-    } else {
-        format!("toast-container position-fixed p-3 {pos} {}", props.class)
-    };
+    let full_class = toast_container_class(props.positioned, props.position, &props.class);
 
     rsx! {
         div { class: "{full_class}", {props.children} }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn toast_container_is_positioned_by_default() {
+        // Unchanged behaviour: every container rendered before this prop existed
+        // carried the fixed-position utilities.
+        assert_eq!(
+            toast_container_class(true, ToastPosition::default(), ""),
+            format!(
+                "toast-container position-fixed p-3 {}",
+                ToastPosition::default()
+            )
+        );
+    }
+
+    #[test]
+    fn toast_container_unpositioned_drops_the_utilities_entirely() {
+        // Not "keeps them with a different position" — the point is that the
+        // !important utilities are absent so the host's CSS can win.
+        let c = toast_container_class(false, ToastPosition::TopEnd, "");
+        assert_eq!(c, "toast-container");
+        assert!(!c.contains("position-fixed"));
+    }
+
+    #[test]
+    fn toast_container_extra_classes_survive_both_modes() {
+        assert!(toast_container_class(true, ToastPosition::TopEnd, "mt-5").ends_with(" mt-5"));
+        assert_eq!(
+            toast_container_class(false, ToastPosition::TopEnd, "mt-5"),
+            "toast-container mt-5"
+        );
     }
 }

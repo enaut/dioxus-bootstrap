@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::types::{Color, NavbarExpand};
+use crate::types::{Color, NavbarContainer, NavbarExpand};
 
 /// Bootstrap Nav component — standalone navigation (not inside a Navbar).
 ///
@@ -157,6 +157,13 @@ pub struct NavbarProps {
     /// Brand element (logo, app name).
     #[props(default)]
     pub brand: Option<Element>,
+    /// The container wrapping brand and children. Defaults to
+    /// [`NavbarContainer::Fluid`] (`container-fluid`), which is Bootstrap's own
+    /// default and what this component emitted before the prop existed. Set
+    /// [`NavbarContainer::None`] when the navbar pads itself and must not gain
+    /// the container's gutter on top.
+    #[props(default)]
+    pub container: NavbarContainer,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -199,11 +206,24 @@ pub fn Navbar(props: NavbarProps) -> Element {
             // Bootstrap 5.3: dark theme via HTML attribute, not CSS class
             "data-bs-theme": if is_dark { "dark" } else { "" },
             ..props.attributes,
-            div { class: "container-fluid",
-                if let Some(brand) = props.brand {
-                    {brand}
-                }
-                {props.children}
+            // A container is Bootstrap's default, not a requirement: the gutter
+            // belongs to the container, so a navbar that pads itself must be
+            // able to omit the element rather than empty its class.
+            match props.container.class() {
+                Some(container) => rsx! {
+                    div { class: "{container}",
+                        if let Some(brand) = props.brand {
+                            {brand}
+                        }
+                        {props.children}
+                    }
+                },
+                None => rsx! {
+                    if let Some(brand) = props.brand {
+                        {brand}
+                    }
+                    {props.children}
+                },
             }
         }
     }
@@ -591,6 +611,26 @@ fn nav_link_class(active: bool, disabled: bool, extra: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn navbar_container_defaults_to_fluid() {
+        // Unchanged behaviour is the requirement: every navbar rendered before
+        // this prop existed wrapped its contents in `container-fluid`.
+        assert_eq!(NavbarContainer::default().class(), Some("container-fluid"));
+    }
+
+    #[test]
+    fn navbar_container_fixed_is_the_responsive_container() {
+        assert_eq!(NavbarContainer::Fixed.class(), Some("container"));
+    }
+
+    #[test]
+    fn navbar_container_none_emits_no_wrapper_at_all() {
+        // `None`, not `Some("")`: an empty class still leaves a `<div>` in the
+        // layout, which is the gutter-free case failing in a way that looks
+        // like it worked.
+        assert_eq!(NavbarContainer::None.class(), None);
+    }
 
     #[test]
     fn navbar_nav_class_base() {

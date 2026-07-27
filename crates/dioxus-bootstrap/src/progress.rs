@@ -81,6 +81,10 @@ pub struct ProgressBarProps {
     /// Show the value as text inside the bar.
     #[props(default)]
     pub show_label: bool,
+    /// The bar's content, for a label Bootstrap allows but `show_label` cannot
+    /// express — "3 of 7", a unit, an icon. Takes precedence over `show_label`.
+    #[props(default)]
+    pub children: Option<Element>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -131,7 +135,11 @@ pub fn ProgressBar(props: ProgressBarProps) -> Element {
             "aria-valuemin": "0",
             "aria-valuemax": "100",
             ..props.attributes,
-            "{label}"
+            if let Some(children) = props.children {
+                {children}
+            } else {
+                "{label}"
+            }
         }
     }
 }

@@ -55,6 +55,12 @@ pub struct BreadcrumbItemProps {
     /// Active (current page) state — renders as plain text instead of link.
     #[props(default)]
     pub active: bool,
+    /// Click handler for the link. A breadcrumb in a single-page app navigates
+    /// by handler rather than by `href`, and without this the only way to
+    /// intercept it is to hand-write the `<a>` — which is the raw Bootstrap the
+    /// component exists to replace.
+    #[props(default)]
+    pub onclick: Option<EventHandler<MouseEvent>>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -84,7 +90,15 @@ pub fn BreadcrumbItem(props: BreadcrumbItemProps) -> Element {
     } else {
         rsx! {
             li { class: "{full_class}",
-                a { href: "{props.href}", {props.children} }
+                a {
+                    href: "{props.href}",
+                    onclick: move |evt| {
+                        if let Some(handler) = &props.onclick {
+                            handler.call(evt);
+                        }
+                    },
+                    {props.children}
+                }
             }
         }
     }

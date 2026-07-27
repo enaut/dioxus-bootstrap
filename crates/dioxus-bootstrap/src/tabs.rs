@@ -98,6 +98,11 @@ pub struct TabListProps {
     /// Additional CSS classes for the tab content area.
     #[props(default)]
     pub content_class: String,
+    /// Inline `style` for the tab content area — the inline-style sibling of
+    /// `content_class`, for a computed value (a `max-height` that makes the
+    /// panel scroll) that no class can name.
+    #[props(default)]
+    pub content_style: Option<String>,
 }
 
 #[component]
@@ -142,7 +147,9 @@ pub fn TabList(props: TabListProps) -> Element {
                 }
             }
         }
-        div { class: "{content_class}",
+        div {
+            class: "{content_class}",
+            style: props.content_style.clone(),
             for (i, tab) in props.tabs.iter().enumerate() {
                 div {
                     class: if current == i { "tab-pane fade show active" } else { "tab-pane fade" },

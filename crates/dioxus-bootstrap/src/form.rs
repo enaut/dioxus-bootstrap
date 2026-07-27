@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::types::Size;
+use crate::types::{Color, Size};
 
 /// Bootstrap FormGroup — label + control wrapper.
 ///
@@ -120,6 +120,19 @@ pub struct InputProps {
     /// Browser autocomplete hint.
     #[props(default)]
     pub autocomplete: Option<String>,
+    /// Safari's `autocorrect` hint (`on` / `off`). Not a `GlobalAttributes`
+    /// attribute, so it needs its own prop rather than riding `..attributes` —
+    /// the same reason `list` has one.
+    #[props(default)]
+    pub autocorrect: Option<String>,
+    /// Step granularity for numeric and date inputs. The typed sibling of
+    /// `min`/`max`, which are already props: a number field that constrains its
+    /// range but not its increment is only two-thirds typed.
+    #[props(default)]
+    pub step: Option<String>,
+    /// Which file types a `type="file"` input will accept.
+    #[props(default)]
+    pub accept: Option<String>,
     /// Datalist id to bind for autocomplete (rendered as the input `list`
     /// attribute). `list` is not a `GlobalAttributes` attribute, so it needs
     /// its own typed prop rather than riding through `..attributes`.
@@ -181,7 +194,10 @@ pub fn Input(props: InputProps) -> Element {
             placeholder: "{props.placeholder}",
             min: props.min.clone(),
             max: props.max.clone(),
+            step: props.step.clone(),
+            accept: props.accept.clone(),
             autocomplete: props.autocomplete.clone(),
+            autocorrect: props.autocorrect.clone(),
             list: props.list.clone(),
             disabled: props.disabled,
             readonly: props.readonly,
@@ -353,6 +369,13 @@ pub struct TextareaProps {
     /// transcript box).
     #[props(default)]
     pub uncontrolled: bool,
+    /// Browser autocomplete hint.
+    #[props(default)]
+    pub autocomplete: Option<String>,
+    /// Safari's `autocorrect` hint (`on` / `off`) — the attribute a compose box
+    /// most often needs turned off, and not one `GlobalAttributes` carries.
+    #[props(default)]
+    pub autocorrect: Option<String>,
     /// Number of visible rows.
     #[props(default = 3)]
     pub rows: u32,
@@ -411,6 +434,8 @@ pub fn Textarea(props: TextareaProps) -> Element {
             class: "{full_class}",
             rows: "{props.rows}",
             placeholder: "{props.placeholder}",
+            autocomplete: props.autocomplete.clone(),
+            autocorrect: props.autocorrect.clone(),
             disabled: props.disabled,
             readonly: props.readonly,
             value: if props.uncontrolled { None } else { Some(props.value.clone()) },
@@ -934,5 +959,269 @@ pub fn Radio(props: RadioProps) -> Element {
                 label { class: "form-check-label", "{props.label}" }
             }
         }
+    }
+}
+
+/// The class string a `btn-check` toggle's `<label>` carries. Shared by
+/// [`CheckboxButton`] and [`RadioButton`] and extracted so it is assertable
+/// without rendering: the whole contract of a toggle button is that it emits
+/// the same button classes a real [`Button`](crate::button::Button) does, and a
+/// drift between the two is exactly what would go unnoticed.
+fn toggle_button_label_class(color: Color, outline: bool, size: Size, class: &str) -> String {
+    let style = if outline { "btn-outline" } else { "btn" };
+    let variant_class = format!(" {style}-{color}");
+
+    let size_class = match size {
+        Size::Md => String::new(),
+        s => format!(" btn-{s}"),
+    };
+
+    if class.is_empty() {
+        format!("btn{variant_class}{size_class}")
+    } else {
+        format!("btn{variant_class}{size_class} {class}")
+    }
+}
+
+/// Bootstrap checkbox toggle button (`btn-check`).
+///
+/// Bootstrap 5.3's "Checkbox toggle buttons": a visually hidden checkbox paired
+/// with a `<label class="btn …">` whose `for` targets it. The label is what the
+/// user sees and clicks; the checkbox holds the state and submits the value.
+/// This is a Bootstrap component in its own right, not a styled
+/// [`Checkbox`] — the markup, the classes and the CSS that drives them are
+/// different.
+///
+/// The `id` is required rather than optional: the `for`/`id` pair *is* the
+/// mechanism. A toggle whose ids do not match renders correctly and does
+/// nothing when clicked, which is the worst kind of broken.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<input class="btn-check" type="checkbox" id="c1"><label class="btn btn-primary" for="c1">Mute</label>` | `CheckboxButton { id: "c1", label: "Mute" }` |
+/// | `<label class="btn btn-outline-secondary btn-sm" …>` | `CheckboxButton { id: "c1", color: Color::Secondary, outline: true, size: Size::Sm, … }` |
+///
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// rsx! {
+///     CheckboxButton { id: "mute", label: "Mute", checked: true }
+///     CheckboxButton { id: "wide", label: "Wide", color: Color::Secondary, outline: true }
+/// }
+/// # }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct CheckboxButtonProps {
+    /// The input's id and the label's `for` target. Required: the pair is what
+    /// makes the label toggle the input.
+    pub id: String,
+    /// Optional `name`, for when several toggles submit under one form field.
+    #[props(default)]
+    pub name: Option<String>,
+    /// The value submitted when checked.
+    #[props(default)]
+    pub value: Option<String>,
+    /// Whether the toggle is on.
+    #[props(default)]
+    pub checked: bool,
+    /// Disable the control.
+    #[props(default)]
+    pub disabled: bool,
+    /// The visible text, rendered after any `children`.
+    #[props(default)]
+    pub label: String,
+    /// Rich label content (a leading icon, say), rendered inside the label
+    /// before `label`.
+    #[props(default)]
+    pub children: Element,
+    /// Button colour variant.
+    #[props(default)]
+    pub color: Color,
+    /// Use the outline style.
+    #[props(default)]
+    pub outline: bool,
+    /// Button size.
+    #[props(default)]
+    pub size: Size,
+    /// Bootstrap's own examples set `autocomplete="off"` so a browser does not
+    /// restore a stale toggle state on reload. Left unset by default so the
+    /// rendered attributes match the markup being ported rather than silently
+    /// adding one.
+    #[props(default)]
+    pub autocomplete: Option<String>,
+    /// Additional CSS classes, appended to the **label**'s button classes.
+    #[props(default)]
+    pub class: String,
+    /// Change handler, fired on the input.
+    #[props(default)]
+    pub onchange: Option<EventHandler<FormEvent>>,
+    /// Any additional HTML attributes, applied to the **input**.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+}
+
+#[component]
+pub fn CheckboxButton(props: CheckboxButtonProps) -> Element {
+    let label_class =
+        toggle_button_label_class(props.color, props.outline, props.size, &props.class);
+
+    rsx! {
+        input {
+            class: "btn-check",
+            r#type: "checkbox",
+            name: props.name,
+            id: "{props.id}",
+            value: props.value,
+            checked: props.checked,
+            disabled: props.disabled,
+            autocomplete: props.autocomplete,
+            onchange: move |evt| {
+                if let Some(handler) = &props.onchange {
+                    handler.call(evt);
+                }
+            },
+            ..props.attributes,
+        }
+        label { class: "{label_class}", r#for: "{props.id}", {props.children} "{props.label}" }
+    }
+}
+
+/// Bootstrap radio toggle button (`btn-check`).
+///
+/// Bootstrap 5.3's "Radio toggle buttons" — the radio sibling of
+/// [`CheckboxButton`], and the markup behind a segmented button group: several
+/// radios sharing one `name`, each with its own label, wrapped in a
+/// [`ButtonGroup`](crate::button::ButtonGroup).
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<input class="btn-check" type="radio" name="view" id="r1"><label class="btn btn-primary" for="r1">List</label>` | `RadioButton { id: "r1", name: "view", label: "List" }` |
+///
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// rsx! {
+///     ButtonGroup {
+///         RadioButton { id: "v-list", name: "view", value: "list", label: "List", checked: true }
+///         RadioButton { id: "v-grid", name: "view", value: "grid", label: "Grid" }
+///     }
+/// }
+/// # }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct RadioButtonProps {
+    /// The input's id and the label's `for` target. Required, as for
+    /// [`CheckboxButton`].
+    pub id: String,
+    /// The radio group name. Radios sharing a `name` are mutually exclusive —
+    /// which is the whole point of a radio, so this is where a segmented
+    /// control is actually defined.
+    #[props(default)]
+    pub name: Option<String>,
+    /// The value submitted when this option is selected.
+    #[props(default)]
+    pub value: Option<String>,
+    /// Whether this option is selected.
+    #[props(default)]
+    pub checked: bool,
+    /// Disable the control.
+    #[props(default)]
+    pub disabled: bool,
+    /// The visible text, rendered after any `children`.
+    #[props(default)]
+    pub label: String,
+    /// Rich label content, rendered inside the label before `label`.
+    #[props(default)]
+    pub children: Element,
+    /// Button colour variant.
+    #[props(default)]
+    pub color: Color,
+    /// Use the outline style.
+    #[props(default)]
+    pub outline: bool,
+    /// Button size.
+    #[props(default)]
+    pub size: Size,
+    /// See [`CheckboxButtonProps::autocomplete`].
+    #[props(default)]
+    pub autocomplete: Option<String>,
+    /// Additional CSS classes, appended to the **label**'s button classes.
+    #[props(default)]
+    pub class: String,
+    /// Change handler, fired on the input.
+    #[props(default)]
+    pub onchange: Option<EventHandler<FormEvent>>,
+    /// Any additional HTML attributes, applied to the **input**.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+}
+
+#[component]
+pub fn RadioButton(props: RadioButtonProps) -> Element {
+    let label_class =
+        toggle_button_label_class(props.color, props.outline, props.size, &props.class);
+
+    rsx! {
+        input {
+            class: "btn-check",
+            r#type: "radio",
+            name: props.name,
+            id: "{props.id}",
+            value: props.value,
+            checked: props.checked,
+            disabled: props.disabled,
+            autocomplete: props.autocomplete,
+            onchange: move |evt| {
+                if let Some(handler) = &props.onchange {
+                    handler.call(evt);
+                }
+            },
+            ..props.attributes,
+        }
+        label { class: "{label_class}", r#for: "{props.id}", {props.children} "{props.label}" }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn toggle_button_label_matches_a_plain_button() {
+        // The contract: a toggle's label carries the same classes the equivalent
+        // Button emits. If Button's composition changes and this does not, a
+        // toggle and a button styled identically stop looking identical.
+        assert_eq!(
+            toggle_button_label_class(Color::Primary, false, Size::Md, ""),
+            "btn btn-primary"
+        );
+    }
+
+    #[test]
+    fn toggle_button_label_outline_and_size() {
+        assert_eq!(
+            toggle_button_label_class(Color::Secondary, true, Size::Sm, ""),
+            "btn btn-outline-secondary btn-sm"
+        );
+    }
+
+    #[test]
+    fn toggle_button_label_appends_extra_classes_last() {
+        assert_eq!(
+            toggle_button_label_class(Color::Danger, false, Size::Lg, "w-100"),
+            "btn btn-danger btn-lg w-100"
+        );
+    }
+
+    #[test]
+    fn toggle_button_medium_size_adds_no_class() {
+        // Bootstrap has no `btn-md`; the default size is the absence of a class.
+        assert!(!toggle_button_label_class(Color::Primary, false, Size::Md, "").contains("btn-md"));
     }
 }

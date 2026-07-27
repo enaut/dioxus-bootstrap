@@ -48,6 +48,12 @@ pub struct ListGroupProps {
     /// Use numbered list style.
     #[props(default)]
     pub numbered: bool,
+    /// Container element. Empty (the default) renders `<ul>`, or `<ol>` when
+    /// `numbered`; `"div"` renders Bootstrap's generic `<div class="list-group">`
+    /// form, which is what a list of links or buttons requires — `<a>` and
+    /// `<button>` are not valid children of `<ul>`.
+    #[props(default)]
+    pub tag: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -72,7 +78,14 @@ pub fn ListGroup(props: ListGroupProps) -> Element {
     }
     let full_class = classes.join(" ");
 
-    if props.numbered {
+    // `div` first: the generic form is the one that can hold `<a>`/`<button>`
+    // children, so it must win over the numbered `<ol>` rather than be
+    // unreachable behind it.
+    if props.tag == "div" {
+        rsx! {
+            div { class: "{full_class}", ..props.attributes, {props.children} }
+        }
+    } else if props.numbered {
         rsx! {
             ol { class: "{full_class}", ..props.attributes, {props.children} }
         }
@@ -98,6 +111,11 @@ pub struct ListGroupItemProps {
     /// Click event handler. When set, renders as a button for interactivity.
     #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Item element. Empty (the default) renders `<li>`; `"div"` renders
+    /// `<div class="list-group-item">` for the generic form. Ignored when
+    /// `onclick` is set — an actionable item is always a `<button>`.
+    #[props(default)]
+    pub tag: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -139,6 +157,10 @@ pub fn ListGroupItem(props: ListGroupItemProps) -> Element {
                 ..props.attributes,
                 {props.children}
             }
+        }
+    } else if props.tag == "div" {
+        rsx! {
+            div { class: "{full_class}", ..props.attributes, {props.children} }
         }
     } else {
         rsx! {

@@ -6,6 +6,87 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.6.0] — saying more of what Bootstrap already says
+
+Two Bootstrap components and thirty-one typed additions the crate could not
+previously express. Everything here is additive: nothing was removed or
+renamed, every new prop defaults to the behaviour that was already rendered,
+and no existing call site changes its output. The version is a minor bump
+because the public API grew, not because anything moved.
+
+The through-line is a single test: *does Bootstrap 5.3 define this?* Where the
+answer is yes and the crate had no way to say it, a caller's only recourse was
+hand-written Bootstrap markup — which is the thing a typed component exists to
+replace. Where the answer is no, it stayed out, however useful it might be.
+
+### Added
+
+- **`CheckboxButton` and `RadioButton`** — Bootstrap's `btn-check` toggle
+  buttons: a visually hidden input paired with a `<label class="btn …">` whose
+  `for` targets it. These are components in their own right, not styled
+  checkboxes: different markup, different classes, different CSS. `id` is
+  required rather than optional because the `for`/`id` pair *is* the mechanism —
+  a mismatched pair renders correctly and does nothing when clicked. Several
+  `RadioButton`s sharing a `name` inside a `ButtonGroup` are Bootstrap's
+  segmented control.
+- **`BadgeFill`** — which colour idiom a badge uses. Bootstrap 5.3 offers three
+  and they are not interchangeable: `text-bg-*` (background plus contrasting
+  foreground, the default and still the default here), `bg-*` (background only,
+  text colour inherited), and the `bg-*-subtle` / `text-*-emphasis` pair, which
+  is one idiom rather than two utilities — the subtle background is unreadable
+  without its matching foreground. `BadgeFill::None` emits the chip geometry
+  alone, for a caller painting the background itself.
+- **`NavbarContainer`** — `container-fluid` (the default, unchanged),
+  `container`, or no container element at all. The gutter belongs to the
+  container, so a navbar that supplies its own padding must be able to omit the
+  wrapper rather than merely blank its class.
+- **`Alert { heading }`** — Bootstrap's `.alert-heading`, documented for exactly
+  this case: a titled callout whose heading inherits the alert's colour.
+- **`Modal { header }`** — rich header content in place of the plain `title`
+  string, matching the slot `Card` already has. Bootstrap's `.modal-header`
+  holds arbitrary markup; a `String` cannot express an icon beside a title.
+- **`Modal { content_class, header_class, body_class, footer_class }`** — the
+  four inner elements a caller most often needs to reach. `Card` already carried
+  the equivalent set.
+- **`Card { body_id, body_style }`** — the card body is the element that
+  scrolls, so it needs to be addressable and to take a computed height no class
+  can name.
+- **`Card { onclick, oncontextmenu }`** — a selectable card without navigating,
+  which the `href` form cannot give.
+- **`ListGroup { tag }` and `ListGroupItem { tag }`** — Bootstrap's generic
+  `<div class="list-group">` form alongside the `<ul>`/`<ol>` one. Not a style
+  preference: `<a>` and `<button>` are not valid children of `<ul>`, so a list
+  of links was previously unexpressible.
+- **`Button { rel, role, onmousedown }`** — `rel` is what makes
+  `target: "_blank"` safe; `role` overrides the `role="button"` a link-button
+  renders by default, and has to be a prop because the attribute spread is
+  appended rather than merged, so a `role` passed that way emitted
+  `role="button" role="link"` and HTML kept the first — the override was
+  discarded while looking exactly like it worked; `onmousedown` is a listener,
+  and `GlobalAttributes` carries attributes only.
+- **`Input { step, accept, autocorrect }`** — `step` is the third of the
+  `min`/`max` triple, `accept` belongs to a file input, and `autocorrect` is not
+  a global attribute.
+- **`Textarea { autocomplete, autocorrect }`** — the attributes a compose box
+  most often needs turned off.
+- **`ProgressBar { children }`** — a label Bootstrap permits but `show_label`
+  cannot express ("3 of 7", a unit, an icon). Takes precedence over
+  `show_label`.
+- **`TabList { content_style }`** — the inline-style sibling of the existing
+  `content_class`, for a `max-height` that makes the panel scroll.
+- **`ToastContainer { positioned }`** — defaults to `true`, unchanged. Set it
+  false when the host's own CSS places the stack: `position-fixed` and its
+  offsets are `!important` utilities and would otherwise win, pinning the
+  container to the viewport instead of leaving it where the page put it.
+- **`BreadcrumbItem { onclick }`** — a breadcrumb in a single-page app
+  navigates by handler rather than by `href`.
+
+### Notes
+
+`Badge`'s and `ToastContainer`'s class composition moved into named functions
+(`badge_class`, `toast_container_class`) so the new idioms are asserted directly
+rather than through a render. Output is unchanged; the tests are new.
+
 ## [0.5.16] — this repository is the origin, not a mirror
 
 ### Changed
