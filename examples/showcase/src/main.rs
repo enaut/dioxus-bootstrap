@@ -11,7 +11,8 @@ fn app() -> Element {
 
     rsx! {
         ThemeProvider { theme: theme }
-        BootstrapHead {}
+        // Bundled assets are the defaults; passed explicitly so the props are exercised.
+        BootstrapHead { css: BootstrapCss::Bundled, icons: BootstrapIcons::Bundled }
         NavbarDemo { theme: theme }
         Container { class: "py-4",
             h1 { class: "mb-4", "dioxus-bootstrap Showcase" }
@@ -22,6 +23,16 @@ fn app() -> Element {
             TabList {
                 active: active_tab,
                 tabs: vec![
+                    TabDef {
+                        label: "New in 0.6.0".into(),
+                        icon: Some("stars".into()),
+                        content: rsx! { WhatsNewSection {} },
+                    },
+                    TabDef {
+                        label: "Coverage".into(),
+                        icon: Some("check2-all".into()),
+                        content: rsx! { CoverageSection {} },
+                    },
                     TabDef {
                         label: "Basics".into(),
                         icon: Some("grid".into()),
@@ -1163,6 +1174,8 @@ fn NavigationSection() -> Element {
                 }
                 Col { md: ColumnSize::Span(6),
                     Scrollspy {
+                        smooth_scroll: true,
+                        threshold: vec![0.0, 0.25, 0.5, 1.0],
                         target: "#scrollspy-custom-nav",
                         root: "#scrollspy-custom-root",
                         active: custom_scrollspy_active,
@@ -1262,6 +1275,1055 @@ fn MoreSection() -> Element {
                     }
                 }
             }
+        }
+    }
+}
+
+// ── What's new in 0.6.0 ─────────────────────────────────────────────────────
+//
+// Every component and prop 0.6.0 added, rendered. The point of this section is
+// that a released feature nobody can see is indistinguishable from one that was
+// never shipped — and because e2e/showcase.spec.ts drives this page in a real
+// browser, everything demonstrated here is also everything covered there.
+
+#[component]
+fn WhatsNewSection() -> Element {
+    let mut checked_bold = use_signal(|| true);
+    let mut checked_italic = use_signal(|| false);
+    let mut radio_choice = use_signal(|| "center".to_string());
+    let mut card_log = use_signal(String::new);
+    let mut badge_clicks = use_signal(|| 0u32);
+    let mut crumb_log = use_signal(String::new);
+    let mut mouse_log = use_signal(String::new);
+    let show_slots = use_signal(|| false);
+    let inner_tab = use_signal(|| 0usize);
+    let mut toast_a = use_signal(|| true);
+    let mut toast_b = use_signal(|| true);
+
+    rsx! {
+        div { class: "mt-3",
+            Alert {
+                color: Color::Info,
+                heading: "New in 0.6.0".to_string(),
+                "Two new components and 27 typed props. Everything below is the additions — "
+                "the other tabs cover the rest of Bootstrap 5.3."
+            }
+
+            // ── Toggle buttons (btn-check) ──────────────────────────────────
+            h3 { class: "mb-2", "Toggle Buttons" }
+            p { class: "text-muted",
+                "Bootstrap's "
+                code { "btn-check" }
+                " idiom: a visually-hidden checkbox or radio paired with a "
+                code { "<label class=\"btn\">" }
+                ". Keyboard-focusable and screen-reader-correct, unlike a button that only looks pressed."
+            }
+
+            h5 { class: "mt-3", "CheckboxButton — independent toggles" }
+            div { class: "d-flex flex-wrap gap-2 mb-2",
+                CheckboxButton {
+                    id: "nw-chk-bold",
+                    label: "Bold".to_string(),
+                    color: Color::Primary,
+                    checked: checked_bold(),
+                    onchange: move |_| checked_bold.set(!checked_bold()),
+                }
+                CheckboxButton {
+                    id: "nw-chk-italic",
+                    label: "Italic".to_string(),
+                    color: Color::Primary,
+                    outline: true,
+                    checked: checked_italic(),
+                    onchange: move |_| checked_italic.set(!checked_italic()),
+                }
+                CheckboxButton {
+                    id: "nw-chk-sm",
+                    label: "Small".to_string(),
+                    color: Color::Secondary,
+                    size: Size::Sm,
+                    name: "nw-opts",
+                    value: "small",
+                    autocomplete: "off",
+                    class: "text-uppercase",
+                }
+                CheckboxButton {
+                    id: "nw-chk-lg",
+                    label: "Large".to_string(),
+                    color: Color::Success,
+                    size: Size::Lg,
+                }
+                CheckboxButton {
+                    id: "nw-chk-disabled",
+                    label: "Disabled".to_string(),
+                    color: Color::Dark,
+                    disabled: true,
+                }
+            }
+            p { class: "small text-muted mb-4",
+                "Bold is " strong { if checked_bold() { "on" } else { "off" } }
+                ", italic is " strong { if checked_italic() { "on" } else { "off" } } "."
+            }
+
+            h5 { "RadioButton — one of a group" }
+            p { class: "text-muted small",
+                "Grouped by a shared " code { "name" } "; each carries its own " code { "value" } "."
+            }
+            div { class: "d-flex flex-wrap gap-2 mb-2",
+                RadioButton {
+                    id: "nw-radio-start",
+                    name: "nw-align",
+                    value: "start",
+                    label: "Start".to_string(),
+                    color: Color::Info,
+                    outline: true,
+                    checked: radio_choice() == "start",
+                    onchange: move |_| radio_choice.set("start".to_string()),
+                }
+                RadioButton {
+                    id: "nw-radio-center",
+                    name: "nw-align",
+                    value: "center",
+                    label: "Center".to_string(),
+                    color: Color::Info,
+                    outline: true,
+                    checked: radio_choice() == "center",
+                    onchange: move |_| radio_choice.set("center".to_string()),
+                }
+                RadioButton {
+                    id: "nw-radio-end",
+                    name: "nw-align",
+                    value: "end",
+                    label: "End".to_string(),
+                    color: Color::Info,
+                    outline: true,
+                    autocomplete: "off",
+                    class: "fst-italic",
+                    checked: radio_choice() == "end",
+                    onchange: move |_| radio_choice.set("end".to_string()),
+                }
+                RadioButton {
+                    id: "nw-radio-justify",
+                    name: "nw-align",
+                    value: "justify",
+                    label: "Justify (disabled, large)".to_string(),
+                    color: Color::Info,
+                    outline: true,
+                    size: Size::Lg,
+                    disabled: true,
+                }
+            }
+            p { class: "small text-muted mb-4", "Selected: " strong { "{radio_choice}" } }
+
+            // ── Button additions ────────────────────────────────────────────
+            h3 { class: "mb-2", "Button — link, plain, rel, role, onmousedown" }
+            div { class: "d-flex flex-wrap gap-2 align-items-center mb-2",
+                Button { color: Color::Primary, link: true, "Link style" }
+                Button { plain: true, "Plain (no variant)" }
+                Button { plain: true, size: Size::Sm, class: "border", "Plain small" }
+                Button {
+                    href: "https://getbootstrap.com/",
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    color: Color::Secondary,
+                    outline: true,
+                    Icon { name: "box-arrow-up-right", class: "me-1" }
+                    "rel=noopener"
+                }
+                Button { color: Color::Dark, role: "switch", "role=switch" }
+                Button {
+                    color: Color::Warning,
+                    onmousedown: move |_| mouse_log.set("mousedown fired before click".to_string()),
+                    "onmousedown"
+                }
+            }
+            p { class: "small text-muted mb-4",
+                if mouse_log().is_empty() { "Press the last button to see onmousedown fire." } else { "{mouse_log}" }
+            }
+
+            // ── Badge fill ──────────────────────────────────────────────────
+            h3 { class: "mb-2", "Badge — fill and onclick" }
+            p { class: "text-muted",
+                code { "BadgeFill::TextBg" }
+                " (the default) emits "
+                code { "text-bg-*" }
+                ", which sets a contrasting foreground as well as the background. "
+                code { "BadgeFill::Bg" }
+                " emits the plain "
+                code { "bg-*" }
+                " for markup that sets its own text colour."
+            }
+            div { class: "d-flex flex-wrap gap-2 align-items-center mb-2",
+                Badge { color: Color::Primary, "text-bg (default)" }
+                Badge { color: Color::Primary, fill: BadgeFill::Bg, "bg only" }
+                Badge { color: Color::Warning, "text-bg warning" }
+                Badge { color: Color::Warning, fill: BadgeFill::Bg, "bg warning" }
+                Badge { color: Color::Success, pill: true, "pill" }
+                Badge {
+                    color: Color::Danger,
+                    class: "user-select-none",
+                    onclick: move |_| badge_clicks += 1,
+                    Icon { name: "hand-index", class: "me-1" }
+                    "clicked {badge_clicks}×"
+                }
+            }
+            p { class: "small text-muted mb-4",
+                "The two fills differ most on light backgrounds — compare the warning pair."
+            }
+
+            // ── Card additions ──────────────────────────────────────────────
+            h3 { class: "mb-2", "Card — link, ids, styles, click handlers" }
+            Row { class: "g-3 mb-2",
+                Col { md: ColumnSize::Span(4),
+                    Card {
+                        href: "https://getbootstrap.com/",
+                        target: "_blank",
+                        class: "h-100",
+                        header: rsx! { strong { "Whole card is a link" } },
+                        body: rsx! {
+                            p { class: "mb-0", "Rendered as an anchor wrapping the card." }
+                        },
+                    }
+                }
+                Col { md: ColumnSize::Span(4),
+                    Card {
+                        class: "h-100",
+                        header_class: "bg-primary-subtle fw-semibold",
+                        body_class: "small",
+                        footer_class: "text-muted small",
+                        header: rsx! { "Per-slot classes" },
+                        body: rsx! { "header_class, body_class and footer_class each target one slot." },
+                        footer: rsx! { "footer_class" },
+                    }
+                }
+                Col { md: ColumnSize::Span(4),
+                    Card {
+                        class: "h-100",
+                        body_id: "nw-card-body",
+                        body_style: "border-left: 4px solid var(--bs-info);",
+                        onclick: move |_| card_log.set("card clicked".to_string()),
+                        oncontextmenu: move |_| card_log.set("card right-clicked".to_string()),
+                        body: rsx! {
+                            p { class: "mb-1", "body_id + body_style, and both click handlers." }
+                            p { class: "mb-0 small text-muted", "Try left- and right-clicking." }
+                        },
+                    }
+                }
+            }
+            p { class: "small text-muted mb-4",
+                if card_log().is_empty() { "No card interaction yet." } else { "{card_log}" }
+            }
+
+            // ── Alert heading ───────────────────────────────────────────────
+            h3 { class: "mb-2", "Alert — heading" }
+            Alert {
+                color: Color::Success,
+                heading: "Well done".to_string(),
+                "The heading renders as a proper "
+                code { "alert-heading" }
+                " element above the body, rather than being hand-rolled inside it."
+            }
+            Alert {
+                color: Color::Warning,
+                heading: "Dismissible with a heading".to_string(),
+                dismissible: true,
+                "Both features compose."
+            }
+
+            // ── List group ──────────────────────────────────────────────────
+            h3 { class: "mb-2 mt-4", "ListGroup — tag and numbered" }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(6),
+                    p { class: "small text-muted mb-1",
+                        code { "numbered: true" } " with " code { "tag: \"ol\"" }
+                        " — a real ordered list, so the numbers are semantic."
+                    }
+                    ListGroup {
+                        numbered: true,
+                        tag: "ol",
+                        ListGroupItem { tag: "li", "First" }
+                        ListGroupItem { tag: "li", "Second" }
+                        ListGroupItem { tag: "li", "Third" }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    p { class: "small text-muted mb-1",
+                        "Default " code { "div" } " rendering, with a flush variant."
+                    }
+                    ListGroup {
+                        flush: true,
+                        ListGroupItem { active: true, "Active" }
+                        ListGroupItem { color: Some(Color::Success), "Success" }
+                        ListGroupItem { disabled: true, "Disabled" }
+                    }
+                }
+            }
+
+            // ── Breadcrumb onclick ──────────────────────────────────────────
+            h3 { class: "mb-2", "BreadcrumbItem — onclick" }
+            Breadcrumb {
+                BreadcrumbItem {
+                    href: "#",
+                    onclick: move |_| crumb_log.set("navigated: Home".to_string()),
+                    "Home"
+                }
+                BreadcrumbItem {
+                    href: "#",
+                    onclick: move |_| crumb_log.set("navigated: Library".to_string()),
+                    "Library"
+                }
+                BreadcrumbItem { active: true, "Data" }
+            }
+            p { class: "small text-muted mb-4",
+                if crumb_log().is_empty() { "Click a crumb — the handler fires without a page load." } else { "{crumb_log}" }
+            }
+
+            // ── Navbar container ────────────────────────────────────────────
+            h3 { class: "mb-2", "Navbar — container" }
+            p { class: "text-muted",
+                "Controls the wrapper Bootstrap puts inside the navbar: a fixed-width "
+                code { "container" } ", a " code { "container-fluid" } ", or none at all."
+            }
+            div { class: "border rounded mb-2 overflow-hidden",
+                Navbar {
+                    color: Some(Color::Dark),
+                    container: NavbarContainer::Fluid,
+                    class: "position-static",
+                    brand: rsx! { span { class: "navbar-brand mb-0", "container-fluid" } },
+                }
+            }
+            div { class: "border rounded mb-4 overflow-hidden",
+                Navbar {
+                    color: Some(Color::Primary),
+                    container: NavbarContainer::None,
+                    class: "position-static px-3",
+                    brand: rsx! { span { class: "navbar-brand mb-0", "no container" } },
+                }
+            }
+
+            // ── Modal slot classes ──────────────────────────────────────────
+            h3 { class: "mb-2", "Modal — custom header and per-slot classes" }
+            p { class: "text-muted",
+                code { "header" } " replaces the default title bar entirely; "
+                code { "content_class" } ", " code { "header_class" } ", "
+                code { "body_class" } " and " code { "footer_class" }
+                " style each region without wrapping it."
+            }
+            ModalSlotsDemo { show: show_slots }
+            p { class: "mb-4" }
+
+            // ── TabList ─────────────────────────────────────────────────────
+            h3 { class: "mb-2", "TabList — fill, justified, content styling" }
+            TabList {
+                active: inner_tab,
+                fill: true,
+                content_class: "border border-top-0 rounded-bottom p-3",
+                content_style: "min-height: 6rem; background: var(--bs-tertiary-bg);",
+                tabs: vec![
+                    TabDef {
+                        label: "One".into(),
+                        icon: Some("1-circle".into()),
+                        content: rsx! { p { class: "mb-0", "content_style sets the panel background and a minimum height." } },
+                    },
+                    TabDef {
+                        label: "Two".into(),
+                        icon: Some("2-circle".into()),
+                        content: rsx! { p { class: "mb-0", "fill spreads the tabs across the full width." } },
+                    },
+                    TabDef {
+                        label: "Three".into(),
+                        icon: None,
+                        content: rsx! { p { class: "mb-0", "content_class styles the panel itself." } },
+                    },
+                ],
+            }
+
+            // ── Toast positioned ────────────────────────────────────────────
+            h3 { class: "mb-2 mt-4", "ToastContainer — positioned" }
+            p { class: "text-muted",
+                code { "positioned: false" }
+                " drops the "
+                code { "position-fixed" }
+                " and placement utilities so the host's own CSS can win. Note that Bootstrap's base "
+                code { ".toast-container" }
+                " rule is still "
+                code { "position: absolute" }
+                " — so to place the stack in normal document flow you supply that yourself, as this "
+                "example does with " code { "position-static" } ". Dropping the utilities is the prop's "
+                "job; choosing the replacement is yours."
+            }
+            div { class: "border rounded p-3 mb-4",
+                ToastContainer {
+                    positioned: false,
+                    class: "gap-2 position-static",
+                    Toast {
+                        show: toast_a,
+                        title: "Inline".to_string(),
+                        autohide: false,
+                        "This stack is in the document flow."
+                    }
+                    Toast {
+                        show: toast_b,
+                        title: "Second".to_string(),
+                        subtitle: "no overlay".to_string(),
+                        color: Some(Color::Success),
+                        autohide: false,
+                        "Stacked underneath, not overlaid."
+                    }
+                }
+            }
+            Button {
+                color: Color::Secondary,
+                outline: true,
+                size: Size::Sm,
+                class: "mb-4",
+                onclick: move |_| { toast_a.set(true); toast_b.set(true); },
+                "Restore both toasts"
+            }
+
+            // ── Input / Textarea additions ──────────────────────────────────
+            h3 { class: "mb-2", "Input and Textarea — typed attributes and events" }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(4),
+                    FormGroup { label: "Number with step/min/max".to_string(),
+                        Input {
+                            r#type: "number",
+                            step: "0.25",
+                            min: "0",
+                            max: "10",
+                            value: "2.5",
+                        }
+                    }
+                }
+                Col { md: ColumnSize::Span(4),
+                    FormGroup { label: "File with accept".to_string(),
+                        Input { r#type: "file", accept: "image/png,image/jpeg" }
+                    }
+                }
+                Col { md: ColumnSize::Span(4),
+                    FormGroup { label: "autocorrect / autocomplete".to_string(),
+                        Input {
+                            placeholder: "no autocorrect",
+                            autocorrect: "off",
+                            autocomplete: "off",
+                        }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Textarea with typed attributes".to_string(),
+                        Textarea {
+                            rows: 3,
+                            placeholder: "autocomplete and autocorrect are typed props",
+                            autocomplete: "off",
+                            autocorrect: "off",
+                        }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Readonly and disabled".to_string(),
+                        Textarea { rows: 3, readonly: true, value: "readonly" }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ModalSlotsDemo(show: Signal<bool>) -> Element {
+    let mut show = show;
+    rsx! {
+        Button { color: Color::Primary, onclick: move |_| show.set(true), "Open slotted modal" }
+        Modal {
+            show: show,
+            size: ModalSize::Lg,
+            scrollable: true,
+            content_class: "border border-primary",
+            header_class: "bg-primary-subtle",
+            body_class: "bg-body-tertiary",
+            footer_class: "justify-content-between",
+            header: rsx! {
+                div { class: "d-flex align-items-center gap-2",
+                    Icon { name: "stars", class: "text-primary" }
+                    strong { "A fully custom header" }
+                    Badge { color: Color::Primary, fill: BadgeFill::Bg, "0.6.0" }
+                }
+            },
+            body: rsx! {
+                p { "The header slot replaces the default title bar, so it can hold anything." }
+                p { class: "mb-0",
+                    "Each region also takes its own class prop, which is how the border, "
+                    "tinted header and split footer below are done."
+                }
+            },
+            footer: rsx! {
+                span { class: "small text-muted", "footer_class: justify-content-between" }
+                Button { color: Color::Primary, onclick: move |_| show.set(false), "Done" }
+            },
+        }
+    }
+}
+
+// ── Complete prop coverage ──────────────────────────────────────────────────
+//
+// The props the themed sections above do not reach. This exists so the site can
+// answer "does it support X" by showing X rather than by a reader inferring it
+// from a type signature, and so the browser suite covers them.
+//
+// Two props are deliberately absent, and the reason is recorded rather than left
+// to look like an oversight:
+//
+//   BootstrapThemeProvider { theme } injects a global <style> overriding
+//   Bootstrap's colour variables. Demonstrating it here would recolour the whole
+//   page; demonstrating it with an empty theme would render nothing at all, and a
+//   demo that behaves identically whether or not the feature works is not
+//   evidence the feature works. It belongs in a dedicated example, not a section.
+
+#[component]
+fn CoverageSection() -> Element {
+    let mut event_log = use_signal(String::new);
+    let mut click_log = use_signal(String::new);
+    let acc_open = use_signal(|| Some(0usize));
+    let carousel = use_signal(|| 0usize);
+    let collapse_h = use_signal(|| false);
+    let drop_up = use_signal(|| false);
+    let drop_end = use_signal(|| false);
+    let page = use_signal(|| 3usize);
+    let oc_top = use_signal(|| false);
+    let oc_bottom = use_signal(|| false);
+    let oc_responsive = use_signal(|| false);
+    let mut check_a = use_signal(|| false);
+    let mut switch_on = use_signal(|| true);
+    let mut radio_pick = use_signal(|| "a".to_string());
+    let mut range_val = use_signal(|| "40".to_string());
+    let mut select_val = use_signal(|| "two".to_string());
+    let toast_timed = use_signal(|| false);
+    let modal_strict = use_signal(|| false);
+    let nested_tab = use_signal(|| 0usize);
+    let theme_local = use_signal(|| Theme::Dark);
+
+    rsx! {
+        div { class: "mt-3",
+            p { class: "lead",
+                "Everything not covered by the themed tabs. If a prop exists, it renders here."
+            }
+
+            // ── Layout ──────────────────────────────────────────────────────
+            h3 { class: "mb-2", "Layout" }
+            h5 { "Container — fluid" }
+            Container { fluid: true, class: "bg-primary-subtle border rounded py-2 mb-3",
+                "container-fluid spans the full width at every breakpoint."
+            }
+
+            h5 { "Col — every breakpoint, offset and order" }
+            Row { class: "g-2 mb-2",
+                Col { xs: ColumnSize::Span(6), sm: ColumnSize::Span(4), xl: ColumnSize::Span(3), xxl: ColumnSize::Span(2),
+                    div { class: "p-2 bg-body-tertiary border rounded small", "xs-6 sm-4 xl-3 xxl-2" }
+                }
+                Col { xs: ColumnSize::Span(6), sm: ColumnSize::Span(8), xl: ColumnSize::Span(9), xxl: ColumnSize::Span(10),
+                    div { class: "p-2 bg-body-tertiary border rounded small", "the complement" }
+                }
+            }
+            Row { class: "g-2 mb-2",
+                Col { md: ColumnSize::Span(4), offset: Some(4), offset_sm: Some(2), offset_lg: Some(4),
+                    div { class: "p-2 bg-success-subtle border rounded small", "offset + offset_sm + offset_lg" }
+                }
+                Col { md: ColumnSize::Span(4), offset_xl: Some(0), offset_xxl: Some(0),
+                    div { class: "p-2 bg-success-subtle border rounded small", "offset_xl / offset_xxl" }
+                }
+            }
+            Row { class: "g-2 mb-4",
+                Col { md: ColumnSize::Span(4), order: Some(3), order_sm: Some(3), order_lg: Some(3),
+                    div { class: "p-2 bg-warning-subtle border rounded small", "order 3 (renders last)" }
+                }
+                Col { md: ColumnSize::Span(4), order: Some(1), order_md: Some(1),
+                    div { class: "p-2 bg-warning-subtle border rounded small", "order 1 (renders first)" }
+                }
+                Col { md: ColumnSize::Span(4), order: Some(2),
+                    div { class: "p-2 bg-warning-subtle border rounded small", "order 2" }
+                }
+            }
+
+            // ── Collapse / Accordion ────────────────────────────────────────
+            h3 { class: "mb-2", "Collapse and Accordion" }
+            CollapseHorizontalDemo { expanded: collapse_h }
+            h5 { class: "mt-3", "Accordion — flush" }
+            Accordion { open: acc_open, flush: true, class: "mb-4 border rounded",
+                AccordionItem { index: 0, open: acc_open, title: "Flush removes the outer borders".to_string(),
+                    "Useful when the accordion sits inside a card or list group."
+                }
+                AccordionItem { index: 1, open: acc_open, title: "Second item".to_string(),
+                    "Only one panel opens at a time."
+                }
+            }
+
+            // ── Tables ──────────────────────────────────────────────────────
+            h3 { class: "mb-2", "Table — borderless, size, colour" }
+            Table { borderless: true, size: Size::Sm, color: Some(Color::Dark), hover: true,
+                caption: "borderless + sm + dark".to_string(), caption_top: true,
+                thead { tr { th { "Prop" } th { "Effect" } } }
+                tbody {
+                    tr { td { "borderless" } td { "drops every rule" } }
+                    tr { td { "size: Sm" } td { "table-sm, tighter padding" } }
+                    tr { td { "color" } td { "table-dark and friends" } }
+                }
+            }
+
+            // ── Dropdowns ───────────────────────────────────────────────────
+            h3 { class: "mb-2 mt-4", "Dropdown — direction, toggle_class, item states" }
+            div { class: "d-flex flex-wrap gap-3 mb-3",
+                Dropdown {
+                    open: drop_up,
+                    direction: DropDirection::Up,
+                    toggle_class: "fw-bold",
+                    color: Some(Color::Secondary),
+                    toggle: rsx! { "Drops up" },
+                    menu: rsx! {
+                        DropdownItem { active: true, "Active item" }
+                        DropdownItem {
+                            onclick: move |_| click_log.set("dropdown item clicked".to_string()),
+                            "With onclick"
+                        }
+                        DropdownItem { disabled: true, "Disabled" }
+                    },
+                }
+                Dropdown {
+                    open: drop_end,
+                    direction: DropDirection::End,
+                    color: Some(Color::Info),
+                    toggle: rsx! { "Drops end" },
+                    menu: rsx! {
+                        DropdownItem { href: "https://getbootstrap.com/", target: "_blank", "External link" }
+                    },
+                }
+            }
+            h5 { "DropdownMenu — standalone, always shown, end-aligned" }
+            div { class: "position-relative border rounded p-3 mb-4", style: "min-height: 9rem;",
+                DropdownMenu { show: true, align_end: true, class: "position-static d-inline-block",
+                    DropdownItem { "align_end + show" }
+                    DropdownItem { "rendered without a toggle" }
+                }
+            }
+
+            // ── Form controls ───────────────────────────────────────────────
+            h3 { class: "mb-2", "Form controls — disabled, sizes, events" }
+            Row { class: "g-3 mb-3",
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Input events (focus, type, blur)".to_string(),
+                        Input {
+                            placeholder: "watch the log below",
+                            list: "nw-suggestions",
+                            onfocus: move |_| event_log.set("onfocus".to_string()),
+                            onblur: move |_| event_log.set("onblur".to_string()),
+                            onchange: move |_| event_log.set("onchange".to_string()),
+                            onkeydown: move |_| event_log.set("onkeydown".to_string()),
+                            onkeyup: move |_| event_log.set("onkeyup".to_string()),
+                        }
+                    }
+                    datalist { id: "nw-suggestions",
+                        option { value: "alpha" }
+                        option { value: "beta" }
+                        option { value: "gamma" }
+                    }
+                    p { class: "small text-muted",
+                        "Last event: " strong { if event_log().is_empty() { "—" } else { "{event_log}" } }
+                        " · the " code { "list" } " prop wires the datalist."
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Uncontrolled, readonly, disabled".to_string(),
+                        Input { uncontrolled: true, value: "uncontrolled — type freely", class: "mb-2" }
+                        Input { readonly: true, value: "readonly", class: "mb-2" }
+                        Input { disabled: true, value: "disabled" }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Textarea — size, events, uncontrolled".to_string(),
+                        Textarea {
+                            rows: 2,
+                            size: Size::Sm,
+                            uncontrolled: true,
+                            placeholder: "small, uncontrolled",
+                            onfocus: move |_| event_log.set("textarea onfocus".to_string()),
+                            onblur: move |_| event_log.set("textarea onblur".to_string()),
+                            onchange: move |_| event_log.set("textarea onchange".to_string()),
+                            onkeydown: move |_| event_log.set("textarea onkeydown".to_string()),
+                            onkeyup: move |_| event_log.set("textarea onkeyup".to_string()),
+                        }
+                        Textarea { rows: 2, disabled: true, value: "disabled", class: "mt-2" }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    FormGroup { label: "Select — size and disabled".to_string(),
+                        Select {
+                            value: "{select_val}",
+                            size: Size::Lg,
+                            onchange: move |e: FormEvent| select_val.set(e.value()),
+                            class: "mb-2",
+                            option { value: "one", "Large select — one" }
+                            option { value: "two", "Large select — two" }
+                        }
+                        Select { disabled: true,
+                            option { "Disabled select" }
+                        }
+                    }
+                }
+            }
+            div { class: "d-flex flex-wrap gap-4 mb-4",
+                div {
+                    Checkbox {
+                        checked: check_a(),
+                        input_id: "cov-check",
+                        label: "Checkbox with input_id + onclick".to_string(),
+                        onchange: move |_| check_a.set(!check_a()),
+                        onclick: move |_| click_log.set("checkbox onclick".to_string()),
+                    }
+                    Checkbox { checked: false, label: "Disabled checkbox".to_string(), disabled: true }
+                }
+                div {
+                    Radio {
+                        name: "cov-radio",
+                        checked: radio_pick() == "a",
+                        label: "Radio A".to_string(),
+                        onchange: move |_| radio_pick.set("a".to_string()),
+                    }
+                    Radio {
+                        name: "cov-radio",
+                        checked: radio_pick() == "b",
+                        label: "Radio B".to_string(),
+                        onchange: move |_| radio_pick.set("b".to_string()),
+                    }
+                    Radio { name: "cov-radio", checked: false, label: "Disabled".to_string(), disabled: true }
+                }
+                div {
+                    Switch {
+                        checked: switch_on(),
+                        label: "Switch".to_string(),
+                        onchange: move |_| switch_on.set(!switch_on()),
+                    }
+                    Switch { checked: false, label: "Disabled switch".to_string(), disabled: true }
+                }
+            }
+            h5 { "Range — step and disabled" }
+            div { class: "mb-4",
+                Range {
+                    value: "{range_val}",
+                    min: "0",
+                    max: "100",
+                    step: "10",
+                    oninput: move |e: FormEvent| range_val.set(e.value()),
+                }
+                p { class: "small text-muted mb-1", "step 10 → value {range_val}" }
+                Range { value: "50", disabled: true }
+            }
+
+            // ── Buttons / list group ────────────────────────────────────────
+            h3 { class: "mb-2", "ButtonGroup size, ListGroupItem onclick" }
+            ButtonGroup { size: Size::Lg, class: "mb-2",
+                Button { color: Color::Primary, "Large" }
+                Button { color: Color::Primary, "Group" }
+            }
+            ButtonGroup { size: Size::Sm, class: "mb-3 ms-2",
+                Button { color: Color::Secondary, "Small" }
+                Button { color: Color::Secondary, "Group" }
+            }
+            ListGroup { class: "mb-4",
+                ListGroupItem {
+                    onclick: move |_| click_log.set("list item clicked".to_string()),
+                    "Clickable list item"
+                }
+                ListGroupItem { "Inert list item" }
+            }
+            p { class: "small text-muted mb-4",
+                "Click log: " strong { if click_log().is_empty() { "—" } else { "{click_log}" } }
+            }
+
+            // ── Pagination ──────────────────────────────────────────────────
+            h3 { class: "mb-2", "Pagination — window and show_prev_next" }
+            Pagination { current: page, total: 20, window: 3, class: "mb-2" }
+            Pagination { current: page, total: 20, window: 7, show_prev_next: false, size: Size::Sm, class: "mb-4" }
+
+            // ── Placeholders ────────────────────────────────────────────────
+            h3 { class: "mb-2", "Placeholder — size, tag, wave and glow" }
+            div { class: "mb-2",
+                Placeholder { width: 6, size: Size::Lg, tag: "span", color: Some(Color::Primary), class: "me-2" }
+                Placeholder { width: 4, size: Size::Sm, tag: "span", color: Some(Color::Secondary) }
+            }
+            div { class: "mb-2", PlaceholderParagraph { lines: 3, glow: true } }
+            div { class: "mb-4", PlaceholderParagraph { lines: 2, wave: true } }
+
+            // ── Figure ──────────────────────────────────────────────────────
+            h3 { class: "mb-2", "Figure — thumbnail, fluid, caption alignment" }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(6),
+                    Figure {
+                        src: "{showcase_svg(320, 160, \"%230d6efd\", \"thumbnail\")}",
+                        alt: "Thumbnail figure",
+                        caption: "thumbnail + img_class, caption end-aligned".to_string(),
+                        caption_align: "end",
+                        thumbnail: true,
+                        img_class: "border border-primary",
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    Figure {
+                        src: "{showcase_svg(320, 160, \"%23198754\", \"fluid\")}",
+                        alt: "Fluid figure",
+                        caption: "fluid scales to the column".to_string(),
+                        caption_align: "center",
+                        fluid: true,
+                    }
+                }
+            }
+
+            // ── Offcanvas ───────────────────────────────────────────────────
+            h3 { class: "mb-2", "Offcanvas — placement and behaviour flags" }
+            OffcanvasDemos { top: oc_top, bottom: oc_bottom, responsive: oc_responsive }
+
+            // ── Overlays ────────────────────────────────────────────────────
+            h3 { class: "mb-2 mt-4", "Tooltip and Popover — offset, delay, disabled triggers" }
+            p { class: "text-muted",
+                "The " code { "open" } " prop, which pins an overlay open without an interaction, is "
+                "deliberately not demonstrated here: a forced-open overlay is currently rendered without "
+                "its position being computed, so it lands at a default viewport coordinate rather than "
+                "against its trigger. Showing it would put a floating box over unrelated content. "
+                "Everything else on these two components is below."
+            }
+            div { class: "d-flex flex-wrap gap-3 align-items-center mb-3",
+                Tooltip {
+                    text: "Offset 16px away from the trigger".to_string(),
+                    offset: OverlayOffset { skidding: 0.0, distance: 16.0 },
+                    delay: TooltipDelay { show_ms: 300, hide_ms: 100 },
+                    boundary_padding: 12.0,
+                    Button { color: Color::Secondary, outline: true, "offset + delay" }
+                }
+                TooltipDisabledTrigger { style: "display:inline-block;",
+                    Button { color: Color::Secondary, disabled: true, "disabled + tooltip" }
+                }
+            }
+            div { class: "d-flex flex-wrap gap-3 align-items-center mb-4",
+                Popover {
+                    title: "Offset and delay".to_string(),
+                    body: rsx! { "Pushed 20px out, with show/hide delays." },
+                    offset: OverlayOffset { skidding: 0.0, distance: 20.0 },
+                    delay: PopoverDelay { show_ms: 200, hide_ms: 150 },
+                    boundary_padding: 16.0,
+                    dismiss_on_outside_click: true,
+                    Button { color: Color::Primary, outline: true, "offset + delay" }
+                }
+                PopoverDisabledTrigger { style: "display:inline-block;",
+                    Button { color: Color::Primary, disabled: true, "disabled + popover" }
+                }
+            }
+
+            // ── Carousel ────────────────────────────────────────────────────
+            h3 { class: "mb-2", "Carousel — fade, dark, indicators, controls" }
+            Carousel {
+                active: carousel,
+                fade: true,
+                dark: true,
+                indicators: true,
+                controls: true,
+                class: "mb-4 border rounded overflow-hidden",
+                slides: vec![
+                    CarouselSlide {
+                        src: showcase_svg(960, 320, "%230d6efd", "fade"),
+                        alt: "Fade transition slide".into(),
+                        caption_title: Some("Fade transition".into()),
+                        caption_text: Some("fade: true crossfades instead of sliding.".into()),
+                    },
+                    CarouselSlide {
+                        src: showcase_svg(960, 320, "%23198754", "dark"),
+                        alt: "Dark controls slide".into(),
+                        caption_title: Some("Dark controls".into()),
+                        caption_text: Some("dark: true darkens the indicators and arrows.".into()),
+                    },
+                ],
+            }
+
+            // ── Toast timing / theme toggle / tabs ──────────────────────────
+            h3 { class: "mb-2", "Toast autohide, ThemeToggle colour, TabList justified" }
+            ToastAutohideDemo { show: toast_timed }
+            div { class: "d-flex align-items-center gap-3 my-3",
+                span { class: "small text-muted", "ThemeToggle with an explicit colour:" }
+                ThemeToggle { theme: theme_local, color: Some(Color::Warning) }
+            }
+            TabList {
+                active: nested_tab,
+                justified: true,
+                pills: true,
+                class: "mb-2",
+                tabs: vec![
+                    TabDef { label: "Justified".into(), icon: None, content: rsx! { p { class: "mb-0 small", "justified gives every tab equal width." } } },
+                    TabDef { label: "Pills".into(), icon: None, content: rsx! { p { class: "mb-0 small", "combined with the pills variant." } } },
+                ],
+            }
+
+            // ── Navigation odds and ends ────────────────────────────────────
+            h3 { class: "mb-2 mt-4", "NavLink prevent_default, NavbarNav scroll" }
+            Nav {
+                NavItem {
+                    NavLink {
+                        href: "#",
+                        prevent_default: true,
+                        onclick: move |_| click_log.set("nav link — default prevented".to_string()),
+                        "prevent_default + onclick"
+                    }
+                }
+                NavItem { NavLink { href: "#", disabled: true, "Disabled" } }
+            }
+            div { class: "border rounded mt-2 mb-4 overflow-hidden",
+                Navbar {
+                    color: Some(Color::Dark),
+                    container: NavbarContainer::Fluid,
+                    class: "position-static",
+                    brand: rsx! { span { class: "navbar-brand mb-0", "scrollable nav" } },
+                    NavbarNav { scroll: true, class: "flex-row gap-3",
+                        NavItem { NavLink { href: "#", "One" } }
+                        NavItem { NavLink { href: "#", "Two" } }
+                        NavItem { NavLink { href: "#", "Three" } }
+                    }
+                }
+            }
+
+            // ── Modal behaviour flags ───────────────────────────────────────
+            h3 { class: "mb-2", "Modal — dismissal behaviour" }
+            ModalFlagsDemo { show: modal_strict }
+
+            // ── BootstrapHead defaults, stated explicitly ───────────────────
+            h3 { class: "mb-2", "BootstrapHead — asset sources" }
+            p { class: "text-muted mb-4",
+                code { "BootstrapHead" }
+                " takes " code { "css" } " and " code { "icons" }
+                ", each of which selects bundled assets (the default), a custom URL, or none. "
+                "This page passes the bundled defaults explicitly — see the top of "
+                code { "main.rs" }
+                " — rather than demonstrating an override here, which would change what the whole page loads."
+            }
+        }
+    }
+}
+
+#[component]
+fn CollapseHorizontalDemo(expanded: Signal<bool>) -> Element {
+    let mut expanded = expanded;
+    rsx! {
+        h5 { "Collapse — horizontal" }
+        Button {
+            color: Color::Secondary,
+            outline: true,
+            size: Size::Sm,
+            class: "mb-2",
+            onclick: move |_| expanded.set(!expanded()),
+            "Toggle horizontal collapse"
+        }
+        div { style: "min-height: 4.5rem;",
+            Collapse { expanded: expanded, horizontal: true,
+                div { class: "p-3 bg-body-tertiary border rounded", style: "width: 18rem;",
+                    "Collapses along the horizontal axis rather than the vertical one."
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn OffcanvasDemos(top: Signal<bool>, bottom: Signal<bool>, responsive: Signal<bool>) -> Element {
+    let mut top = top;
+    let mut bottom = bottom;
+    let mut responsive = responsive;
+    rsx! {
+        div { class: "d-flex flex-wrap gap-2",
+            Button { color: Color::Primary, outline: true, onclick: move |_| top.set(true), "Open from top" }
+            Button { color: Color::Primary, outline: true, onclick: move |_| bottom.set(true), "Open from bottom (no backdrop)" }
+            Button { color: Color::Secondary, outline: true, onclick: move |_| responsive.set(true), "Open responsive (md)" }
+        }
+        p { class: "small text-muted mt-2 mb-0",
+            "The responsive one swaps the "
+            code { "offcanvas" }
+            " base class for "
+            code { "offcanvas-md" }
+            ": above the md breakpoint Bootstrap renders it inline rather than as an overlay, "
+            "so on a desktop viewport it appears in the page flow with the backdrop still over it. "
+            "Dismiss it with Escape or the backdrop."
+        }
+        Offcanvas {
+            show: top,
+            title: "placement: Top".to_string(),
+            placement: OffcanvasPlacement::Top,
+            backdrop_close: true,
+            keyboard_close: true,
+            show_close: true,
+            p { class: "mb-0", "backdrop_close, keyboard_close and show_close are all on — backdrop, Escape or the × all dismiss it." }
+        }
+        Offcanvas {
+            show: bottom,
+            title: "placement: Bottom".to_string(),
+            placement: OffcanvasPlacement::Bottom,
+            backdrop: false,
+            backdrop_close: false,
+            keyboard_close: false,
+            show_close: true,
+            on_dismiss: move |_| {},
+            p { class: "mb-0", "No backdrop, and neither the backdrop nor Escape dismisses it — use the close button." }
+        }
+        Offcanvas {
+            show: responsive,
+            title: "responsive: md".to_string(),
+            placement: OffcanvasPlacement::Start,
+            responsive: "md",
+            backdrop_close: true,
+            keyboard_close: true,
+            show_close: true,
+            p { class: "mb-0", "Rendered as offcanvas-md — inline above the breakpoint, an overlay below it." }
+        }
+    }
+}
+
+#[component]
+fn ToastAutohideDemo(show: Signal<bool>) -> Element {
+    let mut show = show;
+    rsx! {
+        Button {
+            color: Color::Success,
+            size: Size::Sm,
+            onclick: move |_| show.set(true),
+            "Show a toast that autohides after 3s"
+        }
+        ToastContainer { positioned: false, class: "mt-2 position-static",
+            Toast {
+                show: show,
+                title: "Autohide".to_string(),
+                autohide: true,
+                delay_ms: 3000,
+                color: Some(Color::Success),
+                "delay_ms: 3000 — this dismisses itself."
+            }
+        }
+    }
+}
+
+#[component]
+fn ModalFlagsDemo(show: Signal<bool>) -> Element {
+    let mut show = show;
+    rsx! {
+        Button { color: Color::Danger, outline: true, onclick: move |_| show.set(true), "Open a strict modal" }
+        Modal {
+            show: show,
+            title: "Strict dismissal".to_string(),
+            backdrop_close: false,
+            keyboard_close: false,
+            show_close: false,
+            body: rsx! {
+                p { "backdrop_close, keyboard_close and show_close are all off." }
+                p { class: "mb-0",
+                    "Clicking the backdrop does nothing, Escape does nothing, and there is no × in "
+                    "the header — the only way out is the button below. This is the shape to use when "
+                    "a dialog must be answered rather than dismissed."
+                }
+            },
+            footer: rsx! {
+                Button { color: Color::Primary, onclick: move |_| show.set(false), "Acknowledge" }
+            },
         }
     }
 }

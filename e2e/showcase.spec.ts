@@ -26,14 +26,14 @@ test.describe("App", () => {
   test("navbar is visible", async ({ page }) => {
     await page.goto("/");
     await waitForApp(page);
-    await expect(page.locator(".navbar")).toBeVisible();
+    await expect(page.locator(".navbar.sticky-top")).toBeVisible();
   });
 
   test("navbar uses navbar-nav structure with separated links", async ({ page }) => {
     await page.goto("/");
     await waitForApp(page);
 
-    const links = page.locator(".navbar .navbar-nav .nav-link");
+    const links = page.locator(".navbar.sticky-top .navbar-nav .nav-link");
     await expect(links).toHaveCount(2);
     await expect(links.nth(0)).toContainText("Showcase");
     await expect(links.nth(1)).toContainText("Docs");
@@ -610,5 +610,360 @@ test.describe("Docs section", () => {
     await waitForApp(page);
     await expect(page.locator("#docs-section")).toBeVisible();
     await expect(page.locator("#docs-section h2")).toContainText("Component Reference");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// New in 0.6.0 — every component and prop the release added
+//
+// These assert the CLASS CONTRACT, not that an element merely exists. The whole
+// value of a typed component layer is that it emits exactly the Bootstrap markup
+// Bootstrap's own CSS selects on, so "a span appeared" proves nothing; "a span
+// carrying text-bg-primary appeared" is the claim worth locking.
+// ---------------------------------------------------------------------------
+test.describe("New in 0.6.0", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await waitForApp(page);
+    await clickTab(page, "New in 0.6.0");
+  });
+
+  test("CheckboxButton emits the btn-check idiom", async ({ page }) => {
+    const input = page.locator("input#nw-chk-bold");
+    await expect(input).toHaveClass(/btn-check/);
+    await expect(input).toHaveAttribute("type", "checkbox");
+    // The visible control is a label.btn bound to the input, not a <button>.
+    const label = page.locator('label[for="nw-chk-bold"]');
+    await expect(label).toHaveClass(/btn/);
+    await expect(label).toContainText("Bold");
+  });
+
+  test("CheckboxButton carries colour, outline and size variants", async ({ page }) => {
+    await expect(page.locator('label[for="nw-chk-bold"]')).toHaveClass(/btn-primary/);
+    await expect(page.locator('label[for="nw-chk-italic"]')).toHaveClass(/btn-outline-primary/);
+    await expect(page.locator('label[for="nw-chk-sm"]')).toHaveClass(/btn-sm/);
+    await expect(page.locator('label[for="nw-chk-lg"]')).toHaveClass(/btn-lg/);
+    await expect(page.locator("input#nw-chk-disabled")).toBeDisabled();
+  });
+
+  test("CheckboxButton toggles independently", async ({ page }) => {
+    await expect(page.getByText("Bold is on")).toBeVisible();
+    await page.locator('label[for="nw-chk-bold"]').click();
+    await expect(page.getByText("Bold is off")).toBeVisible();
+    // Italic is unaffected — these are independent checkboxes, not a radio group.
+    await expect(page.getByText("italic is off")).toBeVisible();
+  });
+
+  test("RadioButton groups by name and selects one at a time", async ({ page }) => {
+    const start = page.locator("input#nw-radio-start");
+    await expect(start).toHaveAttribute("type", "radio");
+    await expect(start).toHaveAttribute("name", "nw-align");
+    await expect(start).toHaveClass(/btn-check/);
+
+    await expect(page.getByText("Selected: center")).toBeVisible();
+    await page.locator('label[for="nw-radio-start"]').click();
+    await expect(page.getByText("Selected: start")).toBeVisible();
+    await expect(page.locator("input#nw-radio-justify")).toBeDisabled();
+  });
+
+  test("Button link and plain variants emit the right classes", async ({ page }) => {
+    const link = page.locator("button", { hasText: "Link style" }).first();
+    await expect(link).toHaveClass(/btn-link/);
+
+    const plain = page.locator("button", { hasText: "Plain (no variant)" }).first();
+    await expect(plain).toHaveClass(/btn/);
+    // The point of `plain` is the ABSENCE of a colour variant.
+    await expect(plain).not.toHaveClass(/btn-primary|btn-secondary|btn-success|btn-danger/);
+  });
+
+  test("Button rel, role and onmousedown are wired", async ({ page }) => {
+    await expect(page.locator('a[rel="noopener noreferrer"]')).toHaveAttribute("target", "_blank");
+    await expect(page.locator('button[role="switch"]')).toBeVisible();
+
+    await page.locator("button", { hasText: "onmousedown" }).first().click();
+    await expect(page.getByText("mousedown fired before click")).toBeVisible();
+  });
+
+  test("Badge fill switches between text-bg and bg", async ({ page }) => {
+    await expect(page.locator("span", { hasText: "text-bg (default)" }).first()).toHaveClass(/text-bg-primary/);
+
+    const bgOnly = page.locator("span", { hasText: "bg only" }).first();
+    await expect(bgOnly).toHaveClass(/bg-primary/);
+    await expect(bgOnly).not.toHaveClass(/text-bg-primary/);
+  });
+
+  test("Badge onclick fires", async ({ page }) => {
+    const badge = page.locator("span.badge", { hasText: "clicked" }).first();
+    await expect(badge).toContainText("clicked 0×");
+    await badge.click();
+    await expect(badge).toContainText("clicked 1×");
+  });
+
+  test("Card renders as an anchor when href is set", async ({ page }) => {
+    const card = page.locator('a.card[href="https://getbootstrap.com/"]').first();
+    await expect(card).toHaveAttribute("target", "_blank");
+  });
+
+  test("Card per-slot classes and body id/style land", async ({ page }) => {
+    await expect(page.locator(".card-header.bg-primary-subtle")).toBeVisible();
+    const body = page.locator("#nw-card-body");
+    await expect(body).toHaveClass(/card-body/);
+    await expect(body).toHaveAttribute("style", /border-left/);
+  });
+
+  test("Card click and contextmenu handlers fire", async ({ page }) => {
+    const body = page.locator("#nw-card-body");
+    await body.click();
+    await expect(page.getByText("card clicked")).toBeVisible();
+    await body.click({ button: "right" });
+    await expect(page.getByText("card right-clicked")).toBeVisible();
+  });
+
+  test("Alert heading renders as alert-heading", async ({ page }) => {
+    const heading = page.locator(".alert .alert-heading", { hasText: "Well done" });
+    await expect(heading).toBeVisible();
+  });
+
+  test("ListGroup numbered renders a real ordered list", async ({ page }) => {
+    const ol = page.locator("ol.list-group.list-group-numbered");
+    await expect(ol).toBeVisible();
+    await expect(ol.locator("li.list-group-item")).toHaveCount(3);
+  });
+
+  test("BreadcrumbItem onclick fires without navigating", async ({ page }) => {
+    await page.locator(".breadcrumb-item a", { hasText: "Library" }).click();
+    await expect(page.getByText("navigated: Library")).toBeVisible();
+  });
+
+  test("Navbar container variants", async ({ page }) => {
+    await expect(page.locator(".navbar .container-fluid").first()).toBeVisible();
+    const bare = page.locator(".navbar", { hasText: "no container" }).first();
+    await expect(bare.locator(".container, .container-fluid")).toHaveCount(0);
+  });
+
+  test("Modal custom header and slot classes", async ({ page }) => {
+    await page.locator("button", { hasText: "Open slotted modal" }).click();
+    await expect(page.locator(".modal-content.border-primary")).toBeVisible();
+    await expect(page.locator(".modal-header.bg-primary-subtle")).toBeVisible();
+    await expect(page.locator(".modal-body.bg-body-tertiary")).toBeVisible();
+    await expect(page.locator(".modal-footer.justify-content-between")).toBeVisible();
+    await expect(page.locator(".modal-dialog.modal-lg")).toBeVisible();
+    await expect(page.locator(".modal-header", { hasText: "A fully custom header" })).toBeVisible();
+    await page.locator("button", { hasText: "Done" }).click();
+  });
+
+  test("TabList content_style and fill apply", async ({ page }) => {
+    const nav = page.locator(".nav-fill").first();
+    await expect(nav).toBeVisible();
+    const pane = page.locator('.tab-content[style*="min-height"]');
+    await expect(pane).toHaveCount(1);
+    await expect(pane).toHaveClass(/border-top-0/);
+  });
+
+  test("ToastContainer positioned=false drops fixed positioning", async ({ page }) => {
+    const container = page.locator(".toast-container").filter({ hasText: "document flow" }).first();
+    await expect(container).toBeVisible();
+    await expect(container).not.toHaveClass(/position-fixed/);
+
+    // Asserting the absent CLASS is not enough, and this is the reason the check is
+    // written twice. Bootstrap's own `.toast-container` rule is `position: absolute`,
+    // so a container that has correctly lost the utility can still be out of flow and
+    // overlay whatever follows it. The rendered result is the claim worth locking.
+    const laidOut = await container.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const parent = getComputedStyle(el.parentElement!);
+      return {
+        position: cs.position,
+        // in flow => the parent grows to contain it
+        parentTallerThanContainer:
+          Number.parseFloat(parent.height) >= Number.parseFloat(cs.height),
+      };
+    });
+    expect(laidOut.position).toBe("static");
+    expect(laidOut.parentTallerThanContainer).toBe(true);
+  });
+
+  test("Input typed numeric and file attributes", async ({ page }) => {
+    const num = page.locator('input[type="number"]').first();
+    await expect(num).toHaveAttribute("step", "0.25");
+    await expect(num).toHaveAttribute("min", "0");
+    await expect(num).toHaveAttribute("max", "10");
+    await expect(page.locator('input[type="file"]').first()).toHaveAttribute("accept", "image/png,image/jpeg");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Coverage tab — the props the themed sections do not reach
+// ---------------------------------------------------------------------------
+test.describe("Coverage", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await waitForApp(page);
+    await clickTab(page, "Coverage");
+  });
+
+  test("Container fluid and Col breakpoint/offset/order classes", async ({ page }) => {
+    await expect(page.locator(".container-fluid.bg-primary-subtle")).toBeVisible();
+    await expect(page.locator(".col-xs-6, .col-6").first()).toBeVisible();
+    await expect(page.locator('[class*="offset-"]').first()).toBeVisible();
+    await expect(page.locator('[class*="order-"]').first()).toBeVisible();
+  });
+
+  test("Accordion flush", async ({ page }) => {
+    await expect(page.locator(".accordion.accordion-flush")).toBeVisible();
+  });
+
+  test("Collapse horizontal", async ({ page }) => {
+    await page.locator("button", { hasText: "Toggle horizontal collapse" }).click();
+    await expect(page.locator(".collapse-horizontal").first()).toBeVisible();
+  });
+
+  test("Table borderless, sm and dark", async ({ page }) => {
+    const table = page.locator("table.table-borderless").first();
+    await expect(table).toHaveClass(/table-sm/);
+    await expect(table).toHaveClass(/table-dark/);
+  });
+
+  test("Dropdown direction and item states", async ({ page }) => {
+    await expect(page.locator(".dropup").first()).toBeVisible();
+    await expect(page.locator(".dropend").first()).toBeVisible();
+    await expect(page.locator(".dropdown-menu.dropdown-menu-end").first()).toBeVisible();
+
+    // Items live in a closed menu until the toggle is clicked: present, not visible.
+    await page.locator("button", { hasText: "Drops up" }).click();
+    const menu = page.locator(".dropup .dropdown-menu.show");
+    await expect(menu.locator(".dropdown-item.active")).toBeVisible();
+    await expect(menu.locator(".dropdown-item.disabled")).toBeVisible();
+    await menu.locator(".dropdown-item", { hasText: "With onclick" }).click();
+    await expect(page.getByText("dropdown item clicked")).toBeVisible();
+  });
+
+  test("Input events fire and the datalist is wired", async ({ page }) => {
+    const input = page.locator('input[list="nw-suggestions"]');
+    await input.focus();
+    await expect(page.getByText("Last event: onfocus")).toBeVisible();
+    await input.press("a");
+    await expect(page.getByText(/Last event: onkey/)).toBeVisible();
+    await expect(page.locator("datalist#nw-suggestions option")).toHaveCount(3);
+  });
+
+  test("readonly and disabled inputs", async ({ page }) => {
+    await expect(page.locator("input[readonly]").first()).toBeVisible();
+    await expect(page.locator("input:disabled").first()).toBeDisabled();
+  });
+
+  test("Select size and disabled", async ({ page }) => {
+    await expect(page.locator("select.form-select-lg").first()).toBeVisible();
+    await expect(page.locator("select:disabled").first()).toBeDisabled();
+  });
+
+  test("Range step and disabled", async ({ page }) => {
+    const range = page.locator("input.form-range").first();
+    await expect(range).toHaveAttribute("step", "10");
+    await expect(page.locator("input.form-range:disabled")).toBeVisible();
+  });
+
+  test("ButtonGroup sizes", async ({ page }) => {
+    await expect(page.locator(".btn-group-lg").first()).toBeVisible();
+    await expect(page.locator(".btn-group-sm").first()).toBeVisible();
+  });
+
+  test("Pagination window and prev/next suppression", async ({ page }) => {
+    const paginations = page.locator(".pagination");
+    await expect(paginations.first()).toBeVisible();
+    // The second pagination has show_prev_next off, so it has no arrow items.
+    const second = paginations.nth(1);
+    await expect(second).toHaveClass(/pagination-sm/);
+  });
+
+  test("Placeholder sizes and animations", async ({ page }) => {
+    await expect(page.locator(".placeholder-lg").first()).toBeVisible();
+    await expect(page.locator(".placeholder-sm").first()).toBeVisible();
+    await expect(page.locator(".placeholder-glow").first()).toBeVisible();
+    await expect(page.locator(".placeholder-wave").first()).toBeVisible();
+  });
+
+  test("Figure thumbnail and fluid", async ({ page }) => {
+    await expect(page.locator("img.img-thumbnail").first()).toBeVisible();
+    await expect(page.locator("figure img.img-fluid").first()).toBeVisible();
+    await expect(page.locator(".figure-caption.text-end").first()).toBeVisible();
+  });
+
+  test("Offcanvas placement", async ({ page }) => {
+    await page.locator("button", { hasText: "Open from top" }).click();
+    const top = page.locator(".offcanvas.offcanvas-top");
+    await expect(top).toBeVisible();
+    await top.locator(".btn-close").click();
+    await expect(top).toHaveCount(0);
+
+    await page.locator("button", { hasText: "Open from bottom" }).click();
+    const bottom = page.locator(".offcanvas.offcanvas-bottom");
+    await expect(bottom).toBeVisible();
+    // backdrop: false — no overlay is rendered for this one.
+    await expect(page.locator(".offcanvas-backdrop")).toHaveCount(0);
+    await bottom.locator(".btn-close").click();
+    await expect(bottom).toHaveCount(0);
+  });
+
+  test("Offcanvas responsive swaps the base class", async ({ page }) => {
+    // responsive: "md" replaces the `offcanvas` base with `offcanvas-md` — Bootstrap's
+    // own responsive form, which renders inline above the breakpoint. The base class is
+    // therefore deliberately absent, and asserting that is the point of the test.
+    await page.locator("button", { hasText: "Open responsive" }).click();
+    await expect(page.locator(".offcanvas-md.offcanvas-start")).toBeVisible();
+    await expect(page.locator(".offcanvas.offcanvas-start")).toHaveCount(0);
+  });
+
+  test("Modal with every dismissal route disabled", async ({ page }) => {
+    await page.locator("button", { hasText: "Open a strict modal" }).click();
+    const modal = page.locator(".modal.show").first();
+    await expect(modal).toBeVisible();
+    // show_close: false — no × in the header.
+    await expect(modal.locator(".modal-header .btn-close")).toHaveCount(0);
+    // keyboard_close: false — Escape must not dismiss it.
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeVisible();
+    await page.locator("button", { hasText: "Acknowledge" }).click();
+    await expect(page.locator(".modal.show")).toHaveCount(0);
+  });
+
+  test("Tooltip and Popover disabled triggers render a wrapper", async ({ page }) => {
+    // `open` is not exercised on the page — a forced-open overlay is positioned at a
+    // default viewport coordinate rather than against its trigger, so demonstrating it
+    // would float a box over unrelated content. Tracked separately; see the section text.
+    await expect(page.locator(".tooltip")).toHaveCount(0);
+    await expect(page.locator(".popover")).toHaveCount(0);
+
+    const tipWrap = page.locator("span", { hasText: "disabled + tooltip" }).first();
+    await expect(tipWrap).toBeVisible();
+    await expect(page.locator("button:disabled", { hasText: "disabled + tooltip" })).toBeVisible();
+    await expect(page.locator("button:disabled", { hasText: "disabled + popover" })).toBeVisible();
+  });
+
+  test("Carousel fade and dark", async ({ page }) => {
+    const carousel = page.locator(".carousel.carousel-fade").first();
+    await expect(carousel).toBeVisible();
+    await expect(carousel).toHaveClass(/carousel-dark/);
+    await expect(carousel.locator(".carousel-indicators")).toBeVisible();
+    await expect(carousel.locator(".carousel-control-next")).toBeVisible();
+  });
+
+  test("Toast autohide dismisses itself", async ({ page }) => {
+    await page.locator("button", { hasText: "Show a toast that autohides" }).click();
+    const toast = page.locator(".toast", { hasText: "delay_ms: 3000" });
+    await expect(toast).toBeVisible();
+    await expect(toast).toBeHidden({ timeout: 8_000 });
+  });
+
+  test("TabList justified with pills", async ({ page }) => {
+    const nav = page.locator(".nav-pills.nav-justified").first();
+    await expect(nav).toBeVisible();
+  });
+
+  test("NavLink prevent_default keeps the page put", async ({ page }) => {
+    const before = page.url();
+    await page.locator(".nav-link", { hasText: "prevent_default" }).click();
+    await expect(page.getByText("nav link — default prevented")).toBeVisible();
+    expect(page.url()).toBe(before);
   });
 });
