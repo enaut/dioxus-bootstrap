@@ -927,17 +927,92 @@ test.describe("Coverage", () => {
     await expect(page.locator(".modal.show")).toHaveCount(0);
   });
 
-  test("Tooltip and Popover disabled triggers render a wrapper", async ({ page }) => {
-    // `open` is not exercised on the page — a forced-open overlay is positioned at a
-    // default viewport coordinate rather than against its trigger, so demonstrating it
-    // would float a box over unrelated content. Tracked separately; see the section text.
-    await expect(page.locator(".tooltip")).toHaveCount(0);
-    await expect(page.locator(".popover")).toHaveCount(0);
-
-    const tipWrap = page.locator("span", { hasText: "disabled + tooltip" }).first();
-    await expect(tipWrap).toBeVisible();
+  test("disabled triggers render a wrapper", async ({ page }) => {
     await expect(page.locator("button:disabled", { hasText: "disabled + tooltip" })).toBeVisible();
     await expect(page.locator("button:disabled", { hasText: "disabled + popover" })).toBeVisible();
+  });
+
+  // ── forced-open overlays ────────────────────────────────────────────────
+  //
+  // These lock the two halves of a defect that shipped invisible: an overlay is
+  // painted `position: fixed` from a single measurement, so (a) one opened while
+  // its trigger was below the fold had its box clamped INTO the viewport and
+  // floated ~2700px from the thing it points at, and (b) nothing ever re-measured,
+  // so any open overlay detached the moment the page scrolled.
+
+  test("a forced-open overlay is suppressed while its trigger is off-screen", async ({ page }) => {
+    const state = await page.evaluate(() => {
+      const tip = document.querySelector(".tooltip");
+      const trig = Array.from(document.querySelectorAll("button"))
+        .find((b) => b.textContent?.includes("always visible"));
+      if (!tip || !trig) return null;
+      return {
+        visibility: getComputedStyle(tip).visibility,
+        triggerTop: trig.getBoundingClientRect().top,
+        viewport: window.innerHeight,
+      };
+    });
+    expect(state).not.toBeNull();
+    // The trigger really is below the fold — otherwise this test proves nothing.
+    expect(state!.triggerTop).toBeGreaterThan(state!.viewport);
+    expect(state!.visibility).toBe("hidden");
+
+    // Hidden, NOT unmounted: an overlay that is removed cannot be measured, so it
+    // could never come back when the trigger scrolls into view.
+    await expect(page.locator(".tooltip")).toHaveCount(1);
+  });
+
+  test("a forced-open overlay anchors to its trigger once scrolled into view", async ({ page }) => {
+    await page.locator("h3", { hasText: "Tooltip and Popover" }).first().scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900);
+
+    const geo = await page.evaluate(() => {
+      const tip = document.querySelector(".tooltip");
+      const trig = Array.from(document.querySelectorAll("button"))
+        .find((b) => b.textContent?.includes("always visible"));
+      if (!tip || !trig) return null;
+      const t = trig.getBoundingClientRect();
+      const o = tip.getBoundingClientRect();
+      return {
+        visibility: getComputedStyle(tip).visibility,
+        gap: o.top - t.bottom,
+        centreOffset: Math.abs(o.left + o.width / 2 - (t.left + t.width / 2)),
+      };
+    });
+    expect(geo).not.toBeNull();
+    expect(geo!.visibility).toBe("visible");
+    // Placed just below the trigger and centred on it, rather than parked anywhere.
+    expect(geo!.gap).toBeGreaterThanOrEqual(0);
+    expect(geo!.gap).toBeLessThan(24);
+    expect(geo!.centreOffset).toBeLessThan(4);
+  });
+
+  test("an open overlay keeps tracking its trigger through a scroll", async ({ page }) => {
+    await page.locator("h3", { hasText: "Tooltip and Popover" }).first().scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900);
+
+    const measure = () =>
+      page.evaluate(() => {
+        const tip = document.querySelector(".tooltip");
+        const trig = Array.from(document.querySelectorAll("button"))
+          .find((b) => b.textContent?.includes("always visible"));
+        if (!tip || !trig) return null;
+        const t = trig.getBoundingClientRect();
+        const o = tip.getBoundingClientRect();
+        return { gap: o.top - t.bottom, triggerTop: t.top };
+      });
+
+    const before = await measure();
+    await page.mouse.wheel(0, 140);
+    await page.waitForTimeout(800);
+    const after = await measure();
+
+    expect(before).not.toBeNull();
+    expect(after).not.toBeNull();
+    // The page actually moved…
+    expect(Math.abs(after!.triggerTop - before!.triggerTop)).toBeGreaterThan(50);
+    // …and the overlay moved with it, keeping the same gap.
+    expect(Math.abs(after!.gap - before!.gap)).toBeLessThan(4);
   });
 
   test("Carousel fade and dark", async ({ page }) => {

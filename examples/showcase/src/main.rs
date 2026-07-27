@@ -2080,13 +2080,13 @@ fn CoverageSection() -> Element {
             OffcanvasDemos { top: oc_top, bottom: oc_bottom, responsive: oc_responsive }
 
             // ── Overlays ────────────────────────────────────────────────────
-            h3 { class: "mb-2 mt-4", "Tooltip and Popover — offset, delay, disabled triggers" }
+            h3 { class: "mb-2 mt-4", "Tooltip and Popover — offset, delay, forced open" }
             p { class: "text-muted",
-                "The " code { "open" } " prop, which pins an overlay open without an interaction, is "
-                "deliberately not demonstrated here: a forced-open overlay is currently rendered without "
-                "its position being computed, so it lands at a default viewport coordinate rather than "
-                "against its trigger. Showing it would put a floating box over unrelated content. "
-                "Everything else on these two components is below."
+                code { "open: Some(true)" }
+                " pins an overlay open with no interaction. It stays glued to its trigger while you "
+                "scroll, and suppresses itself entirely when the trigger leaves the viewport — an "
+                "overlay with no on-screen anchor would otherwise be clamped into view and float over "
+                "unrelated content."
             }
             div { class: "d-flex flex-wrap gap-3 align-items-center mb-3",
                 Tooltip {
@@ -2095,6 +2095,12 @@ fn CoverageSection() -> Element {
                     delay: TooltipDelay { show_ms: 300, hide_ms: 100 },
                     boundary_padding: 12.0,
                     Button { color: Color::Secondary, outline: true, "offset + delay" }
+                }
+                Tooltip {
+                    text: "Forced open — open: Some(true)".to_string(),
+                    open: Some(true),
+                    placement: TooltipPlacement::Bottom,
+                    Button { color: Color::Info, outline: true, "always visible" }
                 }
                 TooltipDisabledTrigger { style: "display:inline-block;",
                     Button { color: Color::Secondary, disabled: true, "disabled + tooltip" }
@@ -2109,6 +2115,13 @@ fn CoverageSection() -> Element {
                     boundary_padding: 16.0,
                     dismiss_on_outside_click: true,
                     Button { color: Color::Primary, outline: true, "offset + delay" }
+                }
+                Popover {
+                    title: "Forced open".to_string(),
+                    body: rsx! { "open: Some(true) pins it." },
+                    open: Some(true),
+                    placement: PopoverPlacement::Bottom,
+                    Button { color: Color::Warning, outline: true, "pinned" }
                 }
                 PopoverDisabledTrigger { style: "display:inline-block;",
                     Button { color: Color::Primary, disabled: true, "disabled + popover" }

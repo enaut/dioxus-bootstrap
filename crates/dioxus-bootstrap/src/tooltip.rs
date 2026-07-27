@@ -5,6 +5,7 @@ use gloo_timers::future::TimeoutFuture;
 
 use crate::overlay::{
     OverlayOffset, OverlayPlacement, OverlayPosition, OverlayRect, calculate_overlay_position,
+    install_overlay_anchor_watch, next_overlay_anchor_revision,
 };
 
 static NEXT_TOOLTIP_ID: AtomicUsize = AtomicUsize::new(1);
@@ -262,6 +263,8 @@ pub fn Tooltip(props: TooltipProps) -> Element {
     let mut focus_active = use_signal(|| false);
     let mut click_active = use_signal(|| false);
 
+    use_hook(install_overlay_anchor_watch);
+
     let has_text = !props.text.is_empty();
     let is_visible = has_text && props.open.unwrap_or(*visible.read());
     let effective_placement = overlay_position
@@ -290,6 +293,10 @@ pub fn Tooltip(props: TooltipProps) -> Element {
         offset: props.offset,
         boundary_padding: props.boundary_padding,
     };
+    // Each effect run claims a generation; a loop whose generation is stale exits, so
+    // repeated runs cannot stack watchers on one overlay.
+    let watch_generation = use_signal(|| 0_u64);
+    let effect_watch_generation = watch_generation;
     let effect_trigger_id = trigger_id.read().clone();
     let effect_tooltip_id = tooltip_id.read().clone();
     let mut effect_overlay_position = overlay_position;
@@ -306,7 +313,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
             let current_visible = has_text && open.unwrap_or(*visible.read());
 
             if current_visible {
-                measure_tooltip_position(TooltipPositioning {
+                let positioning = TooltipPositioning {
                     trigger_id: effect_trigger_id.clone(),
                     tooltip_id: effect_tooltip_id.clone(),
                     overlay_position: effect_overlay_position,
@@ -314,7 +321,12 @@ pub fn Tooltip(props: TooltipProps) -> Element {
                     fallback_placements,
                     offset,
                     boundary_padding,
-                });
+                };
+                measure_tooltip_position(positioning.clone());
+                // Re-measure while it stays open: a fixed-position box does not follow
+                // its trigger when the page scrolls, and an overlay opened while its
+                // trigger was off screen needs a second chance to be placed.
+                watch_tooltip_anchor(positioning, effect_watch_generation);
             } else {
                 effect_overlay_position.set(None);
             }
@@ -453,6 +465,15 @@ fn classes(base: &str, placement_class: &str, extra: &str) -> String {
 
 fn tooltip_style(position: Option<OverlayPosition>) -> String {
     match position {
+        // A trigger that has scrolled out of view has no on-screen anchor, and the
+        // computed box was clamped into the viewport — so painting it would float a
+        // tooltip over unrelated content. It is hidden rather than unmounted on
+        // purpose: an unmounted overlay cannot be measured, so it could never come
+        // back when the trigger scrolls into view again.
+        Some(position) if !position.trigger_visible => format!(
+            "position: fixed; left: {:.3}px; top: {:.3}px; z-index: 1080; pointer-events: none; white-space: nowrap; visibility: hidden;",
+            position.x, position.y
+        ),
         Some(position) => format!(
             "position: fixed; left: {:.3}px; top: {:.3}px; z-index: 1080; pointer-events: none; white-space: nowrap; visibility: visible;",
             position.x, position.y
@@ -537,6 +558,29 @@ fn tooltip_should_show(
     (trigger.hover && *interactions.hover_active.read())
         || (trigger.focus && *interactions.focus_active.read())
         || (trigger.click && *interactions.click_active.read())
+}
+
+/// Keep an open tooltip glued to its trigger for as long as it stays open.
+fn watch_tooltip_anchor(positioning: TooltipPositioning, mut generation: Signal<u64>) {
+    let mine = *generation.peek() + 1;
+    generation.set(mine);
+
+    spawn(async move {
+        let mut revision = 0_u64;
+        loop {
+            let Some(next) = next_overlay_anchor_revision(revision).await else {
+                break;
+            };
+            revision = next;
+
+            // A newer effect run (or a close) has superseded this watcher.
+            if *generation.peek() != mine {
+                break;
+            }
+
+            measure_tooltip_position(positioning.clone());
+        }
+    });
 }
 
 fn measure_tooltip_position(mut positioning: TooltipPositioning) {
@@ -670,6 +714,7 @@ mod tests {
             y: 50.0,
             placement: OverlayPlacement::Bottom,
             fits: false,
+            trigger_visible: true,
             arrow: 30.0,
         };
         // Top/Bottom placements slide the arrow in x; the arrow element is centred

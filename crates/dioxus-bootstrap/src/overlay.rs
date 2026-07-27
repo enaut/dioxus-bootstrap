@@ -1,3 +1,82 @@
+use dioxus::prelude::*;
+
+/// A single global watcher that bumps a revision on any scroll or resize, so every
+/// visible overlay can re-measure against its trigger.
+///
+/// Overlays are painted `position: fixed` in viewport coordinates, measured once when
+/// they become visible. Without this, the moment the page moves the box stays where it
+/// was and detaches from its trigger — and an overlay opened while its trigger was off
+/// screen never got a second chance to be placed correctly at all.
+///
+/// It is global rather than per-overlay on purpose: one listener pair, installed once,
+/// with no per-id registry to leak or race. Scroll is captured so that scrolling
+/// containers count, not just the window.
+const OVERLAY_WATCH_SCRIPT: &str = r##"
+(function() {
+    const state = window.__dbcssOverlayAnchor = window.__dbcssOverlayAnchor || {
+        revision: 0,
+        installed: false
+    };
+
+    if (state.installed) {
+        return;
+    }
+    state.installed = true;
+
+    let frame = null;
+    const bump = function() {
+        if (frame !== null) {
+            return;
+        }
+        frame = requestAnimationFrame(function() {
+            frame = null;
+            state.revision += 1;
+            window.dispatchEvent(new CustomEvent("dbcss:overlay-anchor"));
+        });
+    };
+
+    window.addEventListener("scroll", bump, { passive: true, capture: true });
+    window.addEventListener("resize", bump, { passive: true });
+})();
+"##;
+
+/// Resolve when the anchor revision moves past `__LAST__`.
+const OVERLAY_EVENT_SCRIPT: &str = r##"
+const last = __LAST__;
+
+return new Promise(function(resolve) {
+    const state = window.__dbcssOverlayAnchor;
+    if (!state) {
+        resolve(last);
+        return;
+    }
+    if (state.revision !== last) {
+        resolve(state.revision);
+        return;
+    }
+
+    const handler = function() {
+        window.removeEventListener("dbcss:overlay-anchor", handler);
+        resolve(window.__dbcssOverlayAnchor.revision);
+    };
+
+    window.addEventListener("dbcss:overlay-anchor", handler);
+});
+"##;
+
+/// Install the global scroll/resize watcher. Idempotent — safe to call per overlay.
+pub fn install_overlay_anchor_watch() {
+    let _ = document::eval(OVERLAY_WATCH_SCRIPT);
+}
+
+/// Await the next scroll/resize revision. `None` means the bridge is gone (the
+/// document went away), which ends the caller's loop rather than spinning.
+pub async fn next_overlay_anchor_revision(last: u64) -> Option<u64> {
+    let script = OVERLAY_EVENT_SCRIPT.replace("__LAST__", &last.to_string());
+    let value = document::eval(&script).await.ok()?;
+    value.as_f64().map(|revision| revision as u64)
+}
+
 /// Overlay placement relative to a trigger element.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum OverlayPlacement {
@@ -45,6 +124,15 @@ impl OverlayRect {
 
     pub fn right(self) -> f64 {
         self.x + self.width
+    }
+
+    /// True when this rect overlaps `other` at all. Touching edges do not count:
+    /// a trigger flush against the viewport edge has no room for an overlay.
+    pub fn intersects(self, other: Self) -> bool {
+        self.x < other.right()
+            && other.x < self.right()
+            && self.y < other.bottom()
+            && other.y < self.bottom()
     }
 
     pub fn bottom(self) -> f64 {
@@ -102,6 +190,14 @@ pub struct OverlayPosition {
     pub placement: OverlayPlacement,
     /// True when the overlay fits inside the boundary without clamping.
     pub fits: bool,
+    /// True when the TRIGGER itself intersects the boundary.
+    ///
+    /// A trigger that has scrolled out of view has no on-screen anchor, so
+    /// clamping its overlay into the viewport would park a box somewhere the
+    /// user is looking at unrelated content — which is exactly what a forced-open
+    /// overlay did before this existed. Callers hide the overlay when this is
+    /// false rather than rendering it detached.
+    pub trigger_visible: bool,
     /// Arrow centre in overlay-local coordinates along the cross axis (x for
     /// top/bottom placements, y for start/end). Lets the caller keep the arrow
     /// pointing at the trigger even after the overlay box is clamped to the
@@ -144,6 +240,7 @@ pub fn calculate_overlay_position(
     offset: OverlayOffset,
     boundary_padding: f64,
 ) -> OverlayPosition {
+    let trigger_visible = trigger.intersects(boundary);
     let candidates = candidate_placements(requested, fallback_placements);
     let mut best: Option<(OverlayPlacement, OverlayRect, f64)> = None;
 
@@ -155,6 +252,7 @@ pub fn calculate_overlay_position(
                 y: rect.y,
                 placement,
                 fits: true,
+                trigger_visible,
                 arrow: arrow_offset(trigger, rect, placement),
             };
         }
@@ -183,6 +281,7 @@ pub fn calculate_overlay_position(
         y: clamped.y,
         placement,
         fits: false,
+        trigger_visible,
         arrow: arrow_offset(trigger, clamped, placement),
     }
 }
@@ -284,6 +383,104 @@ fn clamp_to_boundary(rect: OverlayRect, boundary: OverlayRect, padding: f64) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // ── trigger visibility ──────────────────────────────────────────────────
+    //
+    // These lock the arm that fixes a forced-open overlay landing ~2700px from
+    // its trigger: the position is computed once, and if the trigger is below the
+    // fold the box was clamped INTO view rather than suppressed.
+
+    #[test]
+    fn trigger_inside_the_boundary_is_visible() {
+        let position = calculate_overlay_position(
+            OverlayRect::new(100.0, 100.0, 40.0, 20.0),
+            OverlayRect::new(0.0, 0.0, 80.0, 30.0),
+            OverlayRect::new(0.0, 0.0, 300.0, 300.0),
+            OverlayPlacement::Top,
+            &[],
+            OverlayOffset::default(),
+            8.0,
+        );
+        assert!(position.trigger_visible);
+    }
+
+    #[test]
+    fn trigger_below_the_fold_is_not_visible() {
+        // The measured shape of the real defect: trigger far down the document,
+        // viewport only 800px tall.
+        let position = calculate_overlay_position(
+            OverlayRect::new(225.0, 3389.0, 128.0, 38.0),
+            OverlayRect::new(0.0, 0.0, 200.0, 29.0),
+            OverlayRect::new(0.0, 0.0, 1280.0, 800.0),
+            OverlayPlacement::Bottom,
+            &[],
+            OverlayOffset::default(),
+            8.0,
+        );
+        assert!(
+            !position.trigger_visible,
+            "a trigger 3389px down a 800px viewport is off-screen"
+        );
+    }
+
+    #[test]
+    fn trigger_above_the_fold_is_not_visible() {
+        let position = calculate_overlay_position(
+            OverlayRect::new(100.0, -400.0, 40.0, 20.0),
+            OverlayRect::new(0.0, 0.0, 80.0, 30.0),
+            OverlayRect::new(0.0, 0.0, 300.0, 300.0),
+            OverlayPlacement::Top,
+            &[],
+            OverlayOffset::default(),
+            8.0,
+        );
+        assert!(!position.trigger_visible);
+    }
+
+    #[test]
+    fn trigger_scrolled_off_to_the_side_is_not_visible() {
+        let position = calculate_overlay_position(
+            OverlayRect::new(-500.0, 100.0, 40.0, 20.0),
+            OverlayRect::new(0.0, 0.0, 80.0, 30.0),
+            OverlayRect::new(0.0, 0.0, 300.0, 300.0),
+            OverlayPlacement::Top,
+            &[],
+            OverlayOffset::default(),
+            8.0,
+        );
+        assert!(!position.trigger_visible);
+    }
+
+    #[test]
+    fn a_trigger_flush_against_the_edge_does_not_count_as_visible() {
+        // Touching edges only: no room for an overlay, and treating it as visible
+        // would reintroduce the clamped-into-view box by one pixel of slack.
+        let position = calculate_overlay_position(
+            OverlayRect::new(100.0, 300.0, 40.0, 20.0),
+            OverlayRect::new(0.0, 0.0, 80.0, 30.0),
+            OverlayRect::new(0.0, 0.0, 300.0, 300.0),
+            OverlayPlacement::Top,
+            &[],
+            OverlayOffset::default(),
+            8.0,
+        );
+        assert!(!position.trigger_visible);
+    }
+
+    #[test]
+    fn partially_visible_trigger_still_counts() {
+        // Half off the bottom edge: there is still an anchor to point at.
+        let position = calculate_overlay_position(
+            OverlayRect::new(100.0, 290.0, 40.0, 20.0),
+            OverlayRect::new(0.0, 0.0, 80.0, 30.0),
+            OverlayRect::new(0.0, 0.0, 300.0, 300.0),
+            OverlayPlacement::Top,
+            &[],
+            OverlayOffset::default(),
+            8.0,
+        );
+        assert!(position.trigger_visible);
+    }
 
     fn trigger() -> OverlayRect {
         OverlayRect::new(100.0, 100.0, 40.0, 20.0)

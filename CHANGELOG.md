@@ -81,6 +81,36 @@ replace. Where the answer is no, it stayed out, however useful it might be.
 - **`BreadcrumbItem { onclick }`** — a breadcrumb in a single-page app
   navigates by handler rather than by `href`.
 
+### Fixed
+
+- **An overlay no longer detaches from its trigger when the page scrolls.**
+  Tooltips and popovers are painted `position: fixed` in viewport coordinates
+  from a single measurement taken when they open. Nothing re-measured, so the
+  moment the page moved the box stayed where it was. There is now one global
+  scroll/resize watcher — installed once, `requestAnimationFrame`-coalesced,
+  capturing so scrolling containers count — and every open overlay re-measures
+  against it.
+
+- **A forced-open overlay no longer floats over unrelated content.** With
+  `open: Some(true)` an overlay opens at mount, which is typically while its
+  trigger is still far below the fold. The position was computed anyway and then
+  *clamped into the viewport*, parking the box against content it has nothing to
+  do with: measured on the showcase, a tooltip landed **~2700px** from its
+  trigger and a popover **~2800px**. `OverlayPosition` now reports
+  `trigger_visible`, and an overlay whose trigger is outside the viewport is
+  painted `visibility: hidden` until the trigger scrolls back into view.
+
+  It is hidden rather than unmounted deliberately, and the two are not
+  interchangeable: an unmounted overlay cannot be measured, so it could never
+  learn that its trigger had come back. Removing it is the fix that looks
+  right and silently never recovers.
+
+  Both halves were reachable only in a browser — the crate compiled, and the
+  unit tests passed, throughout. The suppression rule is now six unit tests over
+  `calculate_overlay_position`, and the rendered behaviour — suppressed while
+  off-screen, anchored within 24px once scrolled to, still anchored after a
+  further scroll — is three end-to-end tests.
+
 ### Notes
 
 `Badge`'s and `ToastContainer`'s class composition moved into named functions

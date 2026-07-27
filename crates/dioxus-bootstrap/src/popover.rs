@@ -6,6 +6,7 @@ use gloo_timers::future::TimeoutFuture;
 
 use crate::overlay::{
     OverlayOffset, OverlayPlacement, OverlayPosition, OverlayRect, calculate_overlay_position,
+    install_overlay_anchor_watch, next_overlay_anchor_revision,
 };
 
 static NEXT_POPOVER_ID: AtomicUsize = AtomicUsize::new(1);
@@ -270,6 +271,8 @@ pub fn Popover(props: PopoverProps) -> Element {
     let mut focus_active = use_signal(|| false);
     let mut click_active = use_signal(|| false);
 
+    use_hook(install_overlay_anchor_watch);
+
     let has_content = !props.title.is_empty() || element_has_content(&props.body);
     let is_visible = has_content && props.open.unwrap_or(*visible.read());
     let effective_placement = overlay_position
@@ -302,6 +305,10 @@ pub fn Popover(props: PopoverProps) -> Element {
     let effect_popover_id = popover_id.read().clone();
     let mut effect_overlay_position = overlay_position;
 
+    // Each effect run claims a generation; a stale loop exits, so repeated runs
+    // cannot stack watchers on one overlay.
+    let watch_generation = use_signal(|| 0_u64);
+    let effect_watch_generation = watch_generation;
     let effect_positioning = positioning.clone();
     use_effect(use_reactive(
         (
@@ -322,6 +329,10 @@ pub fn Popover(props: PopoverProps) -> Element {
 
             if props.open == Some(true) || (props.open.is_none() && *visible.read()) {
                 measure_popover_position(effect_positioning.clone());
+                // See `tooltip.rs`: a fixed-position box does not follow its trigger
+                // when the page scrolls, and one opened while the trigger was off
+                // screen needs a second chance to be placed.
+                watch_popover_anchor(effect_positioning.clone(), effect_watch_generation);
             }
         },
     ));
@@ -492,6 +503,12 @@ fn classes(base: &str, placement_class: &str, extra: &str) -> String {
 
 fn popover_style(position: Option<OverlayPosition>) -> String {
     match position {
+        // See `tooltip_style`: hidden, not unmounted, so it stays measurable and can
+        // return when the trigger scrolls back into view.
+        Some(position) if !position.trigger_visible => format!(
+            "position: fixed; left: {:.3}px; top: {:.3}px; z-index: 1070; visibility: hidden;",
+            position.x, position.y
+        ),
         Some(position) => format!(
             "position: fixed; left: {:.3}px; top: {:.3}px; z-index: 1070; visibility: visible;",
             position.x, position.y
@@ -560,6 +577,28 @@ fn schedule_popover_visibility(
             } else {
                 positioning.overlay_position.set(None);
             }
+        }
+    });
+}
+
+/// Keep an open popover glued to its trigger for as long as it stays open.
+fn watch_popover_anchor(positioning: PopoverPositioning, mut generation: Signal<u64>) {
+    let mine = *generation.peek() + 1;
+    generation.set(mine);
+
+    spawn(async move {
+        let mut revision = 0_u64;
+        loop {
+            let Some(next) = next_overlay_anchor_revision(revision).await else {
+                break;
+            };
+            revision = next;
+
+            if *generation.peek() != mine {
+                break;
+            }
+
+            measure_popover_position(positioning.clone());
         }
     });
 }
