@@ -29,12 +29,41 @@ Apache-2.0, restructured into `src/elements/` + `src/widgets/` + `catalog.rs`).
 Upstream state `e5f7ea31489c`, 2026-07-27. Compared against `dioxus-bootstrap-css`
 0.5.15.
 
-### Element layer — at parity, nothing adopted
+### Element layer — 34 of 35 modules correspond, but 32 differ in content
 
-Module-for-module comparison of the fork's `src/elements/` against this crate's
-`src/`: **34 of 35 modules correspond**. The crate is not behind.
+**A first pass of this assessment compared module *names* and concluded the crate
+was at parity. That conclusion was wrong, and is corrected here.** Matching
+filenames prove only that both trees cover the same Bootstrap components; they say
+nothing about what is inside. Comparing the files themselves tells a different
+story: **32 of the 34 corresponding modules differ**.
 
-The single module without a counterpart here is `embed.rs`, and it is **declined**
+Most of that difference is the rename — doctests reading
+`use ui_components::prelude::*` where this crate reads its own name. Stripping
+that noise, the substantive delta is real and **entirely additive** (nothing was
+removed on either side):
+
+| | |
+|---|---|
+| components the fork has and this crate lacks | `CheckboxButton`, `RadioButton` |
+| enums | `BadgeFill`, `NavbarContainer` |
+| new props on existing components | **27**, across 14 components — `Modal` +5, `Card` +4, `Button` +3, `Input` +3, `Alert` +2, `Textarea` +2, and eight more with +1 |
+
+**These are adoptable, and should be adopted**, because each one passes the
+parity contract rather than merely being useful: `CheckboxButton` / `RadioButton`
+are Bootstrap 5.3's `btn-check` toggle buttons, `NavbarContainer` is the
+`.container` / `.container-fluid` / `.container-{breakpoint}` choice a navbar
+takes, and `BadgeFill` is the `bg-*` versus `text-bg-*` distinction. All four are
+Bootstrap expressing something this crate does not yet let you say.
+
+Adoption is tracked as its own release rather than folded in here, since it is a
+public API addition and warrants a minor version.
+
+**Method note, so this is repeatable:** compare *contents*, not file listings, and
+separate rename noise from substance before drawing a conclusion. A name-level
+comparison is a cheap smoke test and nothing more — it is what produced the
+retracted claim above.
+
+The one module without any counterpart here is `embed.rs`, and it is **declined**
 as out of contract:
 
 | | |

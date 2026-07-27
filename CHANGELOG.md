@@ -35,8 +35,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **An Adoption Log chapter** (`docs/10_adoption.md`) recording what has been
   assessed from downstream forks, adopted or declined, by content hash — so
   "we took the good parts" is checkable rather than untracked divergence. First
-  entry assesses `ui_components` 0.6.0: the element layer is at parity and the
-  widget layer is declined in full, against the Design chapter's parity contract.
+  entry assesses `ui_components` 0.6.0: the widget layer is declined in full
+  against the Design chapter's parity contract, and the element layer carries an
+  additive delta (2 components, 2 enums, 27 props) queued for adoption in its own
+  release.
 
 ## [0.5.15] — `Range` reflects its controlled value
 
