@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.16] — this repository is the origin, not a mirror
+
 ### Changed
 
 - **This repository is now the origin, not a mirror.** Development, issues,
