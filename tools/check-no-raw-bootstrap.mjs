@@ -116,6 +116,45 @@ function scanFile(file) {
       if (c.index === COND_CLASS_RE.lastIndex) COND_CLASS_RE.lastIndex++; // guard zero-width
     }
   });
+
+  // Multi-line conditional class attrs. Everything above is a per-LINE scan, so it
+  // cannot see these at all: when the `if`/`match` arms sit on their own lines — how
+  // a formatter lays out any conditional longer than a few tokens — the string
+  // literals are simply not on the line carrying `class:`, and the file reads clean.
+  //
+  // A gate that cannot evaluate a construct must not report it as satisfied, so the
+  // block is reassembled by brace matching and checked whole. Openers that already
+  // contain a quote are skipped: those are the single-line form the pass above owns,
+  // and scanning them twice would double-report.
+  for (let i = 0; i < lines.length; i++) {
+    if (!/\bclass\s*[:=]\s*(?:if|match)\b/.test(lines[i])) continue;
+    if (lines[i].includes('"')) continue;
+    let depth = 0, opened = false;
+    const buf = [];
+    for (let j = i; j < lines.length && j < i + 60; j++) {
+      buf.push(lines[j]);
+      // Braces inside string literals are content, not structure.
+      for (const ch of lines[j].replace(/"(?:[^"\\]|\\.)*"/g, '')) {
+        if (ch === '{') { depth++; opened = true; }
+        else if (ch === '}') depth--;
+      }
+      if (opened && depth <= 0) break;
+    }
+    const bad = new Set();
+    for (const lit of buf.join('\n').match(/"[^"]*"/g) || []) {
+      for (const tok of lit.slice(1, -1).replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean)) {
+        if (tokenForbidden(tok)) bad.add(tok);
+      }
+    }
+    if (bad.size) {
+      violations.push({
+        file,
+        line: i + 1,
+        msg: `RAW: raw Bootstrap component class "${[...bad].join(' ')}" in a multi-line conditional class (use the typed component, see docs/04_migration.md)`,
+        src: lines[i].trim().slice(0, 140),
+      });
+    }
+  }
 }
 
 function walk(dir) {

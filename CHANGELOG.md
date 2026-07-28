@@ -4,7 +4,81 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [0.7.0] — the other element Bootstrap documents
+
+Bootstrap gives several components two legal structures, not one. A list group
+is a `<ul>` of `<li>`s *or* a `<div>` of `<a>`/`<button>`s; a nav is a `<ul>` of
+`<li>`s *or* a flat `<nav>` of links; a dropdown menu is a `<ul>` of items *or*
+a `<div>` that may also hold text and forms. Each pair exists because the two
+are not interchangeable — they put different elements in the flex flow, and only
+one of each pair can legally contain what some callers need to put inside it.
+The crate previously emitted one of each, so the other was reachable only by
+hand-writing the markup a typed component exists to replace.
+
+Everything here is additive. Every new prop defaults to what was already
+rendered, and no existing call site changes its output.
+
+### Added
+
+- **`ListGroupItem { tag }` is now honoured alongside `onclick`.** A handler
+  previously forced a `<button>` and silently ignored the element the caller
+  asked for. A `<button>` may not contain interactive descendants, so a
+  clickable row holding its own input or buttons could not be expressed at all:
+  the browser's tag-soup recovery reparents those controls and they stop
+  working, while every class-level check still passes. `tag: "div"` now wins,
+  and still carries `list-group-item-action` — the caller supplying a handler is
+  what says the row is actionable.
+
+- **`Nav { tag: "nav" }`** — Bootstrap's flat nav, with `NavLink` children and
+  no `NavItem` layer. Not a shorthand for the list form: `.nav` is a flex
+  container, so inserting an `<li>` between it and the link changes which
+  element is the flex item, and a vertical nav whose links carry their own
+  spacing or an active-state border lays out differently under the two.
+
+- **`DropdownMenu { tag: "div" }`, with `DropdownItem { tag }` and
+  `DropdownDivider { tag }`** for the matching bare forms. The generic menu is
+  the one Bootstrap's own "forms and text inside a dropdown" examples use, and
+  the only legal choice when a menu holds anything that is not a menu item — a
+  `<div>` or a `<p>` is not a valid child of `<ul>`.
+
+- **`Badge { href, target }`** — Bootstrap documents badges used as links. An
+  anchor is not interchangeable with a span carrying a click handler: only the
+  anchor is focusable, announced as a link, and openable in a new tab.
+
+- **`Modal { on_dismiss }`** — called on every close the component performs
+  itself (close button, backdrop click, Escape). Without it, state a caller
+  clears in its own close handler was skipped by all three, and the only way to
+  be certain was to switch all three off. Bootstrap fires `hide.bs.modal` for
+  the same reason.
+
+- **`Modal { backdrop_class, backdrop_style }`** — Bootstrap fixes the backdrop
+  and the modal at adjacent z-indexes, so a page stacking its own overlays
+  around them needs to say where these two sit.
+
+### Fixed
+
+- **`Modal` and `DropdownMenu` silently dropped a caller's inline `style`.**
+  Both set `style` on the same element the attribute spread lands on, so a
+  caller-supplied one was a second `style` attribute and one of the two was
+  lost. For `Modal` the stake is not cosmetic: its own value is the
+  `display: block` that stands in for Bootstrap's JS-driven show, so losing that
+  side renders an invisible modal while every class assertion still passes. Both
+  now take an explicit `style` prop and compose it with their own.
+
+- **`check-no-raw-bootstrap.mjs` could not see multi-line conditional classes.**
+  The gate scans line by line, so `class: if cond { … } else { … }` spanning
+  several lines — how any conditional longer than a few tokens gets formatted —
+  put the string literals on lines that never carried `class:`, and the file read
+  clean. A gate that cannot evaluate a construct must not report it satisfied, so
+  the block is now reassembled by brace matching and checked whole. Single-line
+  conditionals are unaffected and are not double-reported.
+
+### Removed
+
+- **Duplicate CI workflow definitions** — a second copy of the
+  `.github/workflows/` CI and release jobs, kept for a platform this repository
+  does not build on. It publishes from GitHub Actions, so the copies described
+  a pipeline that never ran.
 
 ## [0.6.0] — saying more of what Bootstrap already says
 

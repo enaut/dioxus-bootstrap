@@ -63,14 +63,32 @@ pub struct NavProps {
     /// Vertical layout.
     #[props(default)]
     pub vertical: bool,
+    /// Nav element. Empty (the default) renders `<ul>`, whose children are
+    /// `NavItem`s wrapping `NavLink`s; `"nav"` renders `<nav class="nav">` and
+    /// takes `NavLink`/`NavButton` children directly, with no `NavItem` layer.
+    ///
+    /// Bootstrap documents both forms, and the choice is not cosmetic: `.nav` is
+    /// a flex container, so the two put different elements in flow. A vertical
+    /// nav whose items carry their own spacing or an active-state border lays out
+    /// differently once an `<li>` sits between the container and the link.
+    /// Convert an existing `<nav class="nav">` to this, not to the `<ul>` default.
+    #[props(default)]
+    pub tag: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
-    /// Child elements (NavItems).
+    /// Child elements (NavItems, or NavLinks directly when `tag` is `"nav"`).
     pub children: Element,
+}
+
+/// Which element a nav renders as. Bootstrap documents both the `<ul>`/`<li>`
+/// structure and the flat `<nav>` one; they are different flex containers, not
+/// two spellings of one thing.
+fn nav_element(tag: &str) -> &'static str {
+    if tag == "nav" { "nav" } else { "ul" }
 }
 
 #[component]
@@ -98,6 +116,15 @@ pub fn Nav(props: NavProps) -> Element {
         classes.push(props.class.clone());
     }
     let full_class = classes.join(" ");
+
+    if nav_element(&props.tag) == "nav" {
+        return rsx! {
+            nav { class: "{full_class}",
+                ..props.attributes,
+                {props.children}
+            }
+        };
+    }
 
     rsx! {
         ul { class: "{full_class}",
@@ -611,6 +638,19 @@ fn nav_link_class(active: bool, disabled: bool, extra: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn nav_defaults_to_the_list_structure() {
+        assert_eq!(nav_element(""), "ul");
+    }
+
+    #[test]
+    fn nav_tag_selects_the_flat_form() {
+        // Not cosmetic: `.nav` is a flex container, so the `<li>` layer the list
+        // form adds becomes the flex item. A vertical nav whose links carry their
+        // own spacing or an active-state border lays out differently under the two.
+        assert_eq!(nav_element("nav"), "nav");
+    }
 
     #[test]
     fn navbar_container_defaults_to_fluid() {

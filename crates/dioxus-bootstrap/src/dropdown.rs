@@ -208,14 +208,43 @@ pub struct DropdownMenuProps {
     /// Align menu to the end side.
     #[props(default)]
     pub align_end: bool,
+    /// Menu element. Empty (the default) renders `<ul>`, whose children are the
+    /// `<li>`-wrapped `DropdownItem`/`DropdownDivider` forms; `"div"` renders
+    /// `<div class="dropdown-menu">`, which takes the bare forms
+    /// (`DropdownItem { tag: "div" }`) and, unlike a `<ul>`, may also hold
+    /// arbitrary content.
+    ///
+    /// Bootstrap documents both, and the generic form is the one its own "forms
+    /// and text inside a dropdown" examples use. It is the only legal choice when
+    /// the menu holds anything that is not a menu item — a `<div>` or a `<p>` is
+    /// not a valid child of `<ul>`.
+    #[props(default)]
+    pub tag: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Inline style, appended to the component's own. Declared explicitly rather
+    /// than left to the attribute spread because this element always sets
+    /// `style` itself; see the composition note in the body.
+    #[props(default)]
+    pub style: String,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     /// Child menu items.
     pub children: Element,
+}
+
+/// The menu's inline style: the end-alignment values the component applies itself
+/// (Bootstrap gates the CSS on a `data-bs-popper` its JS would set) with the
+/// caller's appended. Composed rather than spread, for the reason on `style`.
+fn dropdown_menu_style(align: &str, extra: &str) -> String {
+    match (align.is_empty(), extra.is_empty()) {
+        (true, true) => String::new(),
+        (true, false) => extra.to_string(),
+        (false, true) => align.to_string(),
+        (false, false) => format!("{align} {extra}"),
+    }
 }
 
 #[component]
@@ -238,8 +267,21 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     } else {
         ""
     };
+    // The caller's style is COMPOSED with ours, never spread alongside it. This
+    // element already sets `style`, so a caller-supplied one arriving through
+    // `..attributes` would be a second `style` attribute on the same element and
+    // one of the two would be dropped — silently, and whichever way the renderer
+    // resolved it would be wrong for somebody.
+    let full_style = dropdown_menu_style(align_style, &props.style);
+
+    if props.tag == "div" {
+        return rsx! {
+            div { class: "{full_class}", style: "{full_style}", ..props.attributes, {props.children} }
+        };
+    }
+
     rsx! {
-    ul { class: "{full_class}", style: "{align_style}", ..props.attributes, {props.children} }
+    ul { class: "{full_class}", style: "{full_style}", ..props.attributes, {props.children} }
     }
 }
 
@@ -285,6 +327,12 @@ pub struct DropdownItemProps {
     /// Click event handler.
     #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Item wrapper. Empty (the default) wraps the item in the `<li>` a `<ul>`
+    /// menu requires; `"div"` emits the bare `<button>`/`<a>` for the generic
+    /// `DropdownMenu { tag: "div" }` form, where an `<li>` would have no list to
+    /// belong to. Match it to the menu's `tag`.
+    #[props(default)]
+    pub tag: String,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -315,38 +363,20 @@ fn dropdown_item_class(active: bool, disabled: bool, class: &str) -> String {
 #[component]
 pub fn DropdownItem(props: DropdownItemProps) -> Element {
     let full_class = dropdown_item_class(props.active, props.disabled, &props.class);
+    let bare = props.tag == "div";
 
     // Anchor form: a real hyperlink so browser link behaviours work. Anchors
     // can't be HTML-`disabled`, so disabled state is conveyed by the `.disabled`
     // class plus `aria-disabled`/`tabindex="-1"` (matching NavLink).
     if let Some(href) = props.href.clone() {
         let target = props.target.clone();
-        return rsx! {
-            li {
-                a {
-                    class: "{full_class}",
-                    href: "{href}",
-                    target: target,
-                    "aria-disabled": if props.disabled { "true" } else { "" },
-                    tabindex: if props.disabled { "-1" } else { "" },
-                    onclick: move |evt| {
-                        if let Some(handler) = &props.onclick {
-                            handler.call(evt);
-                        }
-                    },
-                    ..props.attributes,
-                    {props.children}
-                }
-            }
-        };
-    }
-
-    rsx! {
-        li {
-            button {
+        let anchor = rsx! {
+            a {
                 class: "{full_class}",
-                r#type: "button",
-                disabled: props.disabled,
+                href: "{href}",
+                target: target,
+                "aria-disabled": if props.disabled { "true" } else { "" },
+                tabindex: if props.disabled { "-1" } else { "" },
                 onclick: move |evt| {
                     if let Some(handler) = &props.onclick {
                         handler.call(evt);
@@ -355,13 +385,50 @@ pub fn DropdownItem(props: DropdownItemProps) -> Element {
                 ..props.attributes,
                 {props.children}
             }
+        };
+        return if bare {
+            anchor
+        } else {
+            rsx! { li { {anchor} } }
+        };
+    }
+
+    let button = rsx! {
+        button {
+            class: "{full_class}",
+            r#type: "button",
+            disabled: props.disabled,
+            onclick: move |evt| {
+                if let Some(handler) = &props.onclick {
+                    handler.call(evt);
+                }
+            },
+            ..props.attributes,
+            {props.children}
         }
+    };
+    if bare {
+        button
+    } else {
+        rsx! { li { {button} } }
     }
 }
 
 /// Dropdown menu divider.
+#[derive(Clone, PartialEq, Props)]
+pub struct DropdownDividerProps {
+    /// Divider wrapper. Empty (the default) wraps the `<hr>` in the `<li>` a
+    /// `<ul>` menu requires; `"div"` emits the bare `<hr>` for the generic
+    /// `DropdownMenu { tag: "div" }` form. Match it to the menu's `tag`.
+    #[props(default)]
+    pub tag: String,
+}
+
 #[component]
-pub fn DropdownDivider() -> Element {
+pub fn DropdownDivider(props: DropdownDividerProps) -> Element {
+    if props.tag == "div" {
+        return rsx! { hr { class: "dropdown-divider" } };
+    }
     rsx! {
         li { hr { class: "dropdown-divider" } }
     }
@@ -404,5 +471,29 @@ mod tests {
     #[test]
     fn dropdown_item_class_active_only() {
         assert_eq!(dropdown_item_class(true, false, ""), "dropdown-item active");
+    }
+
+    #[test]
+    fn menu_style_is_empty_when_neither_side_asks_for_one() {
+        assert_eq!(dropdown_menu_style("", ""), "");
+    }
+
+    #[test]
+    fn menu_style_keeps_the_alignment_when_the_caller_is_silent() {
+        assert_eq!(
+            dropdown_menu_style("right: 0; left: auto;", ""),
+            "right: 0; left: auto;"
+        );
+    }
+
+    #[test]
+    fn menu_style_keeps_both_sides() {
+        // A menu that is both end-aligned and positioned by its page needs the
+        // two together; spreading the caller's through `..attributes` would have
+        // put a second `style` on the element and silently dropped one of them.
+        assert_eq!(
+            dropdown_menu_style("right: 0; left: auto;", "z-index: 1050;"),
+            "right: 0; left: auto; z-index: 1050;"
+        );
     }
 }

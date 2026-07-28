@@ -140,12 +140,54 @@ pub struct ModalProps {
     /// Additional CSS classes for the modal-footer div.
     #[props(default)]
     pub footer_class: String,
+    /// Inline style, appended to the modal element's own. Declared explicitly
+    /// rather than left to the attribute spread because this element always sets
+    /// `style` itself (`display: block`, which replaces Bootstrap's JS-driven
+    /// show): a caller style arriving through `..attributes` would be a second
+    /// `style` attribute on one element, and losing the fight would render the
+    /// modal invisible.
+    #[props(default)]
+    pub style: String,
+    /// Additional CSS classes for the backdrop element.
+    #[props(default)]
+    pub backdrop_class: String,
+    /// Inline style for the backdrop element. Bootstrap fixes the backdrop and
+    /// the modal at adjacent z-indexes; a page that stacks its own overlays
+    /// around them needs to be able to say where these two sit.
+    #[props(default)]
+    pub backdrop_style: String,
+    /// Called whenever the modal closes itself — the close button, a backdrop
+    /// click, or Escape. `show` is set to false first, so this is for the work
+    /// that must accompany closing rather than for the closing itself.
+    ///
+    /// Without it, state a caller clears in its own close handler is skipped by
+    /// every dismissal path the component owns, and the only way to be sure was
+    /// to switch all three off. Bootstrap fires `hide.bs.modal`/`hidden.bs.modal`
+    /// for the same reason.
+    #[props(default)]
+    pub on_dismiss: Option<EventHandler<()>>,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     /// Child elements (alternative to body prop for custom layout).
     #[props(default)]
     pub children: Element,
+}
+
+/// The modal element's inline style: the component's own `display: block` — which
+/// stands in for Bootstrap's JS-driven show — with the caller's appended.
+///
+/// This is a composition rather than an attribute, because the element already
+/// sets `style`. A caller style arriving through the attribute spread would be a
+/// second `style` on the same element; whichever one lost, the result is wrong,
+/// and if `display: block` is the loser the modal is invisible while every class
+/// assertion still passes.
+fn modal_inline_style(extra: &str) -> String {
+    if extra.is_empty() {
+        "display: block;".to_string()
+    } else {
+        format!("display: block; {extra}")
+    }
 }
 
 #[component]
@@ -212,20 +254,36 @@ pub fn Modal(props: ModalProps) -> Element {
     let body_class = with_extra("modal-body", &props.body_class);
     let footer_class = with_extra("modal-footer", &props.footer_class);
 
+    // Every dismissal the component owns runs through here, so a caller's
+    // `on_dismiss` cannot be reached by one path and missed by another.
+    let on_dismiss = props.on_dismiss;
+    let mut dismiss = move || {
+        show_signal.set(false);
+        if let Some(handler) = &on_dismiss {
+            handler.call(());
+        }
+    };
+
+    // Composed, never spread alongside the component's own — see `style`/
+    // `backdrop_style` on the props.
+    let backdrop_full_class = with_extra("modal-backdrop fade show", &props.backdrop_class);
+    let modal_style = modal_inline_style(&props.style);
+
     rsx! {
         // Backdrop
         div {
-            class: "modal-backdrop fade show",
+            class: "{backdrop_full_class}",
+            style: "{props.backdrop_style}",
             onclick: move |_| {
                 if backdrop_close {
-                    show_signal.set(false);
+                    dismiss();
                 }
             },
         }
         // Modal
         div {
             class: "modal fade show",
-            style: "display: block;",
+            style: "{modal_style}",
             tabindex: "-1",
             role: "dialog",
             "aria-modal": "true",
@@ -238,12 +296,12 @@ pub fn Modal(props: ModalProps) -> Element {
             },
             onkeydown: move |evt: KeyboardEvent| {
                 if keyboard_close && is_escape_key(&evt.key()) {
-                    show_signal.set(false);
+                    dismiss();
                 }
             },
             onclick: move |_| {
                 if backdrop_close {
-                    show_signal.set(false);
+                    dismiss();
                 }
             },
             ..props.attributes,
@@ -266,7 +324,7 @@ pub fn Modal(props: ModalProps) -> Element {
                                     class: "btn-close",
                                     r#type: "button",
                                     "aria-label": "Close",
-                                    onclick: move |_| show_signal.set(false),
+                                    onclick: move |_| dismiss(),
                                 }
                             }
                         }
@@ -283,5 +341,26 @@ pub fn Modal(props: ModalProps) -> Element {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn modal_style_alone_is_the_display_override() {
+        assert_eq!(modal_inline_style(""), "display: block;");
+    }
+
+    #[test]
+    fn a_caller_style_is_appended_not_substituted() {
+        // Both must survive. `display: block` is what makes the modal visible at
+        // all, so a composition that dropped it in favour of the caller's would
+        // render nothing while looking entirely correct in the class list.
+        assert_eq!(
+            modal_inline_style("z-index: 1080;"),
+            "display: block; z-index: 1080;"
+        );
     }
 }

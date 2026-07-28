@@ -45,11 +45,29 @@ pub struct BadgeProps {
     /// Click event handler.
     #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Render as a real `<a class="badge" href=…>` instead of a `<span>`.
+    ///
+    /// Bootstrap documents badges used as links and buttons, and the anchor is
+    /// not interchangeable with a span carrying a click handler: only the anchor
+    /// is focusable, announced as a link, and openable in a new tab or copied
+    /// from the context menu. A badge that navigates should be one.
+    #[props(default)]
+    pub href: Option<String>,
+    /// Anchor `target` (e.g. `"_blank"`). Only applies when `href` is set.
+    #[props(default)]
+    pub target: Option<String>,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     /// Child elements.
     pub children: Element,
+}
+
+/// Which element a badge renders as. Bootstrap documents badges used as links;
+/// only a real anchor is focusable, announced as a link, and openable in a new
+/// tab, so a span with a click handler is not a substitute for one.
+fn badge_element(has_href: bool) -> &'static str {
+    if has_href { "a" } else { "span" }
 }
 
 /// The badge's class string. Extracted so the colour idioms are assertable
@@ -74,6 +92,25 @@ fn badge_class(color: Color, fill: BadgeFill, pill: bool, class: &str) -> String
 pub fn Badge(props: BadgeProps) -> Element {
     let full_class = badge_class(props.color, props.fill, props.pill, &props.class);
 
+    if badge_element(props.href.is_some()) == "a" {
+        let href = props.href.clone().expect("anchor form implies an href");
+        let target = props.target.clone();
+        return rsx! {
+            a {
+                class: "{full_class}",
+                href: "{href}",
+                target: target,
+                onclick: move |evt| {
+                    if let Some(handler) = &props.onclick {
+                        handler.call(evt);
+                    }
+                },
+                ..props.attributes,
+                {props.children}
+            }
+        };
+    }
+
     rsx! {
         span {
             class: "{full_class}",
@@ -91,6 +128,16 @@ pub fn Badge(props: BadgeProps) -> Element {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn badge_is_a_span_without_an_href() {
+        assert_eq!(badge_element(false), "span");
+    }
+
+    #[test]
+    fn badge_with_an_href_is_an_anchor() {
+        assert_eq!(badge_element(true), "a");
+    }
 
     #[test]
     fn badge_default_fill_is_text_bg() {
